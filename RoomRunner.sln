@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32802.440
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoomRunner", "RoomRunner\RoomRunner\RoomRunner.csproj", "{6BC26B9C-0DF3-4D0E-AF00-0933B6C2C21E}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "RoomRunnerContent", "RoomRunner\RoomRunnerContent\RoomRunnerContent.contentproj", "{5632A71B-BBDA-4146-84ED-1D662A4BC0C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BC26B9C-0DF3-4D0E-AF00-0933B6C2C21E}.Debug|x86.ActiveCfg = Debug|x86
+		{6BC26B9C-0DF3-4D0E-AF00-0933B6C2C21E}.Debug|x86.Build.0 = Debug|x86
+		{6BC26B9C-0DF3-4D0E-AF00-0933B6C2C21E}.Release|x86.ActiveCfg = Release|x86
+		{6BC26B9C-0DF3-4D0E-AF00-0933B6C2C21E}.Release|x86.Build.0 = Release|x86
+		{5632A71B-BBDA-4146-84ED-1D662A4BC0C9}.Debug|x86.ActiveCfg = Debug|x86
+		{5632A71B-BBDA-4146-84ED-1D662A4BC0C9}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D71BACF-1D2F-429E-B9CD-91C6F4E33858}
+	EndGlobalSection
+EndGlobal
