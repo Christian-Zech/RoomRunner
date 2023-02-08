@@ -19,6 +19,9 @@ namespace RoomRunner
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Texture2D pixel;
+        
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -57,6 +60,7 @@ namespace RoomRunner
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+            pixel = this.Content.Load<Texture2D>("pixel");
         }
 
         /// <summary>
@@ -84,6 +88,9 @@ namespace RoomRunner
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            spriteBatch.Begin();
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
