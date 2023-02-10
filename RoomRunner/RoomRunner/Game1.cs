@@ -20,7 +20,17 @@ namespace RoomRunner
         SpriteBatch spriteBatch;
 
         Texture2D pixel;
-        
+
+        enum GameState
+        {
+            Menu,
+            Shop,
+            Play,
+            GameOver
+
+        }
+
+        GameState gameState;
 
         public Game1()
         {
@@ -37,6 +47,7 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            gameState = GameState.Menu;
 
             base.Initialize();
         }
