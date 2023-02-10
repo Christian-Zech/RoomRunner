@@ -22,7 +22,12 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
-        List<Rectangle> jebList;
+        List<Rectangle> jebList = new List<Rectangle>();
+        List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        Rectangle window;
+
+
+        int count;
 
 
         enum GameState
@@ -40,6 +45,8 @@ namespace RoomRunner
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferWidth = 1900;
+            graphics.PreferredBackBufferHeight = 1000;
         }
 
         /// <summary>
@@ -52,12 +59,18 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             gameState = GameState.Menu;
+            count = 0;
+
+            window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
             jebList.Add(new Rectangle(0, 0, 32, 32));
             jebList.Add(new Rectangle(32, 0, 32, 32));
             jebList.Add(new Rectangle(0, 32, 32, 32));
             jebList.Add(new Rectangle(32, 32, 32, 32));
-            jebList.Add(new Rectangle(0, 62, 32, 32));
+            jebList.Add(new Rectangle(0, 64, 32, 32));
+
+            idleAnimationRectangles.Add(jebList[3]);
+            idleAnimationRectangles.Add(jebList[4]);
 
             base.Initialize();
         }
@@ -99,6 +112,9 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
+            count++;
+            
+
             base.Update(gameTime);
         }
 
@@ -108,10 +124,18 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+
+
+            int halfSeconds = count / 30;
+
+            if(halfSeconds % 2 == 0)
+                spriteBatch.Draw(jebSheet, new Rectangle(500, 100, 100, 100), idleAnimationRectangles[0], Color.White);
+            else
+                spriteBatch.Draw(jebSheet, new Rectangle(500, 100, 100, 100), idleAnimationRectangles[1], Color.White);
 
 
 
