@@ -140,7 +140,7 @@ namespace RoomRunner
             {
                 int halfSeconds = count / 30;
                 Rectangle playerIdleDimensions = new Rectangle(window.Width / 2, 100, 100, 100);
-                Vector2 menuPosition = new Vector2(window.Width / 2 - 200, 200);
+                Vector2 titlePosition = new Vector2(window.Width / 2 - 200, 200);
 
 
                 if (halfSeconds % 2 == 0)
@@ -148,7 +148,7 @@ namespace RoomRunner
                 else
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
 
-                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", menuPosition, Color.White);
+                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
 
 
