@@ -23,6 +23,7 @@ namespace RoomRunner
         Texture2D jebSheet;
 
         SpriteFont menuFont;
+        SpriteFont buttonFont;
 
         List<Rectangle> jebList = new List<Rectangle>();
         List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
@@ -63,6 +64,8 @@ namespace RoomRunner
             gameState = GameState.Menu;
             count = 0;
 
+            this.IsMouseVisible = true;
+
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
             jebList.Add(new Rectangle(0, 0, 32, 32));
@@ -89,7 +92,9 @@ namespace RoomRunner
             // TODO: use this.Content to load your game content here
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
-            menuFont = this.Content.Load<SpriteFont>("menuFont");
+            menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
+            buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            
         }
 
         /// <summary>
@@ -145,7 +150,7 @@ namespace RoomRunner
             if(gameState == GameState.Menu)
             {
                 int halfSeconds = count / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2, 100, 100, 100);
+                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 + 20, 100, 100, 100);
                 Vector2 titlePosition = new Vector2(window.Width / 2 - 200, 200);
 
 
@@ -160,11 +165,15 @@ namespace RoomRunner
 
                 // menu buttons
 
+                Rectangle startButtonRectangle = new Rectangle(window.Width / 2 - 100, 400, 350, 100);
+                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 100, startButtonRectangle.Y + 20), Color.White);
+
 
 
             }
 
-                
+
 
 
 
