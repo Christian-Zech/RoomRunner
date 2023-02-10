@@ -27,6 +27,8 @@ namespace RoomRunner
 
         List<Rectangle> jebList = new List<Rectangle>();
         List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        Rectangle startButtonRectangle;
+
         Rectangle window;
 
 
@@ -77,6 +79,8 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[3]);
             idleAnimationRectangles.Add(jebList[4]);
 
+            startButtonRectangle = new Rectangle(window.Width / 2 - 100, 400, 350, 100);
+
             base.Initialize();
         }
 
@@ -122,7 +126,8 @@ namespace RoomRunner
                 this.Exit();
 
 
-            
+            if (mouse.LeftButton == ButtonState.Pressed && mouse.X < startButtonRectangle.Right && mouse.X > startButtonRectangle.Left && mouse.Y < startButtonRectangle.Bottom && mouse.Y > startButtonRectangle.Top)
+                gameState = GameState.Play;
 
             // TODO: Add your update logic here
 
@@ -165,7 +170,7 @@ namespace RoomRunner
 
                 // menu buttons
 
-                Rectangle startButtonRectangle = new Rectangle(window.Width / 2 - 100, 400, 350, 100);
+                
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 100, startButtonRectangle.Y + 20), Color.White);
 
