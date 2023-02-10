@@ -22,6 +22,16 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
+        SpriteFont menuFont;
+
+        List<Rectangle> jebList = new List<Rectangle>();
+        List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        Rectangle window;
+
+
+        int count;
+
+
         enum GameState
         {
             Menu,
@@ -37,6 +47,8 @@ namespace RoomRunner
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferWidth = 1900;
+            graphics.PreferredBackBufferHeight = 1000;
         }
 
         /// <summary>
@@ -49,6 +61,18 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             gameState = GameState.Menu;
+            count = 0;
+
+            window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+
+            jebList.Add(new Rectangle(0, 0, 32, 32));
+            jebList.Add(new Rectangle(32, 0, 32, 32));
+            jebList.Add(new Rectangle(0, 32, 32, 32));
+            jebList.Add(new Rectangle(32, 32, 32, 32));
+            jebList.Add(new Rectangle(0, 64, 32, 32));
+
+            idleAnimationRectangles.Add(jebList[3]);
+            idleAnimationRectangles.Add(jebList[4]);
 
             base.Initialize();
         }
@@ -65,6 +89,7 @@ namespace RoomRunner
             // TODO: use this.Content to load your game content here
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
+            menuFont = this.Content.Load<SpriteFont>("menuFont");
         }
 
         /// <summary>
@@ -90,6 +115,9 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
+            count++;
+            
+
             base.Update(gameTime);
         }
 
@@ -99,10 +127,37 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+
+
+            
+
+
+            if(gameState == GameState.Menu)
+            {
+                int halfSeconds = count / 30;
+                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2, 100, 100, 100);
+                Vector2 menuPosition = new Vector2(window.Width / 2 - 200, 200);
+
+
+                if (halfSeconds % 2 == 0)
+                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
+                else
+                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+
+                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", menuPosition, Color.White);
+
+
+
+            }
+
+                
+
+
+
 
             spriteBatch.End();
 
