@@ -109,9 +109,15 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState keyboard = Keyboard.GetState();
+            MouseState mouse = Mouse.GetState();
+
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboard.IsKeyDown(Keys.Escape))
                 this.Exit();
+
+
+            
 
             // TODO: Add your update logic here
 
@@ -143,12 +149,16 @@ namespace RoomRunner
                 Vector2 titlePosition = new Vector2(window.Width / 2 - 200, 200);
 
 
+                // animation
                 if (halfSeconds % 2 == 0)
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
                 else
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
+        
                 spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
+
+
+                // menu buttons
 
 
 
