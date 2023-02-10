@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,36 +12,57 @@ namespace RoomRunner
     {
         public bool IsAlive;
         public Vector2 Velocity, Position;
-        private Texture2D[] animation;
+        private string currentAnimation;
+        private readonly Dictionary<string, Texture2D[]> animations;
         private int frame;
-        public Texture2D Texture => animation[frame];
-        private int framesUntilChange;
-        private readonly int framesBetween;
+        public Texture2D Texture => animations["idle"][frame];
+        private readonly Dictionary<string, int> framesBetween, framesLeft;
+        private KeyboardState oldkb;
 
-        public Player(Texture2D playerSheet, GraphicsDevice gd, int framesInbetween = 3, params Rectangle[] rects)
+        public Player(Vector2 pos) : this()
+        {
+            Position = pos;
+        }
+        public Player()
         {
             IsAlive = true;
-            animation = RectToTxt(gd, playerSheet, rects);
-            framesUntilChange = framesInbetween;
-            framesBetween = framesInbetween;
+            animations = new Dictionary<string, Texture2D[]>();
+            framesBetween = new Dictionary<string, int>();
+            framesLeft = new Dictionary<string, int>();
             frame = 0;
+            oldkb = Keyboard.GetState();
+            currentAnimation = "idle";
         }
 
+        public void AddAnimation(string name, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 3, params Rectangle[] rects)
+        {
+            animations[name] = RectToTxt(gd, sheet, rects);
+            framesBetween[name] = framesInbetween;
+            framesLeft[name] = framesInbetween;
+        }
         public void Update()
         {
-            if (framesUntilChange-- <= 0)
+            KeyboardState kb = Keyboard.GetState();
+            if (framesLeft[currentAnimation]-- <= 0)
             {
-                framesUntilChange = framesBetween;
+                framesLeft[currentAnimation] = framesBetween[currentAnimation];
                 frame++;
-                if (frame >= animation.Length) 
+                if (frame >= animations[currentAnimation].Length) 
                     frame = 0;
             }
+
+            if (IsPressed(kb, Keys.W)) Velocity.Y = 2.0f;
+
+            oldkb = kb;
         }
+        private bool IsPressed(KeyboardState kb, Keys k) => kb.IsKeyDown(k);
+
 
         public static Texture2D[] RectToTxt(GraphicsDevice gd, Texture2D sheet, params Rectangle[] rects)
         {
             Texture2D[] txts = new Texture2D[rects.Length];
             Color[] pixels = new Color[sheet.Width * sheet.Height];
+            sheet.GetData(pixels);
             int c = 0;
             foreach (Rectangle r in rects)
             {

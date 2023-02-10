@@ -27,6 +27,7 @@ namespace RoomRunner
         List<Rectangle> jebList = new List<Rectangle>();
         List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
         Rectangle window;
+        private Player jeb;
 
 
         int count;
@@ -71,8 +72,7 @@ namespace RoomRunner
             jebList.Add(new Rectangle(32, 32, 32, 32));
             jebList.Add(new Rectangle(0, 64, 32, 32));
 
-            idleAnimationRectangles.Add(jebList[3]);
-            idleAnimationRectangles.Add(jebList[4]);
+            
 
             base.Initialize();
         }
@@ -90,6 +90,9 @@ namespace RoomRunner
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("menuFont");
+
+            jeb = new Player();
+            jeb.AddAnimation("idle", jebSheet, graphics.GraphicsDevice, 10, jebList.ToArray());
         }
 
         /// <summary>
@@ -115,7 +118,7 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
-            count++;
+            jeb.Update();
             
 
             base.Update(gameTime);
@@ -131,33 +134,7 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-
-
-            
-
-
-            if(gameState == GameState.Menu)
-            {
-                int halfSeconds = count / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2, 100, 100, 100);
-                Vector2 menuPosition = new Vector2(window.Width / 2 - 200, 200);
-
-
-                if (halfSeconds % 2 == 0)
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
-                else
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
-                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", menuPosition, Color.White);
-
-
-
-            }
-
-                
-
-
-
+            spriteBatch.Draw(jeb.Texture, new Rectangle(100, 100, 64, 128), Color.White);
 
             spriteBatch.End();
 
