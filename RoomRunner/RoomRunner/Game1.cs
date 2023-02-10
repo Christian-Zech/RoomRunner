@@ -126,7 +126,7 @@ namespace RoomRunner
                 this.Exit();
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && mouse.X < startButtonRectangle.Right && mouse.X > startButtonRectangle.Left && mouse.Y < startButtonRectangle.Bottom && mouse.Y > startButtonRectangle.Top)
+            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle));
                 gameState = GameState.Play;
 
             // TODO: Add your update logic here
@@ -187,5 +187,16 @@ namespace RoomRunner
 
             base.Draw(gameTime);
         }
+
+
+        public Boolean checkForCollision(int x, int y, Rectangle inputRectangle)
+        {
+            if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
+                return true;
+
+            return false;
+        }
+
+
     }
 }
