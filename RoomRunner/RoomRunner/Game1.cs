@@ -22,6 +22,9 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
+        List<Rectangle> jebList;
+
+
         enum GameState
         {
             Menu,
@@ -49,6 +52,12 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             gameState = GameState.Menu;
+
+            jebList.Add(new Rectangle(0, 0, 32, 32));
+            jebList.Add(new Rectangle(32, 0, 32, 32));
+            jebList.Add(new Rectangle(0, 32, 32, 32));
+            jebList.Add(new Rectangle(32, 32, 32, 32));
+            jebList.Add(new Rectangle(0, 62, 32, 32));
 
             base.Initialize();
         }
@@ -103,6 +112,8 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+
+
 
             spriteBatch.End();
 
