@@ -20,6 +20,7 @@ namespace RoomRunner
         SpriteBatch spriteBatch;
 
         Texture2D pixel;
+        Texture2D jebSheet;
 
         enum GameState
         {
@@ -63,6 +64,7 @@ namespace RoomRunner
 
             // TODO: use this.Content to load your game content here
             pixel = this.Content.Load<Texture2D>("pixel");
+            jebSheet = this.Content.Load<Texture2D>("jeb");
         }
 
         /// <summary>
