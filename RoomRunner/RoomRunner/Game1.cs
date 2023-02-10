@@ -62,6 +62,7 @@ namespace RoomRunner
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            pixel = this.Content.Load<Texture2D>("pixel");
         }
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace RoomRunner
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
-            pixel = this.Content.Load<Texture2D>("pixel");
+            
         }
 
         /// <summary>
