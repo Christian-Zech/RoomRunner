@@ -21,6 +21,7 @@ namespace RoomRunner
 
         Texture2D pixel;
         Texture2D jebSheet;
+        Texture2D placeholderBackground;
 
         SpriteFont menuFont;
         SpriteFont buttonFont;
@@ -37,6 +38,8 @@ namespace RoomRunner
 
         int gameTimer;
         int levelTimer;
+        int currentRoom;
+        int scrolling;
 
 
         enum GameState
@@ -67,12 +70,15 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            roomList = new List<Room>();
+
             amountOfRooms = 5;
-            GenerateRoom(amountOfRooms, pixel);
+            
 
             gameState = GameState.Menu;
             gameTimer = 0;
             levelTimer = 0;
+            currentRoom = 0;
 
             this.IsMouseVisible = true;
 
@@ -91,6 +97,9 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
             base.Initialize();
+            GenerateRoom(amountOfRooms, placeholderBackground);
+
+
         }
 
         /// <summary>
@@ -107,7 +116,9 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
-            
+            placeholderBackground = this.Content.Load<Texture2D>("background");
+
+
         }
 
         /// <summary>
@@ -141,6 +152,9 @@ namespace RoomRunner
             if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle))
                 gameState = GameState.Shop;
 
+
+           
+            
 
             // TODO: Add your update logic here
 
@@ -198,7 +212,23 @@ namespace RoomRunner
 
             if(gameState == GameState.Play)
             {
+                levelTimer++;
+                int levelSeconds = levelTimer / 60;
                 
+
+                if (levelTimer > 60 && levelSeconds % 10 == 0)
+                {
+                    currentRoom++;
+                }
+
+                Console.WriteLine(levelSeconds % 10);
+
+                int scrolling = 0;
+                scrolling++;
+
+                if (currentRoom < roomList.Count)
+                    spriteBatch.Draw(roomList[currentRoom].background, window, new Rectangle(scrolling, 100, 100, 100), Color.White);
+
             }
 
             
@@ -221,8 +251,8 @@ namespace RoomRunner
 
         public void GenerateRoom(int amountOfRooms, Texture2D texture)
         {
-            roomList = new List<Room>();
 
+            roomList.Clear();
 
             for(int i = 0; i < amountOfRooms; i++)
             {
