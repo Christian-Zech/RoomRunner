@@ -20,7 +20,7 @@ namespace RoomRunner
         public double currentFrameIndex;
         int count;
 
-        public ShopItem(int p, string n, List<Rectangle> r, Texture2D t)
+        public ShopItem(int p, string n, List<Rectangle> r, Texture2D t) 
         {
             price = p;
             name = n;
@@ -32,7 +32,7 @@ namespace RoomRunner
         public void AnimateLinear()
         {
             currentFrameIndex += 0.09;
-            if (currentFrameIndex > sourceRects.Count-1)
+            if (currentFrameIndex > sourceRects.Count)
             {
                 currentFrameIndex = 0;
             }
@@ -42,7 +42,7 @@ namespace RoomRunner
             if (count == 0)
             {
                 currentFrameIndex += 0.09;
-                if (currentFrameIndex > sourceRects.Count - 1)
+                if (currentFrameIndex+.6 > sourceRects.Count)
                 {
                     count = 1;
                 }
@@ -50,7 +50,7 @@ namespace RoomRunner
             else if (count == 1)
             {
                 currentFrameIndex -= 0.09;
-                if (currentFrameIndex < 1)
+                if (currentFrameIndex-.6 < 0)
                 {
                     count = 0;
                 }
