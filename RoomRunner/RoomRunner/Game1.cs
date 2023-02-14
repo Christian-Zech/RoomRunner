@@ -32,7 +32,7 @@ namespace RoomRunner
 
         Rectangle window;
 
-
+        List<Room> roomList;
 
 
         int gameTimer;
@@ -66,6 +66,9 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            int roomSize = 20;
+            generateRoom(roomSize);
+
             gameState = GameState.Menu;
             gameTimer = 0;
 
@@ -192,7 +195,7 @@ namespace RoomRunner
             }
 
 
-
+            
 
 
 
@@ -208,6 +211,14 @@ namespace RoomRunner
                 return true;
 
             return false;
+        }
+
+        public void generateRoom(int roomSize)
+        {
+            roomList = new List<Room>();
+
+
+            
         }
 
 
