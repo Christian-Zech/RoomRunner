@@ -33,9 +33,10 @@ namespace RoomRunner
         Rectangle window;
 
         List<Room> roomList;
-
+        int amountOfRooms;
 
         int gameTimer;
+        int levelTimer;
 
 
         enum GameState
@@ -66,11 +67,12 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            int roomSize = 20;
-            generateRoom(roomSize);
+            amountOfRooms = 5;
+            GenerateRoom(amountOfRooms, pixel);
 
             gameState = GameState.Menu;
             gameTimer = 0;
+            levelTimer = 0;
 
             this.IsMouseVisible = true;
 
@@ -133,10 +135,10 @@ namespace RoomRunner
                 this.Exit();
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle))
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle))
                 gameState = GameState.Play;
 
-            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle))
                 gameState = GameState.Shop;
 
 
@@ -194,6 +196,10 @@ namespace RoomRunner
 
             }
 
+            if(gameState == GameState.Play)
+            {
+                
+            }
 
             
 
@@ -205,7 +211,7 @@ namespace RoomRunner
         }
 
 
-        public Boolean checkForCollision(int x, int y, Rectangle inputRectangle)
+        public Boolean CheckForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
                 return true;
@@ -213,10 +219,15 @@ namespace RoomRunner
             return false;
         }
 
-        public void generateRoom(int roomSize)
+        public void GenerateRoom(int amountOfRooms, Texture2D texture)
         {
             roomList = new List<Room>();
 
+
+            for(int i = 0; i < amountOfRooms; i++)
+            {
+                roomList.Add(new Room(texture));
+            }
 
             
         }

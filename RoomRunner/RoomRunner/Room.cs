@@ -13,14 +13,12 @@ namespace RoomRunner
 
         public List<Texture2D> animationTextures;
         public Texture2D background;
-        public Vector2 roomSize;
 
 
 
-        public Room(Texture2D background, Vector2 roomSize)
+        public Room(Texture2D background)
         {
             this.background = background;
-            this.roomSize = roomSize;
             animationTextures = new List<Texture2D>();
 
 
@@ -34,13 +32,7 @@ namespace RoomRunner
 
         }
 
-        public void Draw(int gameTimer)
-        {
-
-            
-
-
-        }
+        
 
 
 
