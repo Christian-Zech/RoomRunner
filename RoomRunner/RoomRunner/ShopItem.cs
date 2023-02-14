@@ -15,14 +15,47 @@ namespace RoomRunner
     {
         public int price;
         public string name;
-        public Rectangle rect;
+        public List<Rectangle> sourceRects;
         public Texture2D tex;
-        public ShopItem(int p, string n, Rectangle r, Texture2D t)
+        public double currentFrameIndex;
+        int count;
+
+        public ShopItem(int p, string n, List<Rectangle> r, Texture2D t)
         {
             price = p;
             name = n;
-            rect = r;
+            sourceRects = r;
             tex = t;
+            currentFrameIndex = 0;
+            count = 0;
+        }
+        public void AnimateLinear()
+        {
+            currentFrameIndex += 0.09;
+            if (currentFrameIndex > sourceRects.Count-1)
+            {
+                currentFrameIndex = 0;
+            }
+        }
+        public void AnimateReverse()
+        {
+            if (count == 0)
+            {
+                currentFrameIndex += 0.09;
+                if (currentFrameIndex > sourceRects.Count - 1)
+                {
+                    count = 1;
+                }
+            }
+            else if (count == 1)
+            {
+                currentFrameIndex -= 0.09;
+                if (currentFrameIndex < 1)
+                {
+                    count = 0;
+                }
+            }
+            
         }
     }
 }

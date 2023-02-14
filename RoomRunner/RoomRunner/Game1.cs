@@ -21,6 +21,10 @@ namespace RoomRunner
 
         Texture2D pixel;
         Texture2D jebSheet;
+        Texture2D collectableSheet, cosmeticSheet; //for shop
+        List<ShopItem> items;
+        List<Rectangle> clock, skull, nuke, magnet, coin;
+        Shop shop;
 
         enum GameState
         {
@@ -48,7 +52,12 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            gameState = GameState.Menu;
+            gameState = GameState.Shop;
+
+            //for shop
+            items = new List<ShopItem>();
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
 
             base.Initialize();
         }
@@ -65,6 +74,13 @@ namespace RoomRunner
             // TODO: use this.Content to load your game content here
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
+            collectableSheet = this.Content.Load<Texture2D>("collectables");
+            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
+
+            //for shop, textures have to be loaded first before they can be sent as parameters
+            items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
+            items.Add(new ShopItem(50, "Instakill", skull, collectableSheet));
+            shop = new Shop(items);
         }
 
         /// <summary>
@@ -103,6 +119,11 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+            if (gameState == GameState.Shop)
+            {
+                shop.Draw(gameTime, spriteBatch);
+            }
+
 
             spriteBatch.End();
 
