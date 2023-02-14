@@ -28,11 +28,12 @@ namespace RoomRunner
         List<Rectangle> jebList = new List<Rectangle>();
         List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
         Rectangle startButtonRectangle;
+        Rectangle shopButtonRectangle;
 
         Rectangle window;
 
 
-        int count;
+        int gameTimer;
 
 
         enum GameState
@@ -64,7 +65,7 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             gameState = GameState.Menu;
-            count = 0;
+            gameTimer = 0;
 
             this.IsMouseVisible = true;
 
@@ -79,7 +80,8 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[3]);
             idleAnimationRectangles.Add(jebList[4]);
 
-            startButtonRectangle = new Rectangle(window.Width / 2 - 100, 400, 350, 100);
+            startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
+            shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
             base.Initialize();
         }
@@ -126,12 +128,16 @@ namespace RoomRunner
                 this.Exit();
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle));
+            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle))
                 gameState = GameState.Play;
+
+            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+                gameState = GameState.Shop;
+
 
             // TODO: Add your update logic here
 
-            count++;
+            gameTimer++;
             
 
             base.Update(gameTime);
@@ -154,9 +160,10 @@ namespace RoomRunner
 
             if(gameState == GameState.Menu)
             {
-                int halfSeconds = count / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 + 20, 100, 100, 100);
-                Vector2 titlePosition = new Vector2(window.Width / 2 - 200, 200);
+                int halfSeconds = gameTimer / 30;
+                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
+                
+                Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
 
 
                 // animation
@@ -172,7 +179,11 @@ namespace RoomRunner
 
                 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 100, startButtonRectangle.Y + 20), Color.White);
+                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
+
+
+                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
 
 
 
