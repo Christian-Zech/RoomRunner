@@ -223,11 +223,14 @@ namespace RoomRunner
 
                 Console.WriteLine(levelSeconds % 10);
 
-                int scrolling = 0;
+                
                 scrolling++;
 
                 if (currentRoom < roomList.Count)
                     spriteBatch.Draw(roomList[currentRoom].background, window, new Rectangle(scrolling, 100, 100, 100), Color.White);
+
+                if (levelSeconds > 10)
+                    Console.WriteLine("break");
 
             }
 
