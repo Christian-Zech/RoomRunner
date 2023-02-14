@@ -23,13 +23,17 @@ namespace RoomRunner
         Texture2D jebSheet;
 
         SpriteFont menuFont;
+        SpriteFont buttonFont;
 
         List<Rectangle> jebList = new List<Rectangle>();
         List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        Rectangle startButtonRectangle;
+        Rectangle shopButtonRectangle;
+
         Rectangle window;
 
 
-        int count;
+        int gameTimer;
 
 
         enum GameState
@@ -61,7 +65,9 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             gameState = GameState.Menu;
-            count = 0;
+            gameTimer = 0;
+
+            this.IsMouseVisible = true;
 
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
@@ -73,6 +79,9 @@ namespace RoomRunner
 
             idleAnimationRectangles.Add(jebList[3]);
             idleAnimationRectangles.Add(jebList[4]);
+
+            startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
+            shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
             base.Initialize();
         }
@@ -89,7 +98,9 @@ namespace RoomRunner
             // TODO: use this.Content to load your game content here
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
-            menuFont = this.Content.Load<SpriteFont>("menuFont");
+            menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
+            buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            
         }
 
         /// <summary>
@@ -109,13 +120,24 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState keyboard = Keyboard.GetState();
+            MouseState mouse = Mouse.GetState();
+
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboard.IsKeyDown(Keys.Escape))
                 this.Exit();
+
+
+            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle))
+                gameState = GameState.Play;
+
+            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+                gameState = GameState.Shop;
+
 
             // TODO: Add your update logic here
 
-            count++;
+            gameTimer++;
             
 
             base.Update(gameTime);
@@ -138,23 +160,36 @@ namespace RoomRunner
 
             if(gameState == GameState.Menu)
             {
-                int halfSeconds = count / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2, 100, 100, 100);
-                Vector2 menuPosition = new Vector2(window.Width / 2 - 200, 200);
+                int halfSeconds = gameTimer / 30;
+                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
+                
+                Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
 
 
+                // animation
                 if (halfSeconds % 2 == 0)
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
                 else
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+        
+                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
-                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", menuPosition, Color.White);
+
+                // menu buttons
+
+                
+                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
+
+
+                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
 
 
 
             }
 
-                
+
 
 
 
@@ -163,5 +198,16 @@ namespace RoomRunner
 
             base.Draw(gameTime);
         }
+
+
+        public Boolean checkForCollision(int x, int y, Rectangle inputRectangle)
+        {
+            if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
+                return true;
+
+            return false;
+        }
+
+
     }
 }
