@@ -14,6 +14,8 @@ namespace RoomRunner
     class Shop
     {
         public List<ShopItem> items;
+        public Rectangle selection; //highlights background of currently selected item
+
         public Shop(List<ShopItem> itemList)
         {
             items = itemList;
@@ -23,6 +25,12 @@ namespace RoomRunner
             //if jeb's money is greater than or equal to the items price
             //add it to players item list and subtract their money
         //}
+        public void updateSelection()
+        {
+            MouseState mouse = Mouse.GetState();
+            KeyboardState kb = Keyboard.GetState();
+        }
+        
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
             //will make this in a 2d grid style, just can't do it without being able to test what it looks like
