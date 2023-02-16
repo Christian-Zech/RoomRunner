@@ -158,7 +158,7 @@ namespace RoomRunner
 
             // TODO: use this.Content to load your game content here
 
-            pixel = this.Content.Load<Texture2D>("Level1/Background/pixel");
+            pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
