@@ -52,14 +52,14 @@ namespace RoomRunner
             GameOver
         }
         
-        enum Level1
+        enum Levels
         {
             Level1,
             Level2,
             Level3
         }
 
-
+        Levels levels;
         GameState gameState;
 
         public Game1()
@@ -88,6 +88,7 @@ namespace RoomRunner
             
 
             gameState = GameState.Menu;
+            levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
             currentRoom = 0;
@@ -111,7 +112,7 @@ namespace RoomRunner
 
 
             // reads background images
-            backgroundFiles = Directory.GetFiles(@"Content\Backgrounds", "*");
+            backgroundFiles = Directory.GetFiles(@"Content\" + , "*");
 
             base.Initialize();
             
