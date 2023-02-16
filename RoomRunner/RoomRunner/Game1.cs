@@ -31,6 +31,7 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
 
         Rectangle window;
+        private Player jeb;
 
 
         int gameTimer;
@@ -80,6 +81,8 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[3]);
             idleAnimationRectangles.Add(jebList[4]);
 
+            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
+
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
@@ -100,7 +103,6 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
-            
         }
 
         /// <summary>
@@ -137,6 +139,7 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
+            jeb.Update();
             gameTimer++;
             
 
@@ -153,6 +156,7 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+            jeb.Draw(spriteBatch);
 
 
             
@@ -191,16 +195,13 @@ namespace RoomRunner
 
 
 
-
-
-
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
 
-        public Boolean checkForCollision(int x, int y, Rectangle inputRectangle)
+        public bool checkForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
                 return true;
