@@ -14,7 +14,7 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float JumpMovement = 40.0f; //px per frame
 
-        public bool IsAlive;
+        public bool IsAlive, Show;
         public Vector2 Velocity, Position, Acceleration;
         public Rectangle PlayerRectangle;
         private PlayerState currentAnimation;
@@ -41,6 +41,7 @@ namespace RoomRunner
             currentAnimation = PlayerState.Idle;
             Acceleration.Y = Gravity;
             wasStateSet = false;
+            Show = true;
             MakePlayerAnimations(cm, graphics);
         }
 
@@ -69,6 +70,7 @@ namespace RoomRunner
         }
         public void Update()
         {
+            if (!Show) return;
             KeyboardState kb = Keyboard.GetState();
             bool stateSet = false;
 
@@ -133,7 +135,7 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
-            sb.Draw(Texture, PlayerRectangle, Color.White);
+            if (Show) sb.Draw(Texture, PlayerRectangle, Color.White);
         }
         public static Texture2D[] RectToTxt(GraphicsDevice gd, Texture2D sheet, params Rectangle[] rects)
         {

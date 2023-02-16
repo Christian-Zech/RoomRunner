@@ -78,7 +78,10 @@ namespace RoomRunner
             jebList.Add(new Rectangle(32, 32, 32, 32));
             jebList.Add(new Rectangle(0, 64, 32, 32));
 
-            
+            idleAnimationRectangles.Add(jebList[3]);
+            idleAnimationRectangles.Add(jebList[4]);
+
+            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
@@ -198,7 +201,7 @@ namespace RoomRunner
         }
 
 
-        public Boolean checkForCollision(int x, int y, Rectangle inputRectangle)
+        public bool checkForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
                 return true;
