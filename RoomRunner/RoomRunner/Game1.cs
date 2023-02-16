@@ -274,9 +274,10 @@ namespace RoomRunner
                 
                 // advances to next room every 10 seconds
 
-                if (levelTimer > 60 && levelSeconds % 10 == 0)
+                if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
                 {
-                    //currentRoom++;
+                    currentRoom++;
+                    levelTimer = 0;
                 }
 
 
