@@ -305,7 +305,7 @@ namespace RoomRunner
         }
 
 
-        public bool checkForCollision(int x, int y, Rectangle inputRectangle)
+        public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
                 return true;
