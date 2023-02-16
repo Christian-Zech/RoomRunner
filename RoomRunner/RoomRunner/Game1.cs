@@ -44,6 +44,8 @@ namespace RoomRunner
         int currentRoom;
         int scrollSpeed;
 
+        Random rand;
+
         string[] backgroundFiles;
 
 
@@ -85,6 +87,8 @@ namespace RoomRunner
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             idleAnimationRectangles = new List<Rectangle>();
+            rand = new Random();
+
 
             amountOfRooms = 5;
             scrollSpeed = 5;
@@ -117,7 +121,7 @@ namespace RoomRunner
 
 
             // reads background images
-            backgroundFiles = Directory.GetFiles("Content/" + levels + "/Background/", "*");
+            backgroundFiles = Directory.GetFiles(@"Content\" + levels + "/Background/", "*");
 
             int i = 0;
 
@@ -154,24 +158,20 @@ namespace RoomRunner
 
             // TODO: use this.Content to load your game content here
 
-            pixel = this.Content.Load<Texture2D>("Level1/Background/pixel");
+            pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
 
 
-            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Level1/Background/background"), window);
-            //foreach(string file in backgroundFiles)
-            //{
-            //    Console.WriteLine(file);
-            //}
-
-            //foreach(string file in backgroundFiles)
-            //{
-            //    backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
-            //}
-
             
+            foreach (string file in backgroundFiles)
+            {
+                backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
+            }
+
+            GenerateRoom(amountOfRooms, backgroundImages, window);
+
 
         }
 
@@ -275,9 +275,10 @@ namespace RoomRunner
                 
                 // advances to next room every 10 seconds
 
-                if (levelTimer > 60 && levelSeconds % 10 == 0)
+                if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
                 {
-                    //currentRoom++;
+                    currentRoom++;
+                    levelTimer = 0;
                 }
 
 
@@ -314,7 +315,7 @@ namespace RoomRunner
             return false;
         }
 
-        public void GenerateRoom(int amountOfRooms, Texture2D texture, Rectangle dimensions)
+        public void GenerateRoom(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
         {
 
             roomList.Clear();
@@ -322,7 +323,7 @@ namespace RoomRunner
             for(int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(texture, dimensions));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions));
             }
 
             
