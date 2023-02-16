@@ -23,6 +23,8 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
+        List<Texture2D> backgroundImages = new List<Texture2D>();
+
         SpriteFont menuFont;
         SpriteFont buttonFont;
 
@@ -113,7 +115,9 @@ namespace RoomRunner
 
             // reads background images
             backgroundFiles = Directory.GetFiles("Content/" + levels + "/Background/", "*");
-            
+
+            int i = 0;
+
             foreach(var File in backgroundFiles)
             {
                 string[] Temp;
@@ -121,7 +125,11 @@ namespace RoomRunner
                 string NameMinus = Temp[0];
                 int Index = NameMinus.LastIndexOf('\\') + 1;
                 NameMinus = NameMinus.Substring(Index);
+                
 
+
+                backgroundFiles[i] = NameMinus;
+                i++;
 
             }
 
@@ -142,13 +150,24 @@ namespace RoomRunner
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            pixel = this.Content.Load<Texture2D>("pixel");
+
+            pixel = this.Content.Load<Texture2D>("Level1/Background/pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
 
-            //GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Backgrounds/background"), window);
+            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Level1/Background/background"), window);
+            //foreach(string file in backgroundFiles)
+            //{
+            //    Console.WriteLine(file);
+            //}
 
+            //foreach(string file in backgroundFiles)
+            //{
+            //    backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
+            //}
+
+            
 
         }
 
@@ -297,6 +316,7 @@ namespace RoomRunner
 
             for(int i = 0; i < amountOfRooms; i++)
             {
+
                 roomList.Add(new Room(texture, dimensions));
             }
 
