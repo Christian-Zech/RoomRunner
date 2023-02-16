@@ -112,7 +112,8 @@ namespace RoomRunner
 
 
             // reads background images
-            backgroundFiles = Directory.GetFiles(@"Content\" + , "*");
+            backgroundFiles = Directory.GetFiles("Content/" + levels + "/Background/", "*");
+            Console.WriteLine(backgroundFiles[0]);
 
             base.Initialize();
             
@@ -135,7 +136,7 @@ namespace RoomRunner
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
 
-            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Backgrounds/background"), window);
+            //GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Backgrounds/background"), window);
 
 
         }
