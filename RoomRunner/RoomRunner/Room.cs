@@ -11,30 +11,39 @@ namespace RoomRunner
     {
 
 
-        public List<Texture2D> animationTextures;
-        public Texture2D background;
+        public Texture2D background1;
+        public Texture2D background2;
+
+        public Rectangle backgroundRectangle;
 
 
-
-        public Room(Texture2D background)
+        // intended for single images
+        public Room(Texture2D background, Rectangle backgroundRectangle)
         {
-            this.background = background;
-            animationTextures = new List<Texture2D>();
-
-
-
-
-
+            background1 = background;
+            background2 = background;
+            this.backgroundRectangle = backgroundRectangle;
         }
 
-        public void AddAnimationTexture(Texture2D texture)
+
+        // intended for 2 part images
+        public Room(Texture2D background1, Texture2D background2, Rectangle backgroundRectangle)
         {
+            this.background1 = background1;
+            this.background2 = background2;
+            this.backgroundRectangle = backgroundRectangle;
+        }
+
+
+        public void Update()
+        {
+            backgroundRectangle.X -= 10;
+
 
         }
 
         
-
-
+        
 
 
 

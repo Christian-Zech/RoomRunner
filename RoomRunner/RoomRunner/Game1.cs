@@ -39,7 +39,6 @@ namespace RoomRunner
         int gameTimer;
         int levelTimer;
         int currentRoom;
-        int scrolling;
 
 
         enum GameState
@@ -97,7 +96,7 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
             base.Initialize();
-            GenerateRoom(amountOfRooms, placeholderBackground);
+            
 
 
         }
@@ -117,6 +116,8 @@ namespace RoomRunner
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
             placeholderBackground = this.Content.Load<Texture2D>("background");
+
+            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("background"), window);
 
 
         }
@@ -153,8 +154,9 @@ namespace RoomRunner
                 gameState = GameState.Shop;
 
 
-           
-            
+
+            if(gameState == GameState.Play)
+                roomList[currentRoom].Update();
 
             // TODO: Add your update logic here
 
@@ -215,22 +217,28 @@ namespace RoomRunner
                 levelTimer++;
                 int levelSeconds = levelTimer / 60;
                 
+                // advances to next room every 10 seconds
 
                 if (levelTimer > 60 && levelSeconds % 10 == 0)
                 {
-                    currentRoom++;
+                    //currentRoom++;
                 }
 
-                Console.WriteLine(levelSeconds % 10);
 
-                
-                scrolling++;
+                // scrolling calculations
 
-                if (currentRoom < roomList.Count)
-                    spriteBatch.Draw(roomList[currentRoom].background, window, new Rectangle(scrolling, 100, 100, 100), Color.White);
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
 
-                if (levelSeconds > 10)
-                    Console.WriteLine("break");
+                if (roomRectangle.X < -((window.Width * 2) - window.Right))
+                    roomList[currentRoom].backgroundRectangle.X = 0;
+
+
+                Console.WriteLine(roomRectangle.X + " " + -(window.Width * 2 - window.Right));
+
+                spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
+                spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+
+
 
             }
 
@@ -252,14 +260,14 @@ namespace RoomRunner
             return false;
         }
 
-        public void GenerateRoom(int amountOfRooms, Texture2D texture)
+        public void GenerateRoom(int amountOfRooms, Texture2D texture, Rectangle dimensions)
         {
 
             roomList.Clear();
 
             for(int i = 0; i < amountOfRooms; i++)
             {
-                roomList.Add(new Room(texture));
+                roomList.Add(new Room(texture, dimensions));
             }
 
             
