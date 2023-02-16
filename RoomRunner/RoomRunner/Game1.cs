@@ -21,13 +21,12 @@ namespace RoomRunner
 
         Texture2D pixel;
         Texture2D jebSheet;
-        Texture2D placeholderBackground;
 
         SpriteFont menuFont;
         SpriteFont buttonFont;
 
-        List<Rectangle> jebList = new List<Rectangle>();
-        List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        List<Rectangle> jebList;
+        List<Rectangle> idleAnimationRectangles;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
 
@@ -70,6 +69,8 @@ namespace RoomRunner
         {
             // TODO: Add your initialization logic here
             roomList = new List<Room>();
+            jebList = new List<Rectangle>();
+            idleAnimationRectangles = new List<Rectangle>();
 
             amountOfRooms = 5;
             
@@ -115,7 +116,6 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
-            placeholderBackground = this.Content.Load<Texture2D>("background");
 
             GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("background"), window);
 
@@ -233,7 +233,7 @@ namespace RoomRunner
                     roomList[currentRoom].backgroundRectangle.X = 0;
 
 
-                Console.WriteLine(roomRectangle.X + " " + -(window.Width * 2 - window.Right));
+                
 
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
