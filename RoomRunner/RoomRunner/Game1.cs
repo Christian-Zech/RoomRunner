@@ -26,7 +26,7 @@ namespace RoomRunner
         Texture2D collectableSheet, cosmeticSheet; 
         List<ShopItem> items;
         List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
-        SpriteFont shopFont;
+        SpriteFont shopFont, shopTitleFont;
         Shop shop;
 
         enum GameState
@@ -45,7 +45,7 @@ namespace RoomRunner
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 1900;
-            graphics.PreferredBackBufferHeight = 700;
+            graphics.PreferredBackBufferHeight = 1000;
             
         }
 
@@ -95,6 +95,7 @@ namespace RoomRunner
             collectableSheet = this.Content.Load<Texture2D>("collectables");
             cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
             shopFont = this.Content.Load<SpriteFont>("SpriteFont1");
+            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFont2");
 
             //for shop, textures have to be loaded first before they can be sent as parameters
             items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
@@ -103,7 +104,7 @@ namespace RoomRunner
             items.Add(new ShopItem(50, "Magnet", magnet, collectableSheet));
             items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
             items.Add(new ShopItem(50, "Ski Mask", skiMask, cosmeticSheet));
-            items.Add(new ShopItem(50, "Construction Hat", construction, cosmeticSheet));
+            items.Add(new ShopItem(50, "Construction", construction, cosmeticSheet));
             items.Add(new ShopItem(50, "Hair", hair, cosmeticSheet));
             items.Add(new ShopItem(50, "Headphones", headphones, cosmeticSheet));
             items.Add(new ShopItem(50, "Santa Hat", santa, cosmeticSheet));
@@ -152,7 +153,7 @@ namespace RoomRunner
             spriteBatch.Begin();
             if (gameState == GameState.Shop)
             {
-                shop.Draw(gameTime, spriteBatch, shopFont);
+                shop.Draw(gameTime, spriteBatch, shopFont, shopTitleFont, pixel);
             }
 
 
