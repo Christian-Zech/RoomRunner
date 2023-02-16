@@ -213,6 +213,7 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
+            jeb.Show = gameState == GameState.Play;
             jeb.Update();
             gameTimer++;
             
@@ -230,7 +231,7 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            jeb.Draw(spriteBatch);
+            
 
 
             
@@ -296,9 +297,9 @@ namespace RoomRunner
 
             }
 
-            
 
 
+            jeb.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
