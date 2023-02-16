@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace RoomRunner
@@ -22,19 +23,28 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
+        List<Texture2D> backgroundImages = new List<Texture2D>();
+
         SpriteFont menuFont;
         SpriteFont buttonFont;
 
-        List<Rectangle> jebList = new List<Rectangle>();
-        List<Rectangle> idleAnimationRectangles = new List<Rectangle>();
+        List<Rectangle> jebList;
+        List<Rectangle> idleAnimationRectangles;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
 
         Rectangle window;
         private Player jeb;
 
+        List<Room> roomList;
+        int amountOfRooms;
 
         int gameTimer;
+        int levelTimer;
+        int currentRoom;
+        int scrollSpeed;
+
+        string[] backgroundFiles;
 
 
         enum GameState
@@ -43,9 +53,16 @@ namespace RoomRunner
             Shop,
             Play,
             GameOver
-
+        }
+        
+        enum Levels
+        {
+            Level1,
+            Level2,
+            Level3
         }
 
+        Levels levels;
         GameState gameState;
 
         public Game1()
@@ -65,8 +82,19 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            roomList = new List<Room>();
+            jebList = new List<Rectangle>();
+            idleAnimationRectangles = new List<Rectangle>();
+
+            amountOfRooms = 5;
+            scrollSpeed = 5;
+            
+
             gameState = GameState.Menu;
+            levels = Levels.Level1;
             gameTimer = 0;
+            levelTimer = 0;
+            currentRoom = 0;
 
             this.IsMouseVisible = true;
 
@@ -86,7 +114,33 @@ namespace RoomRunner
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
 
+
+
+            // reads background images
+            backgroundFiles = Directory.GetFiles("Content/" + levels + "/Background/", "*");
+
+            int i = 0;
+
+            foreach(var File in backgroundFiles)
+            {
+                string[] Temp;
+                Temp = File.Split('.');
+                string NameMinus = Temp[0];
+                int Index = NameMinus.LastIndexOf('\\') + 1;
+                NameMinus = NameMinus.Substring(Index);
+                
+
+
+                backgroundFiles[i] = NameMinus;
+                i++;
+
+            }
+
+
             base.Initialize();
+            
+
+
         }
 
         /// <summary>
@@ -99,10 +153,26 @@ namespace RoomRunner
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            pixel = this.Content.Load<Texture2D>("pixel");
+
+            pixel = this.Content.Load<Texture2D>("Level1/Background/pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+
+
+            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Level1/Background/background"), window);
+            //foreach(string file in backgroundFiles)
+            //{
+            //    Console.WriteLine(file);
+            //}
+
+            //foreach(string file in backgroundFiles)
+            //{
+            //    backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
+            //}
+
+            
+
         }
 
         /// <summary>
@@ -130,12 +200,16 @@ namespace RoomRunner
                 this.Exit();
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, startButtonRectangle))
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle))
                 gameState = GameState.Play;
 
-            if (mouse.LeftButton == ButtonState.Pressed && checkForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle))
                 gameState = GameState.Shop;
 
+
+
+            if(gameState == GameState.Play)
+                roomList[currentRoom].Update(scrollSpeed);
 
             // TODO: Add your update logic here
 
@@ -193,6 +267,36 @@ namespace RoomRunner
 
             }
 
+            if(gameState == GameState.Play)
+            {
+                levelTimer++;
+                int levelSeconds = levelTimer / 60;
+                
+                // advances to next room every 10 seconds
+
+                if (levelTimer > 60 && levelSeconds % 10 == 0)
+                {
+                    //currentRoom++;
+                }
+
+
+                // scrolling calculations
+
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
+
+                if (roomRectangle.X < -((window.Width * 2) - window.Right - 10))
+                    roomList[currentRoom].backgroundRectangle.X = 0;
+
+
+                
+
+                spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
+                spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+
+
+            }
+
+            
 
 
             spriteBatch.End();
@@ -207,6 +311,20 @@ namespace RoomRunner
                 return true;
 
             return false;
+        }
+
+        public void GenerateRoom(int amountOfRooms, Texture2D texture, Rectangle dimensions)
+        {
+
+            roomList.Clear();
+
+            for(int i = 0; i < amountOfRooms; i++)
+            {
+
+                roomList.Add(new Room(texture, dimensions));
+            }
+
+            
         }
 
 
