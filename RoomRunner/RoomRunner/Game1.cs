@@ -113,7 +113,18 @@ namespace RoomRunner
 
             // reads background images
             backgroundFiles = Directory.GetFiles("Content/" + levels + "/Background/", "*");
-            Console.WriteLine(backgroundFiles[0]);
+            
+            foreach(var File in backgroundFiles)
+            {
+                string[] Temp;
+                Temp = File.Split('.');
+                string NameMinus = Temp[0];
+                int Index = NameMinus.LastIndexOf('\\') + 1;
+                NameMinus = NameMinus.Substring(Index);
+
+
+            }
+
 
             base.Initialize();
             
