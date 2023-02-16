@@ -35,9 +35,9 @@ namespace RoomRunner
         }
 
 
-        public void Update()
+        public void Update(int scrollSpeed)
         {
-            backgroundRectangle.X -= 10;
+            backgroundRectangle.X -= scrollSpeed;
 
 
         }

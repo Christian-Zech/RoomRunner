@@ -38,6 +38,7 @@ namespace RoomRunner
         int gameTimer;
         int levelTimer;
         int currentRoom;
+        int scrollSpeed;
 
 
         enum GameState
@@ -73,6 +74,7 @@ namespace RoomRunner
             idleAnimationRectangles = new List<Rectangle>();
 
             amountOfRooms = 5;
+            scrollSpeed = 5;
             
 
             gameState = GameState.Menu;
@@ -117,7 +119,7 @@ namespace RoomRunner
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
 
-            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("background"), window);
+            GenerateRoom(amountOfRooms, this.Content.Load<Texture2D>("Backgrounds/background"), window);
 
 
         }
@@ -156,7 +158,7 @@ namespace RoomRunner
 
 
             if(gameState == GameState.Play)
-                roomList[currentRoom].Update();
+                roomList[currentRoom].Update(scrollSpeed);
 
             // TODO: Add your update logic here
 
@@ -229,7 +231,7 @@ namespace RoomRunner
 
                 Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
 
-                if (roomRectangle.X < -((window.Width * 2) - window.Right))
+                if (roomRectangle.X < -((window.Width * 2) - window.Right - 10))
                     roomList[currentRoom].backgroundRectangle.X = 0;
 
 
