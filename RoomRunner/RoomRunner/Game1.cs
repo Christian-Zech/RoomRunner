@@ -90,7 +90,7 @@ namespace RoomRunner
             rand = new Random();
 
 
-            amountOfRooms = 5;
+            amountOfRooms = 50;
             scrollSpeed = 5;
             
 
@@ -207,6 +207,8 @@ namespace RoomRunner
                 gameState = GameState.Shop;
 
 
+
+            scrollSpeed = currentRoom + 3;
 
             if(gameState == GameState.Play)
                 roomList[currentRoom].Update(scrollSpeed);
