@@ -110,7 +110,6 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[4]);
 
             jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
-            jeb.Show = false;
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
@@ -232,7 +231,7 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            jeb.Draw(spriteBatch);
+            
 
 
             
@@ -298,9 +297,9 @@ namespace RoomRunner
 
             }
 
-            
 
 
+            jeb.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
