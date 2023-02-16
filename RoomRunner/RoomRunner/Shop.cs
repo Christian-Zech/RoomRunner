@@ -33,17 +33,30 @@ namespace RoomRunner
         
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
-            //will make this in a 2d grid style, just can't do it without being able to test what it looks like
+            //Title
+
+            //Current Coins, powerups, etc.
+
+            //Drawing Items
             int x = 50;
             int y = 50;
             int count = 0;
             for (int i = 0; i < items.Count; i++)
             {
-                spriteBatch.Draw(items[i].tex, new Rectangle(x, y, 100, 100), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
-                spriteBatch.DrawString(font, items[i].name, new Vector2(x, y + 120), Color.Black);
+                
+                if (items[i].name.Equals("Coin"))
+                {
+                    spriteBatch.Draw(items[i].tex, new Rectangle(1700, 100, 60, 60), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
+                    spriteBatch.DrawString(font, "Current coins:", new Vector2(1700, 170), Color.Black);
+                }
+                else
+                {
+                    spriteBatch.Draw(items[i].tex, new Rectangle(x, y, 80, 80), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
+                    spriteBatch.DrawString(font, items[i].name, new Vector2(x, y + 110), Color.Black);
+                }
                 if (i % 4 == 0 && i != 0)
                 {
-                    y += 100;
+                    y += 150;
                     x = 50;
                     count++;
                     if (count == 3)

@@ -44,6 +44,9 @@ namespace RoomRunner
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferWidth = 1900;
+            graphics.PreferredBackBufferHeight = 700;
+            
         }
 
         /// <summary>
@@ -144,8 +147,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            GraphicsDevice.Clear(Color.Gray);
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             if (gameState == GameState.Shop)
