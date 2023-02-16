@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace RoomRunner
@@ -40,6 +41,8 @@ namespace RoomRunner
         int currentRoom;
         int scrollSpeed;
 
+        string[] backgroundFiles;
+
 
         enum GameState
         {
@@ -47,8 +50,15 @@ namespace RoomRunner
             Shop,
             Play,
             GameOver
-
         }
+        
+        enum Level1
+        {
+            Level1,
+            Level2,
+            Level3
+        }
+
 
         GameState gameState;
 
@@ -97,6 +107,11 @@ namespace RoomRunner
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
+
+
+
+            // reads background images
+            backgroundFiles = Directory.GetFiles(@"Content\Backgrounds", "*");
 
             base.Initialize();
             
