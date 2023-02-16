@@ -91,8 +91,7 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("menuFont");
 
-            jeb = new Player();
-            jeb.AddAnimation("idle", jebSheet, graphics.GraphicsDevice, 10, jebList.ToArray());
+            jeb = new Player(new Vector2(900,500), Content, GraphicsDevice);
         }
 
         /// <summary>
@@ -134,7 +133,7 @@ namespace RoomRunner
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(jeb.Texture, new Rectangle(100, 100, 64, 128), Color.White);
+            jeb.Draw(spriteBatch);
 
             spriteBatch.End();
 
