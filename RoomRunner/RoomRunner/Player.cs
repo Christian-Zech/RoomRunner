@@ -12,7 +12,7 @@ namespace RoomRunner
     public class Player
     {
         public const float Gravity = -2.0f; //px per frame
-        public const float JumpMovement = 40.0f; //px per frame
+        public const float JumpMovement = 50.0f; //px per frame
 
         public bool IsAlive, Show;
         public Vector2 Velocity, Position, Acceleration;
@@ -20,10 +20,11 @@ namespace RoomRunner
         private PlayerState currentAnimation;
         private readonly Dictionary<PlayerState, Texture2D[]> animations;
         private int frame;
-        private bool wasStateSet;
+        private bool wasStateSet, onGround;
         public Texture2D Texture => animations[currentAnimation][frame];
         private readonly Dictionary<PlayerState, int> framesBetween, framesLeft;
         private KeyboardState oldkb;
+        private MouseState oldms;
 
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
@@ -38,6 +39,7 @@ namespace RoomRunner
             framesLeft = new Dictionary<PlayerState, int>();
             frame = 0;
             oldkb = Keyboard.GetState();
+            oldms = Mouse.GetState();
             currentAnimation = PlayerState.Idle;
             Acceleration.Y = Gravity;
             wasStateSet = false;
@@ -72,11 +74,13 @@ namespace RoomRunner
         {
             if (!Show) return;
             KeyboardState kb = Keyboard.GetState();
+            MouseState ms = Mouse.GetState();
             bool stateSet = false;
 
-            if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space))
+            if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
             {
-                Velocity.Y = JumpMovement;
+                if (onGround) Velocity.Y = JumpMovement;
+                else Velocity.Y = JumpMovement / 2;
                 SetState(PlayerState.Jumping);
                 stateSet = true;
             }
@@ -85,6 +89,8 @@ namespace RoomRunner
 
             Velocity.Y += Acceleration.Y;
             Position.Y -= Velocity.Y;
+
+            onGround = Position.Y > 900;
 
             if (Position.Y > 900)
             {
@@ -113,6 +119,7 @@ namespace RoomRunner
             }
 
             oldkb = kb;
+            oldms = ms;
         }
         private void SetState(PlayerState state)
         {
