@@ -14,6 +14,7 @@ namespace RoomRunner
     class Shop
     {
         public List<ShopItem> items;
+        public List<bool> selectedItem;
         public Rectangle[,] grid;
         public Rectangle selection; //highlights background of currently selected item
         public Rectangle backButton;
@@ -23,6 +24,9 @@ namespace RoomRunner
         public Shop(List<ShopItem> itemList)
         {
             items = itemList;
+            
+            selectedItem = new List<bool> { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+            Console.WriteLine(items.Count); Console.WriteLine(selectedItem.Count);
             grid = new Rectangle[4, 4];
             int x = 650;
             int y = 250;
@@ -131,7 +135,7 @@ namespace RoomRunner
                         
                         if (selectionIndexX < 0)
                             selectionIndexX = 3;
-                        if (selectionIndexX == 3 && selectionIndexY == 0 || selectionIndexY == 3)
+                        if (selectionIndexX == 3 && (selectionIndexY == 0 || selectionIndexY == 3))
                             selectionIndexX = 0;
                         selection = grid[selectionIndexX, selectionIndexY];
                     }
@@ -141,14 +145,14 @@ namespace RoomRunner
                         
                         if (selectionIndexX < 0)
                             selectionIndexX = 3;
-                        if (selectionIndexX == 3 && selectionIndexY == 0 || selectionIndexY == 3)
+                        if (selectionIndexX == 3 && (selectionIndexY == 0 || selectionIndexY == 3))
                             selectionIndexX = 0;
                         selection = grid[selectionIndexX, selectionIndexY];
                     }
                     if (pressedKeys[i] == Keys.S && !oldKeys.Contains(Keys.S))
                     {
                         selectionIndexX++;
-                        if (selectionIndexX == 3 && selectionIndexY == 0)
+                        if (selectionIndexX == 3 && (selectionIndexY == 0 || selectionIndexY == 3))
                             selectionIndexX--;
                         if (selectionIndexX > 3)
                             selectionIndexX = 0;
@@ -157,7 +161,7 @@ namespace RoomRunner
                     if (pressedKeys[i] == Keys.Down && !oldKeys.Contains(Keys.Down))
                     {
                         selectionIndexX++;
-                        if (selectionIndexX == 3 && selectionIndexY == 0)
+                        if (selectionIndexX == 3 && (selectionIndexY == 0 || selectionIndexY == 3))
                             selectionIndexX--;
                         if (selectionIndexX > 3)
                             selectionIndexX = 0;
@@ -165,23 +169,44 @@ namespace RoomRunner
                     }
                 }
             }
+            selectedItem = new List<bool>{ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+            selectedItem[(4 * selectionIndexX) + selectionIndexY] = true;
+            for (int i = 0; i < selectedItem.Count; i++)
+            {
+                Console.Write(selectedItem[i] + " ");
+            }
+            Console.WriteLine();
         }
         
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont title, Texture2D pixel)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
+            Console.WriteLine(items.Count);
             updateSelection();
             spriteBatch.Draw(pixel, new Rectangle(mouseX, mouseY, 5, 5), Color.Black);
-            spriteBatch.Draw(pixel, selection, Color.White);
+            spriteBatch.Draw(pixel, new Rectangle(selection.X-5, selection.Y-10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Red);
-            spriteBatch.DrawString(font, "Back", new Vector2(backButton.X+25, backButton.Y+15), Color.Black);
+            spriteBatch.DrawString(bold, "Back", new Vector2(backButton.X+25, backButton.Y+15), Color.Black);
 
             int x = 0;
             int y = 0;
-            spriteBatch.DrawString(title, "SHOP", new Vector2(790, 50), Color.Black);
+            int temp = 0;
+            spriteBatch.DrawString(title, "SHOP", new Vector2(780, 40), Color.Black);
+            spriteBatch.DrawString(font, "(space/click to buy)", new Vector2(790, 170), Color.Black);
             for (int i = 0; i < items.Count; i++)
             {
-                
+                temp = 0;
+                if (items[i].name.Length <= 4)
+                    temp += 20;
+                if (i % 4 == 0 && i != 0)
+                {
+
+                    y = 0;
+                    x++;
+
+                    if (x == 3)
+                        y = 1;
+                }
                 if (items[i].name.Equals("Coin"))
                 {
                     spriteBatch.Draw(items[i].tex, new Rectangle(1650, 120, 60, 60), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
@@ -191,18 +216,27 @@ namespace RoomRunner
                 {
                     
                     spriteBatch.Draw(items[i].tex, grid[x,y], items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
-                    spriteBatch.DrawString(font, items[i].name, new Vector2(grid[x,y].X - items[i].name.Length * 2, grid[x,y].Y + 110), Color.Black);
+                    if (items[i].name.Equals("Blue Headband") && selection == grid[3, 2])
+                    {
+                        spriteBatch.DrawString(bold, items[i].name, new Vector2(grid[x, y].X - items[i].name.Length * 2, grid[x, y].Y + 110), Color.Black);
+                    }
+                    else if (items[i].name.Equals("Red Headband") && selection == grid[3, 1])
+                    {
+                        spriteBatch.DrawString(bold, items[i].name, new Vector2(grid[x, y].X - items[i].name.Length * 2, grid[x, y].Y + 110), Color.Black);
+                    }
+                    else if (selectedItem[i] != true)
+                        spriteBatch.DrawString(font, items[i].name, new Vector2(grid[x, y].X - items[i].name.Length * 2 + temp, grid[x, y].Y + 110), Color.Black);
+                    else
+                    {
+                        if (!items[i].name.Equals("Blue Headband"))
+                            spriteBatch.DrawString(bold, items[i].name, new Vector2(grid[x, y].X - items[i].name.Length * 2 + temp, grid[x, y].Y + 110), Color.Black);
+                        else
+                            spriteBatch.DrawString(font, items[i].name, new Vector2(grid[x, y].X - items[i].name.Length * 2, grid[x, y].Y + 110), Color.Black);
+                    }
+
                 }
                 y++;
-                if (i % 4 == 0 && i != 0)
-                {
-                    
-                    y = 0;
-                    x++;
-
-                    if (x == 3)
-                        y = 1;
-                }
+                
                 
                 
                 if (items[i].name.Equals("Can't Die") || items[i].name.Equals("Coin"))
