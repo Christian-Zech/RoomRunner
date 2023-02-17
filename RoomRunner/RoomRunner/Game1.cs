@@ -43,6 +43,9 @@ namespace RoomRunner
         int levelTimer;
         int currentRoom;
         int scrollSpeed;
+        bool transition;
+        bool endCurrentRoom;
+        bool bossFight;
 
         Random rand;
 
@@ -90,8 +93,8 @@ namespace RoomRunner
             rand = new Random();
 
 
-            amountOfRooms = 50;
-            scrollSpeed = 5;
+            amountOfRooms = 5;
+            scrollSpeed = 0;
             
 
             gameState = GameState.Menu;
@@ -99,6 +102,10 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoom = 0;
+
+            transition = false;
+            endCurrentRoom = false;
+            bossFight = false;
 
             this.IsMouseVisible = true;
 
@@ -208,7 +215,8 @@ namespace RoomRunner
 
 
 
-            scrollSpeed = currentRoom + 3;
+
+            scrollSpeed = currentRoom + 10;
 
             if(gameState == GameState.Play)
                 roomList[currentRoom].Update(scrollSpeed);
@@ -272,33 +280,83 @@ namespace RoomRunner
 
             if(gameState == GameState.Play)
             {
-                levelTimer++;
-                int levelSeconds = levelTimer / 60;
                 
-                // advances to next room every 10 seconds
 
+                if (!transition)
+                    levelTimer++;
+
+                int levelSeconds = levelTimer / 60;
+
+
+
+
+
+                // tries to advance to next room every 10 seconds
                 if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
                 {
-                    currentRoom++;
+                    transition = true;
                     levelTimer = 0;
+                    
                 }
 
 
                 // scrolling calculations
+                
+                bool loopImage = roomList[currentRoom].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
-                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
-
-                if (roomRectangle.X < -((window.Width * 2) - window.Right - 10))
-                    roomList[currentRoom].backgroundRectangle.X = 0;
 
 
                 
+                
+
+
+                // checks if the transition period is over
+                if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
+                {
+                    currentRoom++;
+                    endCurrentRoom = false;
+                    transition = false;
+                }
+
+
+                // checks if we are currently transitioning to next room
+                if (loopImage && transition)
+                {
+                    roomList[currentRoom].background2 = roomList[currentRoom + 1].background1;
+                    endCurrentRoom = true;
+                }
+
+                // checks if we have undergone a full loop of the background
+                if (loopImage)
+                {
+                    roomList[currentRoom].backgroundRectangle.X = 0;
+                }
+
+
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
+
+
+
+                
+
+
 
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
+                if (currentRoom >= roomList.Count - 1)
+                {
+                    bossFight = true;
+                    
+
+                }
+
+                if(bossFight)
+                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
             }
+
+            
 
 
 
