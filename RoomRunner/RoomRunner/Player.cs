@@ -47,12 +47,13 @@ namespace RoomRunner
             MakePlayerAnimations(cm, graphics);
         }
 
-        public void AddAnimation(PlayerState state, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 3, params Rectangle[] rects)
+        public void SetAnimation(PlayerState state, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 3, params Rectangle[] rects)
         {
             animations[state] = RectToTxt(gd, sheet, rects);
             framesBetween[state] = framesInbetween;
             framesLeft[state] = framesInbetween;
         }
+        public void SetFrameDelay(PlayerState state, int newDelay) => framesBetween[state] = newDelay;
         private void MakePlayerAnimations(ContentManager cm, GraphicsDevice graphics)
         {
             List<Rectangle> jebList = new List<Rectangle>();
@@ -65,10 +66,10 @@ namespace RoomRunner
             jebList.Add(new Rectangle(0, 64, 32, 32));
 
             Rectangle[] idle = new Rectangle[] { jebList[3], jebList[4] };
-            AddAnimation(PlayerState.Idle, jebSheet, graphics, 30, idle);
-            AddAnimation(PlayerState.Jumping, jebSheet, graphics, 30, idle);
+            SetAnimation(PlayerState.Idle, jebSheet, graphics, 30, idle);
+            SetAnimation(PlayerState.Jumping, jebSheet, graphics, 30, idle);
             Rectangle[] running = new Rectangle[] { jebList[0], jebList[1], jebList[2] };
-            AddAnimation(PlayerState.Running, jebSheet, graphics, 5, running);
+            SetAnimation(PlayerState.Running, jebSheet, graphics, 5, running);
         }
         public void Update()
         {
