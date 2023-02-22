@@ -23,6 +23,7 @@ namespace RoomRunner
         private bool wasStateSet, onGround;
         private KeyboardState oldkb;
         private MouseState oldms;
+        public int Coins;
 
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
@@ -37,6 +38,7 @@ namespace RoomRunner
             Acceleration.Y = Gravity;
             wasStateSet = false;
             Idle = false;
+            Coins = 0;
             MakePlayerAnimations(cm, graphics);
         }
 
