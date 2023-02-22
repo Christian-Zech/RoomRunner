@@ -169,9 +169,30 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            collectableSheet = this.Content.Load<Texture2D>("collectables");
+            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
+            shopFont = this.Content.Load<SpriteFont>("SpriteFont1");
+            shopFontBold = this.Content.Load<SpriteFont>("SpriteFont3");
+            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFont2");
 
+            //for shop, textures have to be loaded first before they can be sent as parameters
+            items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
+            items.Add(new ShopItem(50, "Can't Die", skull, collectableSheet));
+            items.Add(new ShopItem(50, "Instakill", nuke, collectableSheet));
+            items.Add(new ShopItem(50, "Magnet", magnet, collectableSheet));
+            items.Add(new ShopItem(50, "Ski Mask", skiMask, cosmeticSheet));
+            items.Add(new ShopItem(50, "Construction", construction, cosmeticSheet));
+            items.Add(new ShopItem(50, "Hair", hair, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headphones", headphones, cosmeticSheet));
+            items.Add(new ShopItem(50, "Santa Hat", santa, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headband", headband, cosmeticSheet));
+            items.Add(new ShopItem(50, "Fire", fire, cosmeticSheet));
+            items.Add(new ShopItem(50, "Army Hat", army, cosmeticSheet));
+            items.Add(new ShopItem(50, "Red Headband", redBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Blue Headband", blueBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
+            shop = new Shop(items);
 
-            
             foreach (string file in backgroundFiles)
             {
                 backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
