@@ -223,7 +223,7 @@ namespace RoomRunner
 
             // TODO: Add your update logic here
 
-            jeb.Show = gameState == GameState.Play;
+            jeb.Idle = gameState != GameState.Play;
             jeb.Update();
             gameTimer++;
             
