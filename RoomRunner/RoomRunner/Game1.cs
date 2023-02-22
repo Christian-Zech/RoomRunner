@@ -49,7 +49,7 @@ namespace RoomRunner
 
         Random rand;
 
-        static List<Texture2D> backgroundImages = new List<Texture2D>();
+        List<Texture2D> backgroundImages;
 
 
         public enum GameState
@@ -95,6 +95,7 @@ namespace RoomRunner
 
             amountOfRooms = 5;
             scrollSpeed = 0;
+            
             
 
             gameState = GameState.Menu;
@@ -152,10 +153,10 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            backgroundImages = loadTextures("Background", levels, Content);
 
 
-            
-            
+
 
             GenerateRoom(amountOfRooms, backgroundImages, window);
 
@@ -372,11 +373,12 @@ namespace RoomRunner
 
         public static List<Texture2D> loadTextures(string directory, Levels levels, ContentManager content)
         {
-            string[] backgroundFiles = Directory.GetFiles(@"Content\" + levels + @"\" + directory + @"\", "*");
+            string[] files = Directory.GetFiles(@"Content\" + levels + "/" + directory + "/", "*");
+            List<Texture2D> images = new List<Texture2D>();
 
             int i = 0;
 
-            foreach (var File in backgroundFiles)
+            foreach (var File in files)
             {
                 string[] Temp;
                 Temp = File.Split('.');
@@ -386,18 +388,18 @@ namespace RoomRunner
 
 
 
-                backgroundFiles[i] = NameMinus;
+                files[i] = NameMinus;
                 i++;
 
             }
 
 
-            foreach (string file in backgroundFiles)
+            foreach (string file in files)
             {
-                backgroundImages.Add(content.Load<Texture2D>(@".\" + file));
+                images.Add(content.Load<Texture2D>(@".\" + file));
             }
 
-            return backgroundImages;
+            return images;
             
 
         }
