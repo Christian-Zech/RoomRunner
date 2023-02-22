@@ -23,12 +23,6 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
-        //for shop
-        Texture2D collectableSheet, cosmeticSheet; 
-        List<ShopItem> items;
-        List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
-        SpriteFont shopFont, shopFontBold, shopTitleFont;
-        Shop shop;
         List<Texture2D> backgroundImages = new List<Texture2D>();
 
         SpriteFont menuFont;
@@ -82,7 +76,6 @@ namespace RoomRunner
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 1900;
             graphics.PreferredBackBufferHeight = 1000;
-
         }
 
         /// <summary>
@@ -94,25 +87,6 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            gameState = GameState.Shop;
-
-            //for shop
-            items = new List<ShopItem>();
-            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
-            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
-            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
-            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
-            coin = new List<Rectangle> { new Rectangle(0, 160, 32, 32), new Rectangle(32, 160, 32, 32), new Rectangle(64, 160, 32, 32), new Rectangle(96, 160, 32, 32) };
-            skiMask = new List<Rectangle> { new Rectangle(0, 0, 32, 32)};
-            construction = new List<Rectangle> { new Rectangle(64, 0, 32, 32) };
-            hair = new List<Rectangle> { new Rectangle(128, 0, 32, 32) };
-            headphones = new List<Rectangle> { new Rectangle(32, 32, 32, 32) };
-            santa = new List<Rectangle> { new Rectangle(96, 32, 32, 32) };
-            headband = new List<Rectangle> { new Rectangle(0, 64, 32, 32) };
-            fire = new List<Rectangle> { new Rectangle(64, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(32, 96, 32, 32) };
-            army = new List<Rectangle> { new Rectangle(96, 96, 32, 32) };
-            redBand = new List<Rectangle> { new Rectangle(0, 128, 32, 32) };
-            blueBand = new List<Rectangle> { new Rectangle(64, 128, 32, 32) };
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             idleAnimationRectangles = new List<Rectangle>();
@@ -193,29 +167,6 @@ namespace RoomRunner
 
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
-            collectableSheet = this.Content.Load<Texture2D>("collectables");
-            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
-            shopFont = this.Content.Load<SpriteFont>("SpriteFont1");
-            shopFontBold = this.Content.Load<SpriteFont>("SpriteFont3");
-            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFont2");
-
-            //for shop, textures have to be loaded first before they can be sent as parameters
-            items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
-            items.Add(new ShopItem(50, "Can't Die", skull, collectableSheet));
-            items.Add(new ShopItem(50, "Instakill", nuke, collectableSheet));
-            items.Add(new ShopItem(50, "Magnet", magnet, collectableSheet));    
-            items.Add(new ShopItem(50, "Ski Mask", skiMask, cosmeticSheet));
-            items.Add(new ShopItem(50, "Construction", construction, cosmeticSheet));
-            items.Add(new ShopItem(50, "Hair", hair, cosmeticSheet));
-            items.Add(new ShopItem(50, "Headphones", headphones, cosmeticSheet));
-            items.Add(new ShopItem(50, "Santa Hat", santa, cosmeticSheet));
-            items.Add(new ShopItem(50, "Headband", headband, cosmeticSheet));
-            items.Add(new ShopItem(50, "Fire", fire, cosmeticSheet));
-            items.Add(new ShopItem(50, "Army Hat", army, cosmeticSheet));
-            items.Add(new ShopItem(50, "Red Headband", redBand, cosmeticSheet));
-            items.Add(new ShopItem(50, "Blue Headband", blueBand, cosmeticSheet));
-            items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
-            shop = new Shop(items);
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
 
@@ -286,16 +237,6 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
-            // TODO: Add your drawing code here
-            spriteBatch.Begin();
-            if (gameState == GameState.Shop)
-            {
-                shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                if (shop.leave)
-                    gameState = GameState.Menu;
-            }
-
             GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
