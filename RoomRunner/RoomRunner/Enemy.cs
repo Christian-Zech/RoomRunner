@@ -20,7 +20,7 @@ namespace RoomRunner
         {
             this.texture = texture;
             this.rectangle = rectangle;
-            AddAnimation("Idle", Game1.loadTextures("Enemies", content)[0], graphics, 5);
+            AddAnimation("Idle", texture, graphics, 5);
 
 
         }

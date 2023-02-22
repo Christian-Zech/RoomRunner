@@ -26,8 +26,12 @@ namespace RoomRunner
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
             this.amountOfEnemies = amountOfEnemies;
+            enemyArray = new Enemy[amountOfEnemies];
 
-
+            for(int i = 0; i < enemyArray.Length; i++)
+            {
+                enemyArray[i] = new Enemy()
+            }
 
         }
 
@@ -38,7 +42,7 @@ namespace RoomRunner
         {
             backgroundRectangle.X -= scrollSpeed;
 
-            foreach(Enemy enemy in enemyList)
+            foreach(Enemy enemy in enemyArray)
             {
                 enemy.Update();
             }
