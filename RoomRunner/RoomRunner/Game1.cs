@@ -51,6 +51,12 @@ namespace RoomRunner
 
         string[] backgroundFiles;
 
+        //for shop
+        Texture2D collectableSheet, cosmeticSheet;
+        List<ShopItem> items;
+        List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
+        SpriteFont shopFont, shopFontBold, shopTitleFont;
+        Shop shop;
 
         enum GameState
         {
