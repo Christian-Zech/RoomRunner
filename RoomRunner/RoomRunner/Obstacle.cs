@@ -11,13 +11,14 @@ namespace RoomRunner
     {
         private Texture2D texture;
         public Rectangle BoundingBox;
-        private int speed;
+        private int speed, timeUntilShown;
 
-        public Obstacle(Texture2D txt, Rectangle bounding, int speed)
+        public Obstacle(Texture2D txt, Rectangle bounding, int speed, int timeUntilShown)
         {
             texture = txt;
             BoundingBox = bounding;
             this.speed = speed;
+            this.timeUntilShown = timeUntilShown;
         }
 
         public void Update()

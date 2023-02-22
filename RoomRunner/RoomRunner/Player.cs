@@ -9,20 +9,18 @@ using System.Text;
 
 namespace RoomRunner
 {
-    public class Player
+    public class Player : Animation
     {
         public const float Gravity = -2.0f; //px per frame
         public const float JumpMovement = 50.0f; //px per frame
 
-        public bool IsAlive, Show;
+        private static string[] states = new string[] { "Idle", "Jumping", "Running" };
+        public static string[] States => states;
+
+        public bool IsAlive;
         public Vector2 Velocity, Position, Acceleration;
         public Rectangle PlayerRectangle;
-        private PlayerState currentAnimation;
-        private readonly Dictionary<PlayerState, Texture2D[]> animations;
-        private int frame;
         private bool wasStateSet, onGround;
-        public Texture2D Texture => animations[currentAnimation][frame];
-        private readonly Dictionary<PlayerState, int> framesBetween, framesLeft;
         private KeyboardState oldkb;
         private MouseState oldms;
 
@@ -30,30 +28,18 @@ namespace RoomRunner
         {
             Position = pos;
         }
-        public Player(ContentManager cm, GraphicsDevice graphics)
+        public Player(ContentManager cm, GraphicsDevice graphics) : base(states)
         {
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             IsAlive = true;
-            animations = new Dictionary<PlayerState, Texture2D[]>();
-            framesBetween = new Dictionary<PlayerState, int>();
-            framesLeft = new Dictionary<PlayerState, int>();
-            frame = 0;
             oldkb = Keyboard.GetState();
             oldms = Mouse.GetState();
-            currentAnimation = PlayerState.Idle;
             Acceleration.Y = Gravity;
             wasStateSet = false;
-            Show = true;
+            Idle = false;
             MakePlayerAnimations(cm, graphics);
         }
 
-        public void SetAnimation(PlayerState state, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 3, params Rectangle[] rects)
-        {
-            animations[state] = RectToTxt(gd, sheet, rects);
-            framesBetween[state] = framesInbetween;
-            framesLeft[state] = framesInbetween;
-        }
-        public void SetFrameDelay(PlayerState state, int newDelay) => framesBetween[state] = newDelay;
         private void MakePlayerAnimations(ContentManager cm, GraphicsDevice graphics)
         {
             List<Rectangle> jebList = new List<Rectangle>();
@@ -66,14 +52,13 @@ namespace RoomRunner
             jebList.Add(new Rectangle(0, 64, 32, 32));
 
             Rectangle[] idle = new Rectangle[] { jebList[3], jebList[4] };
-            SetAnimation(PlayerState.Idle, jebSheet, graphics, 30, idle);
-            SetAnimation(PlayerState.Jumping, jebSheet, graphics, 30, idle);
+            AddAnimation(States[0], jebSheet, graphics, 30, idle);
+            AddAnimation(States[1], jebSheet, graphics, 30, idle);
             Rectangle[] running = new Rectangle[] { jebList[0], jebList[1], jebList[2] };
-            SetAnimation(PlayerState.Running, jebSheet, graphics, 5, running);
+            AddAnimation(States[2], jebSheet, graphics, 5, running);
         }
-        public void Update()
+        public new void Update()
         {
-            if (!Show) return;
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
             bool stateSet = false;
@@ -82,7 +67,7 @@ namespace RoomRunner
             {
                 if (onGround) Velocity.Y = JumpMovement;
                 else Velocity.Y = JumpMovement / 2;
-                SetState(PlayerState.Jumping);
+                SetState("Jumping");
                 stateSet = true;
             }
             if (IsPressed(kb, Keys.S, Keys.Down))
@@ -97,7 +82,7 @@ namespace RoomRunner
             {
                 Position.Y = 900;
                 Velocity.Y = 0;
-                if (!wasStateSet) SetState(PlayerState.Running);
+                if (!wasStateSet) SetState("Running");
                 stateSet = true;
             }
             if (Position.Y < 0)
@@ -111,23 +96,10 @@ namespace RoomRunner
             PlayerRectangle.Y = (int)Position.Y;
             PlayerRectangle.X = (int)Position.X;
 
-            if (framesLeft[currentAnimation]-- <= 0)
-            {
-                framesLeft[currentAnimation] = framesBetween[currentAnimation];
-                frame++;
-                if (frame >= animations[currentAnimation].Length) 
-                    frame = 0;
-            }
+            base.Update();
 
             oldkb = kb;
             oldms = ms;
-        }
-        private void SetState(PlayerState state)
-        {
-            wasStateSet = true;
-            framesLeft[currentAnimation] = framesBetween[currentAnimation];
-            frame = 0;
-            currentAnimation = state;
         }
         private bool IsPressed(KeyboardState kb, Keys k) => kb.IsKeyDown(k) && !oldkb.IsKeyDown(k);
         public bool IsPressed(KeyboardState kb, params Keys[] keys)
@@ -143,30 +115,8 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
-            if (Show) sb.Draw(Texture, PlayerRectangle, Color.White);
-        }
-        public static Texture2D[] RectToTxt(GraphicsDevice gd, Texture2D sheet, params Rectangle[] rects)
-        {
-            Texture2D[] txts = new Texture2D[rects.Length];
-            Color[] pixels = new Color[sheet.Width * sheet.Height];
-            sheet.GetData(pixels);
-            int c = 0;
-            foreach (Rectangle r in rects)
-            {
-                Color[] newPixels = new Color[r.Width * r.Height];
-                for (int row = r.Y, newRow = 0; row < r.Y + r.Height; row++, newRow++)
-                    for (int col = r.X, newCol = 0; col < r.X + r.Width; col++, newCol++)
-                        newPixels[newRow * r.Width + newCol] = pixels[row * sheet.Width + col];
-                txts[c] = new Texture2D(gd, r.Width, r.Height);
-                txts[c].SetData(newPixels);
-                c++;
-            }
-            return txts;
+            if (!Idle) sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
         }
 
-    }
-    public enum PlayerState
-    {
-        Idle, Jumping, Running
     }
 }
