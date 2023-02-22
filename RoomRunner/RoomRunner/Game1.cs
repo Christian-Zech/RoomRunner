@@ -87,6 +87,26 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            //for shop
+            items = new List<ShopItem>();
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
+            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
+            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
+            coin = new List<Rectangle> { new Rectangle(0, 160, 32, 32), new Rectangle(32, 160, 32, 32), new Rectangle(64, 160, 32, 32), new Rectangle(96, 160, 32, 32) };
+            skiMask = new List<Rectangle> { new Rectangle(0, 0, 32, 32) };
+            construction = new List<Rectangle> { new Rectangle(64, 0, 32, 32) };
+            hair = new List<Rectangle> { new Rectangle(128, 0, 32, 32) };
+            headphones = new List<Rectangle> { new Rectangle(32, 32, 32, 32) };
+            santa = new List<Rectangle> { new Rectangle(96, 32, 32, 32) };
+            headband = new List<Rectangle> { new Rectangle(0, 64, 32, 32) };
+            fire = new List<Rectangle> { new Rectangle(64, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(32, 96, 32, 32) };
+            army = new List<Rectangle> { new Rectangle(96, 96, 32, 32) };
+            redBand = new List<Rectangle> { new Rectangle(0, 128, 32, 32) };
+            blueBand = new List<Rectangle> { new Rectangle(64, 128, 32, 32) };
+
+
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             idleAnimationRectangles = new List<Rectangle>();
