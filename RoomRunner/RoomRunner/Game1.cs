@@ -400,8 +400,6 @@ namespace RoomRunner
             }
 
             return images;
-            
-
         }
 
 

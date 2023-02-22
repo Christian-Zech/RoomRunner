@@ -81,8 +81,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Level1\Enemies\goomb.png">
-      <Name>goomb</Name>
+    <Compile Include="Level1\Enemies\jeb.png">
+      <Name>jeb</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
