@@ -14,7 +14,7 @@ namespace RoomRunner
         public Texture2D background1;
         public Texture2D background2;
         public int amountOfEnemies;
-        public List<Enemy> enemyList;
+        public Enemy[] enemyArray;
 
         public Rectangle backgroundRectangle;
 
@@ -26,6 +26,9 @@ namespace RoomRunner
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
             this.amountOfEnemies = amountOfEnemies;
+
+
+
         }
 
 
