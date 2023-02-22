@@ -55,8 +55,16 @@ namespace RoomRunner
         //}
         public void updateSelection()
         {
+            if (leave)
+            {
+                leave = false;
+            }
             if (pressedKeys.Contains(Keys.Back))
+            {
                 leave = true;
+                pressedKeys.Clear();
+            }
+                
             oldKeys = pressedKeys;
             MouseState mouse = Mouse.GetState();
             KeyboardState kb = Keyboard.GetState();
