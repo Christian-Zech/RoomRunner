@@ -277,8 +277,13 @@ namespace RoomRunner
 
 
             }
-
-            if(gameState == GameState.Play)
+            if (gameState == GameState.Shop)
+            {
+                shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                if (shop.leave)
+                    gameState = GameState.Menu;
+            }
+            if (gameState == GameState.Play)
             {
                 
 
