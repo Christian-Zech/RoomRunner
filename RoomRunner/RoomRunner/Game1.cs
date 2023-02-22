@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace RoomRunner
@@ -28,6 +29,34 @@ namespace RoomRunner
         List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
         SpriteFont shopFont, shopFontBold, shopTitleFont;
         Shop shop;
+        List<Texture2D> backgroundImages = new List<Texture2D>();
+
+        SpriteFont menuFont;
+        SpriteFont buttonFont;
+
+        List<Rectangle> jebList;
+        List<Rectangle> idleAnimationRectangles;
+        Rectangle startButtonRectangle;
+        Rectangle shopButtonRectangle;
+
+        Rectangle window;
+        private Player jeb;
+
+        List<Room> roomList;
+        int amountOfRooms;
+
+        int gameTimer;
+        int levelTimer;
+        int currentRoom;
+        int scrollSpeed;
+        bool transition;
+        bool endCurrentRoom;
+        bool bossFight;
+
+        Random rand;
+
+        string[] backgroundFiles;
+
 
         enum GameState
         {
@@ -35,9 +64,16 @@ namespace RoomRunner
             Shop,
             Play,
             GameOver
-
+        }
+        
+        enum Levels
+        {
+            Level1,
+            Level2,
+            Level3
         }
 
+        Levels levels;
         GameState gameState;
 
         public Game1()
@@ -46,7 +82,7 @@ namespace RoomRunner
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 1900;
             graphics.PreferredBackBufferHeight = 1000;
-            
+
         }
 
         /// <summary>
@@ -77,7 +113,71 @@ namespace RoomRunner
             army = new List<Rectangle> { new Rectangle(96, 96, 32, 32) };
             redBand = new List<Rectangle> { new Rectangle(0, 128, 32, 32) };
             blueBand = new List<Rectangle> { new Rectangle(64, 128, 32, 32) };
+            roomList = new List<Room>();
+            jebList = new List<Rectangle>();
+            idleAnimationRectangles = new List<Rectangle>();
+            rand = new Random();
+
+
+            amountOfRooms = 5;
+            scrollSpeed = 0;
+            
+
+            gameState = GameState.Menu;
+            levels = Levels.Level1;
+            gameTimer = 0;
+            levelTimer = 0;
+            currentRoom = 0;
+
+            transition = false;
+            endCurrentRoom = false;
+            bossFight = false;
+
+            this.IsMouseVisible = true;
+
+            window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+
+            jebList.Add(new Rectangle(0, 0, 32, 32));
+            jebList.Add(new Rectangle(32, 0, 32, 32));
+            jebList.Add(new Rectangle(0, 32, 32, 32));
+            jebList.Add(new Rectangle(32, 32, 32, 32));
+            jebList.Add(new Rectangle(0, 64, 32, 32));
+
+            idleAnimationRectangles.Add(jebList[3]);
+            idleAnimationRectangles.Add(jebList[4]);
+
+            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
+
+            startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
+            shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
+
+
+
+            // reads background images
+            backgroundFiles = Directory.GetFiles(@"Content\" + levels + "/Background/", "*");
+
+            int i = 0;
+
+            foreach(var File in backgroundFiles)
+            {
+                string[] Temp;
+                Temp = File.Split('.');
+                string NameMinus = Temp[0];
+                int Index = NameMinus.LastIndexOf('\\') + 1;
+                NameMinus = NameMinus.Substring(Index);
+                
+
+
+                backgroundFiles[i] = NameMinus;
+                i++;
+
+            }
+
+
             base.Initialize();
+            
+
+
         }
 
         /// <summary>
@@ -90,6 +190,7 @@ namespace RoomRunner
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+
             pixel = this.Content.Load<Texture2D>("pixel");
             jebSheet = this.Content.Load<Texture2D>("jeb");
             collectableSheet = this.Content.Load<Texture2D>("collectables");
@@ -115,6 +216,19 @@ namespace RoomRunner
             items.Add(new ShopItem(50, "Blue Headband", blueBand, cosmeticSheet));
             items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
             shop = new Shop(items);
+            menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
+            buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+
+
+            
+            foreach (string file in backgroundFiles)
+            {
+                backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
+            }
+
+            GenerateRoom(amountOfRooms, backgroundImages, window);
+
+
         }
 
         /// <summary>
@@ -134,11 +248,34 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState keyboard = Keyboard.GetState();
+            MouseState mouse = Mouse.GetState();
+
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboard.IsKeyDown(Keys.Escape))
                 this.Exit();
 
+
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle))
+                gameState = GameState.Play;
+
+            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+                gameState = GameState.Shop;
+
+
+
+
+            scrollSpeed = currentRoom + 10;
+
+            if(gameState == GameState.Play)
+                roomList[currentRoom].Update(scrollSpeed);
+
             // TODO: Add your update logic here
+
+            jeb.Show = gameState == GameState.Play;
+            jeb.Update();
+            gameTimer++;
+            
 
             base.Update(gameTime);
         }
@@ -159,10 +296,158 @@ namespace RoomRunner
                     gameState = GameState.Menu;
             }
 
+            GraphicsDevice.Clear(Color.Black);
 
+            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            
+
+
+            
+
+
+            if(gameState == GameState.Menu)
+            {
+                int halfSeconds = gameTimer / 30;
+                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
+                
+                Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
+
+
+                // animation
+                if (halfSeconds % 2 == 0)
+                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
+                else
+                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+        
+                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
+
+
+                // menu buttons
+
+                
+                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
+
+
+                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
+
+
+
+            }
+
+            if(gameState == GameState.Play)
+            {
+                
+
+                if (!transition)
+                    levelTimer++;
+
+                int levelSeconds = levelTimer / 60;
+
+
+
+
+
+                // tries to advance to next room every 10 seconds
+                if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
+                {
+                    transition = true;
+                    levelTimer = 0;
+                    
+                }
+
+
+                // scrolling calculations
+                
+                bool loopImage = roomList[currentRoom].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
+
+
+
+                
+                
+
+
+                // checks if the transition period is over
+                if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
+                {
+                    currentRoom++;
+                    endCurrentRoom = false;
+                    transition = false;
+                }
+
+
+                // checks if we are currently transitioning to next room
+                if (loopImage && transition)
+                {
+                    roomList[currentRoom].background2 = roomList[currentRoom + 1].background1;
+                    endCurrentRoom = true;
+                }
+
+                // checks if we have undergone a full loop of the background
+                if (loopImage)
+                {
+                    roomList[currentRoom].backgroundRectangle.X = 0;
+                }
+
+
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
+
+
+
+                
+
+
+
+                spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
+                spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+
+
+                if (currentRoom >= roomList.Count - 1)
+                {
+                    bossFight = true;
+                    
+
+                }
+
+                if(bossFight)
+                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
+            }
+
+            
+
+
+
+            jeb.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
+
+
+        public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
+        {
+            if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
+                return true;
+
+            return false;
+        }
+
+        public void GenerateRoom(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
+        {
+
+            roomList.Clear();
+
+            for(int i = 0; i < amountOfRooms; i++)
+            {
+
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions));
+            }
+
+            
+        }
+
+
     }
 }
