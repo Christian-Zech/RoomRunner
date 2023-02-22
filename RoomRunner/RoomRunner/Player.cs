@@ -12,7 +12,7 @@ namespace RoomRunner
     public class Player : Animation
     {
         public const float Gravity = -2.0f; //px per frame
-        public const float JumpMovement = 50.0f; //px per frame
+        public const float JumpMovement = 40.0f; //px per frame
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
         public static string[] States => statesstates;
@@ -24,6 +24,7 @@ namespace RoomRunner
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
+        public static int floorHeight; //in px
 
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
@@ -38,6 +39,7 @@ namespace RoomRunner
             Acceleration.Y = Gravity;
             wasStateSet = false;
             Idle = false;
+            floorHeight = 0;
             Coins = 0;
             MakePlayerAnimations(cm, graphics);
         }
@@ -87,9 +89,9 @@ namespace RoomRunner
                 if (!wasStateSet) SetState("Running");
                 stateSet = true;
             }
-            if (Position.Y < 0)
+            if (Position.Y < floorHeight)
             {
-                Position.Y = 0;
+                Position.Y = floorHeight;
                 Velocity.Y = 0;
             }
 
