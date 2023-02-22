@@ -43,11 +43,20 @@ namespace RoomRunner
         int levelTimer;
         int currentRoom;
         int scrollSpeed;
+        bool transition;
+        bool endCurrentRoom;
+        bool bossFight;
 
         Random rand;
 
         string[] backgroundFiles;
 
+        //for shop
+        Texture2D collectableSheet, cosmeticSheet;
+        List<ShopItem> items;
+        List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
+        SpriteFont shopFont, shopFontBold, shopTitleFont;
+        Shop shop;
 
         enum GameState
         {
@@ -84,14 +93,34 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            //for shop
+            items = new List<ShopItem>();
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
+            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
+            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
+            coin = new List<Rectangle> { new Rectangle(0, 160, 32, 32), new Rectangle(32, 160, 32, 32), new Rectangle(64, 160, 32, 32), new Rectangle(96, 160, 32, 32) };
+            skiMask = new List<Rectangle> { new Rectangle(0, 0, 32, 32) };
+            construction = new List<Rectangle> { new Rectangle(64, 0, 32, 32) };
+            hair = new List<Rectangle> { new Rectangle(128, 0, 32, 32) };
+            headphones = new List<Rectangle> { new Rectangle(32, 32, 32, 32) };
+            santa = new List<Rectangle> { new Rectangle(96, 32, 32, 32) };
+            headband = new List<Rectangle> { new Rectangle(0, 64, 32, 32) };
+            fire = new List<Rectangle> { new Rectangle(64, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(32, 96, 32, 32) };
+            army = new List<Rectangle> { new Rectangle(96, 96, 32, 32) };
+            redBand = new List<Rectangle> { new Rectangle(0, 128, 32, 32) };
+            blueBand = new List<Rectangle> { new Rectangle(64, 128, 32, 32) };
+
+
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             idleAnimationRectangles = new List<Rectangle>();
             rand = new Random();
 
 
-            amountOfRooms = 50;
-            scrollSpeed = 5;
+            amountOfRooms = 5;
+            scrollSpeed = 0;
             
 
             gameState = GameState.Menu;
@@ -99,6 +128,10 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoom = 0;
+
+            transition = false;
+            endCurrentRoom = false;
+            bossFight = false;
 
             this.IsMouseVisible = true;
 
@@ -162,9 +195,30 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            collectableSheet = this.Content.Load<Texture2D>("collectables");
+            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
+            shopFont = this.Content.Load<SpriteFont>("SpriteFont1");
+            shopFontBold = this.Content.Load<SpriteFont>("SpriteFont3");
+            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFont2");
 
+            //for shop, textures have to be loaded first before they can be sent as parameters
+            items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
+            items.Add(new ShopItem(50, "Can't Die", skull, collectableSheet));
+            items.Add(new ShopItem(50, "Instakill", nuke, collectableSheet));
+            items.Add(new ShopItem(50, "Magnet", magnet, collectableSheet));
+            items.Add(new ShopItem(50, "Ski Mask", skiMask, cosmeticSheet));
+            items.Add(new ShopItem(50, "Construction", construction, cosmeticSheet));
+            items.Add(new ShopItem(50, "Hair", hair, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headphones", headphones, cosmeticSheet));
+            items.Add(new ShopItem(50, "Santa Hat", santa, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headband", headband, cosmeticSheet));
+            items.Add(new ShopItem(50, "Fire", fire, cosmeticSheet));
+            items.Add(new ShopItem(50, "Army Hat", army, cosmeticSheet));
+            items.Add(new ShopItem(50, "Red Headband", redBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Blue Headband", blueBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
+            shop = new Shop(items);
 
-            
             foreach (string file in backgroundFiles)
             {
                 backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
@@ -208,7 +262,8 @@ namespace RoomRunner
 
 
 
-            scrollSpeed = currentRoom + 3;
+
+            scrollSpeed = currentRoom + 10;
 
             if(gameState == GameState.Play)
                 roomList[currentRoom].Update(scrollSpeed);
@@ -229,7 +284,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.Gray);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
@@ -269,36 +324,91 @@ namespace RoomRunner
 
 
             }
-
-            if(gameState == GameState.Play)
+            if (gameState == GameState.Shop)
             {
-                levelTimer++;
-                int levelSeconds = levelTimer / 60;
+                shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                if (shop.leave)
+                    gameState = GameState.Menu;
+            }
+            if (gameState == GameState.Play)
+            {
                 
-                // advances to next room every 10 seconds
 
+                if (!transition)
+                    levelTimer++;
+
+                int levelSeconds = levelTimer / 60;
+
+
+
+
+
+                // tries to advance to next room every 10 seconds
                 if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
                 {
-                    currentRoom++;
+                    transition = true;
                     levelTimer = 0;
+                    
                 }
 
 
                 // scrolling calculations
+                
+                bool loopImage = roomList[currentRoom].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
-                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
-
-                if (roomRectangle.X < -((window.Width * 2) - window.Right - 10))
-                    roomList[currentRoom].backgroundRectangle.X = 0;
 
 
                 
+                
+
+
+                // checks if the transition period is over
+                if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
+                {
+                    currentRoom++;
+                    endCurrentRoom = false;
+                    transition = false;
+                }
+
+
+                // checks if we are currently transitioning to next room
+                if (loopImage && transition)
+                {
+                    roomList[currentRoom].background2 = roomList[currentRoom + 1].background1;
+                    endCurrentRoom = true;
+                }
+
+                // checks if we have undergone a full loop of the background
+                if (loopImage)
+                {
+                    roomList[currentRoom].backgroundRectangle.X = 0;
+                }
+
+
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
+
+
+
+                
+
+
 
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
+                if (currentRoom >= roomList.Count - 1)
+                {
+                    bossFight = true;
+                    
+
+                }
+
+                if(bossFight)
+                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
             }
+
+            
 
 
 
