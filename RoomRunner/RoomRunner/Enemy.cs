@@ -8,16 +8,17 @@ using System.Text;
 namespace RoomRunner
 {
 
-    class Enemy
+    class Enemy : Animation
     {
 
         public Texture2D texture;
         public Rectangle rectangle;
 
 
-        public Enemy()
+        public Enemy(Texture2D texture, Rectangle rectangle) : base(new string[] {"Idle"})
         {
-
+            this.texture = texture;
+            this.rectangle = rectangle;
 
 
 
