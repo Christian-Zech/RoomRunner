@@ -18,13 +18,14 @@ namespace RoomRunner
         public Rectangle[,] grid;
         public Rectangle selection; //highlights background of currently selected item
         public Rectangle backButton;
+        public bool leave;
         int mouseX, mouseY, selectionIndexX, selectionIndexY;
         List<Keys> pressedKeys, oldKeys;
 
         public Shop(List<ShopItem> itemList)
         {
             items = itemList;
-            
+            leave = false;
             selectedItem = new List<bool> { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
             Console.WriteLine(items.Count); Console.WriteLine(selectedItem.Count);
             grid = new Rectangle[4, 4];
@@ -40,7 +41,7 @@ namespace RoomRunner
                 y += 170;
                 x = 650;
             }
-            backButton = new Rectangle(190, 120, 100, 60);
+            backButton = new Rectangle(180, 120, 130, 80);
             pressedKeys = new List<Keys>();
             oldKeys = new List<Keys>();
             selection = grid[0, 0];
@@ -54,6 +55,8 @@ namespace RoomRunner
         //}
         public void updateSelection()
         {
+            if (pressedKeys.Contains(Keys.Back))
+                leave = true;
             oldKeys = pressedKeys;
             MouseState mouse = Mouse.GetState();
             KeyboardState kb = Keyboard.GetState();
@@ -180,13 +183,13 @@ namespace RoomRunner
         
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
-            Console.WriteLine(items.Count);
             updateSelection();
             spriteBatch.Draw(pixel, new Rectangle(mouseX, mouseY, 5, 5), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle(selection.X-5, selection.Y-10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Red);
-            spriteBatch.DrawString(bold, "Back", new Vector2(backButton.X+25, backButton.Y+15), Color.Black);
+            spriteBatch.DrawString(bold, "Back", new Vector2(backButton.X+40, backButton.Y+15), Color.Black);
+            spriteBatch.DrawString(font, "(backspace)", new Vector2(backButton.X + 5, backButton.Y + 40), Color.Black);
 
             int x = 0;
             int y = 0;
