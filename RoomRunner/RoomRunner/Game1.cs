@@ -23,7 +23,7 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
-        List<Texture2D> backgroundImages = new List<Texture2D>();
+        
 
         SpriteFont menuFont;
         SpriteFont buttonFont;
@@ -49,10 +49,10 @@ namespace RoomRunner
 
         Random rand;
 
-        string[] backgroundFiles;
+        
 
 
-        enum GameState
+        public enum GameState
         {
             Menu,
             Shop,
@@ -60,7 +60,7 @@ namespace RoomRunner
             GameOver
         }
         
-        enum Levels
+        public enum Levels
         {
             Level1,
             Level2,
@@ -128,24 +128,7 @@ namespace RoomRunner
 
 
             // reads background images
-            backgroundFiles = Directory.GetFiles(@"Content\" + levels + "/Background/", "*");
-
-            int i = 0;
-
-            foreach(var File in backgroundFiles)
-            {
-                string[] Temp;
-                Temp = File.Split('.');
-                string NameMinus = Temp[0];
-                int Index = NameMinus.LastIndexOf('\\') + 1;
-                NameMinus = NameMinus.Substring(Index);
-                
-
-
-                backgroundFiles[i] = NameMinus;
-                i++;
-
-            }
+            
 
 
             base.Initialize();
@@ -387,6 +370,37 @@ namespace RoomRunner
             }
 
             
+        }
+
+
+        public static List<Texture2D> loadTextures(string directory, Levels levels)
+        {
+
+            List<Texture2D> backgroundImages = new List<Texture2D>();
+            string[] backgroundFiles = Directory.GetFiles(@"Content\" + levels + @"\" + directory + @"\", "*");
+
+            
+
+            int i = 0;
+
+            foreach (var File in backgroundFiles)
+            {
+                string[] Temp;
+                Temp = File.Split('.');
+                string NameMinus = Temp[0];
+                int Index = NameMinus.LastIndexOf('\\') + 1;
+                NameMinus = NameMinus.Substring(Index);
+
+
+
+                backgroundFiles[i] = NameMinus;
+                i++;
+
+            }
+
+            return backgroundImages;
+            
+
         }
 
 
