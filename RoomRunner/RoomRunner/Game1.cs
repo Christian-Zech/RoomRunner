@@ -67,7 +67,7 @@ namespace RoomRunner
             Level3
         }
 
-        Levels levels;
+        public static Levels levels;
         GameState gameState;
 
         public Game1()
@@ -153,7 +153,7 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
-            backgroundImages = loadTextures("Background", levels, Content);
+            backgroundImages = loadTextures("Background", Content);
 
 
 
@@ -371,7 +371,7 @@ namespace RoomRunner
         }
 
 
-        public static List<Texture2D> loadTextures(string directory, Levels levels, ContentManager content)
+        public static List<Texture2D> loadTextures(string directory, ContentManager content)
         {
             string[] files = Directory.GetFiles(@"Content\" + levels + "/" + directory + "/", "*");
             List<Texture2D> images = new List<Texture2D>();
