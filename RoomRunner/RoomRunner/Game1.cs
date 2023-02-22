@@ -49,7 +49,7 @@ namespace RoomRunner
 
         Random rand;
 
-        
+        static List<Texture2D> backgroundImages = new List<Texture2D>();
 
 
         public enum GameState
@@ -155,10 +155,7 @@ namespace RoomRunner
 
 
             
-            foreach (string file in backgroundFiles)
-            {
-                backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
-            }
+            
 
             GenerateRoom(amountOfRooms, backgroundImages, window);
 
@@ -373,13 +370,9 @@ namespace RoomRunner
         }
 
 
-        public static List<Texture2D> loadTextures(string directory, Levels levels)
+        public static List<Texture2D> loadTextures(string directory, Levels levels, ContentManager content)
         {
-
-            List<Texture2D> backgroundImages = new List<Texture2D>();
             string[] backgroundFiles = Directory.GetFiles(@"Content\" + levels + @"\" + directory + @"\", "*");
-
-            
 
             int i = 0;
 
@@ -396,6 +389,12 @@ namespace RoomRunner
                 backgroundFiles[i] = NameMinus;
                 i++;
 
+            }
+
+
+            foreach (string file in backgroundFiles)
+            {
+                backgroundImages.Add(content.Load<Texture2D>(@".\" + file));
             }
 
             return backgroundImages;
