@@ -14,8 +14,8 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float JumpMovement = 50.0f; //px per frame
 
-        private static string[] states = new string[] { "Idle", "Jumping", "Running" };
-        public static string[] States => states;
+        private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
+        public static string[] States => statesstates;
 
         public bool IsAlive;
         public Vector2 Velocity, Position, Acceleration;
@@ -28,7 +28,7 @@ namespace RoomRunner
         {
             Position = pos;
         }
-        public Player(ContentManager cm, GraphicsDevice graphics) : base(states)
+        public Player(ContentManager cm, GraphicsDevice graphics) : base(States)
         {
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             IsAlive = true;
