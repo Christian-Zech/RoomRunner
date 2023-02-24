@@ -17,17 +17,24 @@ namespace RoomRunner
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
         public static string[] States => statesstates;
+        public static readonly Dictionary<PlayerHats, Texture2D> Hats;
 
         public bool IsAlive;
         public Vector2 Velocity, Position, Acceleration;
-        public Rectangle PlayerRectangle;
+        public Rectangle PlayerRectangle, HatRectangle;
         private bool wasStateSet, onGround;
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
         private int delayLeft;
         public static int floorHeight; //in px
+        public PlayerHats currentHat;
         
+        static Player()
+        {
+            Hats = new Dictionary<PlayerHats, Texture2D>();
+            
+        }
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
             Position = pos;
@@ -35,6 +42,7 @@ namespace RoomRunner
         public Player(ContentManager cm, GraphicsDevice graphics) : base(States)
         {
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
+            HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
             IsAlive = true;
             oldkb = Keyboard.GetState();
             oldms = Mouse.GetState();
@@ -43,10 +51,19 @@ namespace RoomRunner
             Idle = false;
             floorHeight = 0;
             delayLeft = InputDelay;
+            currentHat = PlayerHats.Bandana;
             Coins = 0;
             MakePlayerAnimations(cm, graphics);
+            MakePlayerHats(cm, graphics);
         }
 
+        private void MakePlayerHats(ContentManager cm, GraphicsDevice graphics)
+        {
+            Rectangle[] rects = LoadSheet(5, 5, 32, 32, 24);
+            Texture2D sheet = cm.Load<Texture2D>("cosmetics");
+            for (int i = 1, c = 0; i < rects.Length - 1; i += 2, c++)
+                Hats[(PlayerHats)c + 1] = RectToTxt(graphics, sheet, rects[i])[0];
+        }
         private void MakePlayerAnimations(ContentManager cm, GraphicsDevice graphics)
         {
             Rectangle[] jebList = LoadSheet(4, 3, 32, 32);
@@ -103,6 +120,9 @@ namespace RoomRunner
 
             PlayerRectangle.Y = (int)Position.Y;
             PlayerRectangle.X = (int)Position.X;
+            HatRectangle.X = PlayerRectangle.X;
+            HatRectangle.Y = PlayerRectangle.Y;
+            if (SelectedAnimation == "Running" && (Frame == 1 && Frame == 3)) HatRectangle.Y++;
 
             base.Update();
 
@@ -123,7 +143,9 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
-            if (!Idle) sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
+            if (Idle) return;
+            sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
+            sb.Draw(Hats[currentHat], HatRectangle, Color.White);
         }
 
         public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight, int limit = -1)
@@ -139,6 +161,22 @@ namespace RoomRunner
                         return outp;
                 }
             return outp;
-        }//
+        }
+    }
+    public enum PlayerHats
+    {
+        None,
+        Robber,
+        Builder,
+        Hair,
+        Headphones,
+        Santa,
+        Bandana,
+        Fire1,
+        Fire2,
+        Fire3,
+        Military,
+        RedHat,
+        BlueHat
     }
 }
