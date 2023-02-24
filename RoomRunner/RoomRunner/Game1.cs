@@ -202,6 +202,15 @@ namespace RoomRunner
             if(gameState == GameState.Play)
                 roomList[currentRoom].Update(scrollSpeed, window);
 
+            foreach(Enemy enemy in roomList[currentRoom].enemyArray)
+            {
+                if (enemy.rectangle.Intersects(jeb.PlayerRectangle))
+                {
+                    jeb.IsAlive = false;
+                }
+                    
+            }
+
             // TODO: Add your update logic here
 
             jeb.Idle = gameState != GameState.Play;
@@ -317,25 +326,22 @@ namespace RoomRunner
                 Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
 
 
-
-                
-
-
-
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
                 roomList[currentRoom].Draw(spriteBatch);
 
 
+
                 if (currentRoom >= roomList.Count - 1)
                 {
                     bossFight = true;
-                    
-
                 }
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
+
+
+                
             }
 
             

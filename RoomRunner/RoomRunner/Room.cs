@@ -52,11 +52,11 @@ namespace RoomRunner
                 enemy.Update(scrollSpeed);
                 if (enemy.rectangle.X < 0)
                 {
-
                     enemy.rectangle.X = rand.Next(2000, 2500);
                     enemy.rectangle.Y = rand.Next(300, 600);
-
                 }
+
+                
 
             }
 
