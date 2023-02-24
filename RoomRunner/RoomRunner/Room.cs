@@ -52,7 +52,7 @@ namespace RoomRunner
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
+            spriteBatch.Draw()
         }
         
 
