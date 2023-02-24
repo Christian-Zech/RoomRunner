@@ -13,6 +13,7 @@ namespace RoomRunner
         public readonly Dictionary<string, int> FramesLeft, TimeBetweenChanges;
         public readonly Dictionary<string, Texture2D[]> Animations;
         public bool Idle;
+        private readonly Dictionary<string, bool> Repeat;
         private int Frame;
         public string SelectedAnimation { get; private set; }
         public Texture2D CurrentTexture => Animations[SelectedAnimation][Frame];
@@ -25,6 +26,7 @@ namespace RoomRunner
             TimeBetweenChanges = new Dictionary<string, int>();
             FramesLeft = new Dictionary<string, int>();
             Animations = new Dictionary<string, Texture2D[]>();
+            Repeat = new Dictionary<string, bool>();
             Idle = false;
         }
         public Animation(string[] names) : this(names, names[0]) { }
@@ -34,7 +36,11 @@ namespace RoomRunner
             if (Idle) return;
             if (FramesLeft[SelectedAnimation] <= 0)
             {
-                if (Frame + 1 >= Animations[SelectedAnimation].Length) Frame = 0;
+                if (Frame + 1 >= Animations[SelectedAnimation].Length)
+                {
+                    if (!Repeat[SelectedAnimation]) return;
+                    Frame = 0;
+                }
                 else Frame++;
                 FramesLeft[SelectedAnimation] = TimeBetweenChanges[SelectedAnimation];
             }
@@ -53,12 +59,28 @@ namespace RoomRunner
             Animations[state] = RectToTxt(gd, sheet, rects);
             TimeBetweenChanges[state] = framesInbetween;
             FramesLeft[state] = framesInbetween;
+            Repeat[state] = true;
+        }
+        public void AddAnimation(string state, Texture2D sheet, GraphicsDevice gd, int framesInbetween, Rectangle[] rects, bool repeat)
+        {
+            Animations[state] = RectToTxt(gd, sheet, rects);
+            TimeBetweenChanges[state] = framesInbetween;
+            FramesLeft[state] = framesInbetween;
+            Repeat[state] = repeat;
         }
         public void AddAnimation(string state, int framesInbetween = 5, params Texture2D[] txts)
         {
             Animations[state] = txts;
             TimeBetweenChanges[state] = framesInbetween;
             FramesLeft[state] = framesInbetween;
+            Repeat[state] = true;
+        }
+        public void AddAnimation(string state, int framesInbetween, Texture2D[] txts, bool repeat)
+        {
+            Animations[state] = txts;
+            TimeBetweenChanges[state] = framesInbetween;
+            FramesLeft[state] = framesInbetween;
+            Repeat[state] = repeat;
         }
 
         public static Texture2D[] RectToTxt(GraphicsDevice gd, Texture2D sheet, params Rectangle[] rects)
