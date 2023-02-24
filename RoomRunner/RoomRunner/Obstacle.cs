@@ -9,14 +9,19 @@ namespace RoomRunner
 {
     public class Obstacle : Animation
     {
-        public Rectangle BoundingBox;
-        private int speed;
+        public static string[] States => statesstates;
+        private static readonly string[] statesstates = new string[] { "Idle" }; //NEVER USE THIS VARIABLE, ONLY USE THE UPPERCASE ONE!!!!
 
-        public Obstacle(Texture2D[] animation, Rectangle bounding, int speed, int animSpeed = 15) : base(new string[] { "Idle" })
+        private Texture2D texture;
+        public Rectangle BoundingBox;
+        private int speed, timeUntilShown;
+
+        public Obstacle(Texture2D txt, Rectangle bounding, int speed, int timeUntilShown) : base(States)
         {
+            texture = txt;
             BoundingBox = bounding;
             this.speed = speed;
-            AddAnimation("Idle", animSpeed, animation);
+            this.timeUntilShown = timeUntilShown;
         }
 
         public new void Update()
@@ -27,21 +32,8 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
-            sb.Draw(CurrentTexture, BoundingBox, Color.White);
+            sb.Draw(texture, BoundingBox, Color.White);
         }
         public bool DoesCollideWith(Rectangle other) => BoundingBox.Intersects(other);
-
-        public static Obstacle GenerateObstacle(Random rdm = default)
-        {
-            if (rdm == default) rdm = new Random(4298523);
-            return null;
-        }
-        public static void MakeObstacles(Texture2D enemySpriteSheet, GraphicsDevice gd)
-        {
-            List<Texture2D[]> obstacles = new List<Texture2D[]>();
-            Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
-
-            //obstacles.Add()
-        }
     }
 }

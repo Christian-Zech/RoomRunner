@@ -12,8 +12,7 @@ namespace RoomRunner
     public class Player : Animation
     {
         public const float Gravity = -2.0f; //px per frame
-        public const float JumpMovement = 40.0f; //px per frame
-        private const int InputDelay = 60;
+        public const float JumpMovement = 50.0f; //px per frame
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
         public static string[] States => statesstates;
@@ -25,9 +24,7 @@ namespace RoomRunner
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
-        private int delayLeft;
-        public static int floorHeight; //in px
-        
+
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
             Position = pos;
@@ -41,22 +38,25 @@ namespace RoomRunner
             Acceleration.Y = Gravity;
             wasStateSet = false;
             Idle = false;
-            floorHeight = 0;
-            delayLeft = InputDelay;
             Coins = 0;
             MakePlayerAnimations(cm, graphics);
         }
 
         private void MakePlayerAnimations(ContentManager cm, GraphicsDevice graphics)
         {
-            Rectangle[] jebList = LoadSheet(4, 3, 32, 32);
-            Texture2D jebSheet = cm.Load<Texture2D>("jeb (2)");
+            List<Rectangle> jebList = new List<Rectangle>();
+            Texture2D jebSheet = cm.Load<Texture2D>("jeb");
 
-            Rectangle[] idle = new Rectangle[] { jebList[10], jebList[11] };
+            jebList.Add(new Rectangle(0, 0, 32, 32));
+            jebList.Add(new Rectangle(32, 0, 32, 32));
+            jebList.Add(new Rectangle(0, 32, 32, 32));
+            jebList.Add(new Rectangle(32, 32, 32, 32));
+            jebList.Add(new Rectangle(0, 64, 32, 32));
+
+            Rectangle[] idle = new Rectangle[] { jebList[3], jebList[4] };
             AddAnimation(States[0], jebSheet, graphics, 30, idle);
-            Rectangle[] jumping = new Rectangle[] { jebList[4], jebList[5], jebList[6], jebList[7], jebList[8], jebList[9], jebList[10] };
-            AddAnimation(States[1], jebSheet, graphics, 2, jumping, false);
-            Rectangle[] running = new Rectangle[] { jebList[0], jebList[1], jebList[2], jebList[3] };
+            AddAnimation(States[1], jebSheet, graphics, 30, idle);
+            Rectangle[] running = new Rectangle[] { jebList[0], jebList[1], jebList[2] };
             AddAnimation(States[2], jebSheet, graphics, 5, running);
         }
         public new void Update()
@@ -64,11 +64,6 @@ namespace RoomRunner
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
             bool stateSet = false;
-            if (delayLeft > 0)
-            {
-                delayLeft--;
-                goto Gravity;
-            }
 
             if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
             {
@@ -80,7 +75,6 @@ namespace RoomRunner
             if (IsPressed(kb, Keys.S, Keys.Down))
                 Velocity.Y = -JumpMovement;
 
-            Gravity:
             Velocity.Y += Acceleration.Y;
             Position.Y -= Velocity.Y;
 
@@ -93,9 +87,9 @@ namespace RoomRunner
                 if (!wasStateSet) SetState("Running");
                 stateSet = true;
             }
-            if (Position.Y < floorHeight)
+            if (Position.Y < 0)
             {
-                Position.Y = floorHeight;
+                Position.Y = 0;
                 Velocity.Y = 0;
             }
 
@@ -133,6 +127,6 @@ namespace RoomRunner
                 for (int x = 0, ii = 0; ii < width; ii++, x += Swidth)
                     outp[i * width + ii] = new Rectangle(x, y, Swidth, Sheight);
             return outp;
-        }//
+        }
     }
 }
