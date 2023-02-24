@@ -54,7 +54,7 @@ namespace RoomRunner
         {
             foreach(Enemy enemy in enemyArray)
             {
-                
+                spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
         }
         

@@ -324,6 +324,7 @@ namespace RoomRunner
 
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+                roomList[currentRoom].Draw(spriteBatch);
 
 
                 if (currentRoom >= roomList.Count - 1)
