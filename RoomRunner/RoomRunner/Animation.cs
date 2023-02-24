@@ -14,7 +14,7 @@ namespace RoomRunner
         public readonly Dictionary<string, Texture2D[]> Animations;
         public bool Idle;
         private readonly Dictionary<string, bool> Repeat;
-        private int Frame;
+        public int Frame { get; private set; }
         public string SelectedAnimation { get; private set; }
         public Texture2D CurrentTexture => Animations[SelectedAnimation][Frame];
 
