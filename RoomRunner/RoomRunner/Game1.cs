@@ -46,6 +46,7 @@ namespace RoomRunner
         bool transition;
         bool endCurrentRoom;
         bool bossFight;
+        string[] backgroundFiles;
 
         Random rand;
 
