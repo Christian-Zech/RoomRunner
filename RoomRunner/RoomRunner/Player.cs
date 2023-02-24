@@ -120,5 +120,13 @@ namespace RoomRunner
             if (!Idle) sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
         }
 
+        public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight)
+        {
+            Rectangle[] outp = new Rectangle[width * height];
+            for (int y = 0, i = 0; i < height; i++, y += Sheight)
+                for (int x = 0, ii = 0; ii < width; ii++, x += Swidth)
+                    outp[i * width + ii] = new Rectangle(x, y, Swidth, Sheight);
+            return outp;
+        }
     }
 }
