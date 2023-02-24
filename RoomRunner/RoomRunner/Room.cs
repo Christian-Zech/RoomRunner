@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace RoomRunner
 
 
         // intended for single images
-        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics)
+        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content)
         {
             background1 = background;
             background2 = background;
@@ -30,7 +31,7 @@ namespace RoomRunner
 
             for(int i = 0; i < enemyArray.Length; i++)
             {
-                enemyArray[i] = new Enemy();
+                enemyArray[i] = new Enemy(Game1.loadImage("Level1/Enemies/Jeb", content), new Rectangle(500, 200, 10, 10), graphics);
             }
 
         }
@@ -49,7 +50,10 @@ namespace RoomRunner
 
         }
 
-        
+        public void Draw(SpriteBatch spriteBatch)
+        {
+
+        }
         
 
 
