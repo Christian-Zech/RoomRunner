@@ -16,6 +16,7 @@ namespace RoomRunner
         public Texture2D background2;
         public int numberOfEnemies;
         public Enemy[] enemyArray;
+        public Random rand;
 
         public Rectangle backgroundRectangle;
 
@@ -28,10 +29,11 @@ namespace RoomRunner
             this.backgroundRectangle = backgroundRectangle;
             this.numberOfEnemies = numberOfEnemies;
             enemyArray = new Enemy[numberOfEnemies];
+            rand = new Random();
 
             for(int i = 0; i < enemyArray.Length; i++)
             {
-                enemyArray[i] = new Enemy(Game1.loadImage("Level1/Enemies/Jeb", content), new Rectangle(500, 200, 10, 10), graphics);
+                enemyArray[i] = new Enemy(Game1.loadImage("Enemies/Jeb", content), new Rectangle(rand.Next(1000, 1500), rand.Next(300, 600), 100, 100), graphics);
             }
 
         }
@@ -39,13 +41,23 @@ namespace RoomRunner
 
 
 
-        public void Update(int scrollSpeed)
+        public void Update(int scrollSpeed, Rectangle window)
         {
             backgroundRectangle.X -= scrollSpeed;
 
+            
+
             foreach(Enemy enemy in enemyArray)
             {
-                enemy.Update();
+                enemy.Update(scrollSpeed);
+                if (enemy.rectangle.X < 0)
+                {
+                    enemy.rectangle.X = rand.Next(2000, 2500);
+                    enemy.rectangle.Y = rand.Next(300, 600);
+                }
+
+                
+
             }
 
         }
@@ -54,11 +66,11 @@ namespace RoomRunner
         {
             foreach(Enemy enemy in enemyArray)
             {
-                
+                spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
         }
         
-
+        
 
 
     }
