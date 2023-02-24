@@ -133,6 +133,6 @@ namespace RoomRunner
                 for (int x = 0, ii = 0; ii < width; ii++, x += Swidth)
                     outp[i * width + ii] = new Rectangle(x, y, Swidth, Sheight);
             return outp;
-        }
+        }//
     }
 }
