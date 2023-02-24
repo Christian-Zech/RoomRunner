@@ -13,24 +13,24 @@ namespace RoomRunner
 
         public Texture2D background1;
         public Texture2D background2;
-        public int amountOfEnemies;
+        public int numberOfEnemies;
         public Enemy[] enemyArray;
 
         public Rectangle backgroundRectangle;
 
 
         // intended for single images
-        public Room(Texture2D background, Rectangle backgroundRectangle, int amountOfEnemies)
+        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics)
         {
             background1 = background;
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
-            this.amountOfEnemies = amountOfEnemies;
-            enemyArray = new Enemy[amountOfEnemies];
+            this.numberOfEnemies = numberOfEnemies;
+            enemyArray = new Enemy[numberOfEnemies];
 
             for(int i = 0; i < enemyArray.Length; i++)
             {
-                enemyArray[i] = new Enemy()
+                enemyArray[i] = new Enemy();
             }
 
         }

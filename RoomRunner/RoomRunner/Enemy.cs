@@ -16,11 +16,11 @@ namespace RoomRunner
         public Rectangle rectangle;
 
 
-        public Enemy(Texture2D texture, Rectangle rectangle, ContentManager content, GraphicsDevice graphics) : base(new string[] {"Idle"})
+        public Enemy(Texture2D texture, Rectangle rectangle, GraphicsDevice graphics) : base(new string[] {"Idle"})
         {
             this.texture = texture;
             this.rectangle = rectangle;
-            AddAnimation("Idle", texture, graphics, 5);
+            //AddAnimation("Idle", texture, graphics, 5);
 
 
         }
