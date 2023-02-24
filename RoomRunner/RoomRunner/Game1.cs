@@ -405,7 +405,7 @@ namespace RoomRunner
 
         public static Texture2D loadImage(string directory, ContentManager content)
         {
-            return content.Load<Texture2D>(@".\" + directory);
+            return content.Load<Texture2D>(@".\" + levels + @"\" + directory);
         }
 
 
