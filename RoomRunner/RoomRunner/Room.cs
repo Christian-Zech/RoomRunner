@@ -45,9 +45,10 @@ namespace RoomRunner
         {
             backgroundRectangle.X -= scrollSpeed;
 
+
             foreach(Enemy enemy in enemyArray)
             {
-                enemy.Update();
+                enemy.Update(scrollSpeed);
             }
 
         }
@@ -60,7 +61,7 @@ namespace RoomRunner
             }
         }
         
-
+        
 
 
     }

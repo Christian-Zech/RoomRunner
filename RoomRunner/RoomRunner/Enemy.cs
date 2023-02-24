@@ -14,6 +14,7 @@ namespace RoomRunner
 
         public Texture2D texture;
         public Rectangle rectangle;
+        public bool isActive;
 
 
         public Enemy(Texture2D texture, Rectangle rectangle, GraphicsDevice graphics) : base(new string[] {"Idle"})
@@ -27,9 +28,10 @@ namespace RoomRunner
         }
 
 
-        public new void Update() 
+        public void Update(int scrollSpeed) 
         {
             base.Update();
+            rectangle.X -= scrollSpeed;
         }
 
     }
