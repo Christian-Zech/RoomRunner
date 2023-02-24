@@ -200,7 +200,7 @@ namespace RoomRunner
             scrollSpeed = currentRoom + 10;
 
             if(gameState == GameState.Play)
-                roomList[currentRoom].Update(scrollSpeed);
+                roomList[currentRoom].Update(scrollSpeed, window);
 
             // TODO: Add your update logic here
 
