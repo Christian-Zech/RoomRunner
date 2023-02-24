@@ -20,17 +20,15 @@ namespace RoomRunner
         {
             this.texture = texture;
             this.rectangle = rectangle;
-            AddAnimation("Idle", texture, graphics, 5, Player.LoadSheet(2, 2, 32, 32));
-
+            AddAnimation("Idle", texture, graphics, 5);
 
 
         }
 
 
-        public void Update(int scrollSpeed) 
+        public new void Update() 
         {
             base.Update();
-            rectangle.X -= scrollSpeed;
         }
 
     }

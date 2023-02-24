@@ -65,6 +65,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Room.cs" />
+    <Compile Include="Shop.cs" />
+    <Compile Include="ShopItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
