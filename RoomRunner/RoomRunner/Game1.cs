@@ -46,7 +46,6 @@ namespace RoomRunner
         bool transition;
         bool endCurrentRoom;
         bool bossFight;
-        string[] backgroundFiles;
 
         Random rand;
 
@@ -204,10 +203,7 @@ namespace RoomRunner
             items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
             shop = new Shop(items);
 
-            foreach (string file in backgroundFiles)
-            {
-                backgroundImages.Add(this.Content.Load<Texture2D>(@".\" + file));
-            }
+            
             backgroundImages = loadTextures("Background", Content);
 
 
