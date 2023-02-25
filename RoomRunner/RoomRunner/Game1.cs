@@ -214,7 +214,7 @@ namespace RoomRunner
 
 
 
-            GenerateRoom(amountOfRooms, backgroundImages, window);
+            GenerateRooms(amountOfRooms, backgroundImages, window);
 
 
         }
@@ -247,6 +247,7 @@ namespace RoomRunner
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
                 gameState = GameState.Play;
+                GenerateRooms(amountOfRooms, backgroundImages, window);
                 menuCoolDown = 60;
             }
                 
@@ -462,9 +463,9 @@ namespace RoomRunner
             return false;
         }
 
-        public void GenerateRoom(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
+        public void GenerateRooms(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
         {
-
+            currentRoom = 0;
             roomList.Clear();
 
             for(int i = 0; i < amountOfRooms; i++)
@@ -512,6 +513,8 @@ namespace RoomRunner
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
+
+        
 
 
     }
