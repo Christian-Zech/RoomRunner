@@ -263,28 +263,35 @@ namespace RoomRunner
                 gameState = GameState.Shop;
                 menuCoolDown = 60;
             }
-                
 
-
-
-
-            scrollSpeed = currentRoom + 10;
-
-            if(gameState == GameState.Play)
-                roomList[currentRoom].Update(scrollSpeed);
-
-            foreach(Enemy enemy in roomList[currentRoom].enemyArray)
-            {
-                if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                    gameState = GameState.GameOver;
-            }
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
-            
 
-            jeb.Idle = gameState != GameState.Play;
-            jeb.Update();
+
+
+            if (gameState == GameState.Play)
+            {
+
+
+
+                scrollSpeed = currentRoom + 10;
+
+                if (gameState == GameState.Play)
+                    roomList[currentRoom].Update(scrollSpeed);
+
+                foreach (Enemy enemy in roomList[currentRoom].enemyArray)
+                {
+                    if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                        gameState = GameState.GameOver;
+                }
+
+
+
+
+                jeb.Idle = gameState != GameState.Play;
+                jeb.Update();
+            }
             gameTimer++;
             
 
