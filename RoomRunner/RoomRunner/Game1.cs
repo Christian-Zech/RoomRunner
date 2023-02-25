@@ -253,7 +253,12 @@ namespace RoomRunner
             if(gameState == GameState.Play)
                 roomList[currentRoom].Update(scrollSpeed);
 
-            // TODO: Add your update logic here
+            foreach(Enemy enemy in roomList[currentRoom].enemyArray)
+            {
+                if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                    gameState = GameState.GameOver;
+            }
+
 
             jeb.Idle = gameState != GameState.Play;
             jeb.Update();
@@ -391,13 +396,19 @@ namespace RoomRunner
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
-            }
 
+                jeb.Draw(spriteBatch);
+
+            }
+            if(gameState == GameState.GameOver)
+            {
+                spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 100, 300), Color.White);
+            }
             
 
 
 
-            jeb.Draw(spriteBatch);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);

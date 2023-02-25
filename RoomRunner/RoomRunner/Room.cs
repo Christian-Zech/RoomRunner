@@ -33,7 +33,7 @@ namespace RoomRunner
 
             for(int i = 0; i < enemyArray.Length; i++)
             {
-                enemyArray[i] = new Enemy(Game1.loadImage("Enemies/Jeb", content), new Rectangle(rand.Next(1500, 3000), rand.Next(200, 500), 10, 10), graphics);
+                enemyArray[i] = new Enemy(Game1.loadImage("Enemies/Jeb", content), new Rectangle(rand.Next(1500, 3000), rand.Next(200, 500), 100, 100), graphics);
             }
 
         }
