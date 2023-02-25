@@ -23,7 +23,6 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
-        
 
         SpriteFont menuFont;
         SpriteFont buttonFont;
@@ -32,6 +31,7 @@ namespace RoomRunner
         List<Rectangle> idleAnimationRectangles;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
+        Rectangle menuButtonRectangle;
 
         Rectangle window;
         private Player jeb;
@@ -57,6 +57,9 @@ namespace RoomRunner
         List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
         SpriteFont shopFont, shopFontBold, shopTitleFont;
         Shop shop;
+
+        int menuCoolDown;
+
 
         public enum GameState
         {
@@ -121,6 +124,7 @@ namespace RoomRunner
 
             amountOfRooms = 5;
             scrollSpeed = 0;
+            menuCoolDown = 0;
             
             
 
@@ -151,6 +155,7 @@ namespace RoomRunner
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
+            menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
 
 
 
@@ -239,11 +244,26 @@ namespace RoomRunner
                 this.Exit();
 
 
-            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle))
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
+            {
                 gameState = GameState.Play;
+                menuCoolDown = 60;
+            }
+                
 
-            if (mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle))
+            if (gameState == GameState.GameOver && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, menuButtonRectangle) && menuCoolDown == 0)
+            {
+                gameState = GameState.Menu;
+                menuCoolDown = 60;
+            }
+                
+
+            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0)
+            {
                 gameState = GameState.Shop;
+                menuCoolDown = 60;
+            }
+                
 
 
 
@@ -259,6 +279,9 @@ namespace RoomRunner
                     gameState = GameState.GameOver;
             }
 
+            if (menuCoolDown > 0)
+                menuCoolDown--;
+            
 
             jeb.Idle = gameState != GameState.Play;
             jeb.Update();
@@ -402,7 +425,14 @@ namespace RoomRunner
             }
             if(gameState == GameState.GameOver)
             {
-                spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 100, 300), Color.White);
+                spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
+
+                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Play Again", new Vector2(startButtonRectangle.X + 50, startButtonRectangle.Y + 20), Color.White);
+
+                spriteBatch.Draw(pixel, menuButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
+
             }
             
 
@@ -413,6 +443,8 @@ namespace RoomRunner
 
             base.Draw(gameTime);
         }
+
+        
 
 
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
