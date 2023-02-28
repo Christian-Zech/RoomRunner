@@ -14,6 +14,7 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float JumpMovement = 40.0f; //px per frame
         private const int InputDelay = 60;
+        public const int frameHeight = 1000;
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
         public static string[] States => statesstates;
@@ -27,13 +28,14 @@ namespace RoomRunner
         private MouseState oldms;
         public int Coins;
         private int delayLeft;
-        public static int floorHeight; //in px
+        public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
         
         static Player()
         {
             Hats = new Dictionary<PlayerHats, Texture2D>();
-            
+            ceilingHeight = frameHeight;
+            floorHeight = 0;
         }
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
         {
@@ -49,7 +51,6 @@ namespace RoomRunner
             Acceleration.Y = Gravity;
             wasStateSet = false;
             Idle = false;
-            floorHeight = 0;
             delayLeft = InputDelay;
             currentHat = PlayerHats.Bandana;
             Coins = 0;
@@ -90,7 +91,7 @@ namespace RoomRunner
             if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
             {
                 if (onGround) Velocity.Y = JumpMovement;
-                else Velocity.Y = JumpMovement / 2;
+                else Velocity.Y = JumpMovement * 3 / 4;
                 SetState("Jumping");
                 stateSet = true;
             }
@@ -101,18 +102,18 @@ namespace RoomRunner
             Velocity.Y += Acceleration.Y;
             Position.Y -= Velocity.Y;
 
-            onGround = Position.Y > 900;
+            onGround = Position.Y > frameHeight - floorHeight - 100;
 
-            if (Position.Y > 900)
+            if (onGround)
             {
-                Position.Y = 900;
+                Position.Y = frameHeight - floorHeight - 100;
                 Velocity.Y = 0;
                 if (!wasStateSet) SetState("Running");
                 stateSet = true;
             }
-            if (Position.Y < floorHeight)
+            if (Position.Y < frameHeight - ceilingHeight)
             {
-                Position.Y = floorHeight;
+                Position.Y = frameHeight - ceilingHeight;
                 Velocity.Y = 0;
             }
 
@@ -122,7 +123,8 @@ namespace RoomRunner
             PlayerRectangle.X = (int)Position.X;
             HatRectangle.X = PlayerRectangle.X;
             HatRectangle.Y = PlayerRectangle.Y;
-            if (SelectedAnimation == "Running" && (Frame == 1 && Frame == 3)) HatRectangle.Y++;
+            if (SelectedAnimation == "Running" && (Frame == 1 || Frame == 3)) 
+                HatRectangle.Y -= 2;
 
             base.Update();
 

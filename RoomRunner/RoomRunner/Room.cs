@@ -10,15 +10,27 @@ namespace RoomRunner
 {
     class Room
     {
+        public const int minimumNumOfEnemies = 5;
 
+        public static int ceilingHeight, floorHeight;
 
         public Texture2D background1;
         public Texture2D background2;
         public int numberOfEnemies;
-        public Enemy[] enemyArray;
+        public List<Enemy> enemyArray;
         public Random rand;
 
         public Rectangle backgroundRectangle;
+
+        private GraphicsDevice graphics;
+        private ContentManager content;
+
+
+        static Room()
+        {
+            ceilingHeight = Player.frameHeight;
+            floorHeight = 0;
+        }
 
 
         // intended for single images
@@ -28,34 +40,64 @@ namespace RoomRunner
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
             this.numberOfEnemies = numberOfEnemies;
-            enemyArray = new Enemy[numberOfEnemies];
-            rand = new Random();
+            this.graphics = graphics;
+            this.content = content;
+            enemyArray = new List<Enemy>();
+            rand = new Random(DateTime.Now.Millisecond);
 
-            for(int i = 0; i < enemyArray.Length; i++)
-            {
-                enemyArray[i] = new Enemy(Game1.loadImage("Enemies/Jeb", content), new Rectangle(rand.Next(1500, 3000), rand.Next(200, 500), 100, 100), graphics);
-            }
+            generateEnemies(numberOfEnemies);
 
         }
 
-
+        private void generateEnemies(int amount)
+        {
+            Enemy.totalEnemyCount += amount;
+            while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
+            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+            RemoveOverlap();
+        }
+        public void InheritEnemies(List<Enemy> toInherit)
+        {
+            enemyArray.AddRange(toInherit);
+        }
+        private void RemoveOverlap()
+        {
+            List<Enemy> hasOverlap = new List<Enemy>();
+            for (int i1 = 0; i1 < enemyArray.Count; i1++)
+                for (int i2 = i1 + 1; i2 < enemyArray.Count; i2++)
+                    if (enemyArray[i1].rectangle.Intersects(enemyArray[i2].rectangle))
+                    {
+                        hasOverlap.Add(enemyArray[i1]);
+                        hasOverlap.Add(enemyArray[i2]);
+                    }
+            if (hasOverlap.Count == 0) return;
+            foreach (Enemy e in hasOverlap)
+                enemyArray.Remove(e);
+            generateEnemies(hasOverlap.Count);
+        }
 
 
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
+            List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyArray)
             {
                 enemy.Update();
                 enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X < 0)
+                if(enemy.rectangle.X + enemy.rectangle.Width < 0)
                 {
-                    enemy.rectangle.X = rand.Next(1500, 3000);
-                    enemy.rectangle.Y = rand.Next(200, 500);
+                    toRemove.Add(enemy);
+                    Enemy.totalEnemyCount--;
                 }
 
             }
+            foreach (Enemy e in toRemove)
+                enemyArray.Remove(e);
+            generateEnemies(toRemove.Count);
+            if (enemyArray.Count < minimumNumOfEnemies) 
+                generateEnemies(minimumNumOfEnemies - enemyArray.Count);
 
         }
 
