@@ -387,6 +387,7 @@ namespace RoomRunner
                 if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
                 {
                     currentRoom++;
+                    roomList[currentRoom].InheritEnemies(roomList[currentRoom - 1].enemyArray);
                     endCurrentRoom = false;
                     transition = false;
                 }

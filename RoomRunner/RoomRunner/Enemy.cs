@@ -15,14 +15,18 @@ namespace RoomRunner
 
         public Texture2D texture;
         public Rectangle rectangle;
+        public static int totalEnemyCount;
 
-
+        static Enemy()
+        {
+            totalEnemyCount = 0;
+        }
         public Enemy(Texture2D texture, Rectangle rectangle, GraphicsDevice graphics) : base(new string[] {"Idle"})
         {
             this.texture = texture;
             this.rectangle = rectangle;
             AddAnimation("Idle", texture, graphics, 5, Player.LoadSheet(2, 2, 32, 32));
-
+            totalEnemyCount++;
 
         }
         public Enemy(EnemyName name, ContentManager cm, GraphicsDevice gd, Rectangle rect) : base(new string[] { "Idle" })
@@ -30,7 +34,7 @@ namespace RoomRunner
             Texture2D sheet = cm.Load<Texture2D>(EnemySpritesheet);
             rectangle = rect;
             MakeAnimation(name, sheet, gd);
-
+            totalEnemyCount++;
         }
 
         private void MakeAnimation(EnemyName n, Texture2D txt, GraphicsDevice gd)
