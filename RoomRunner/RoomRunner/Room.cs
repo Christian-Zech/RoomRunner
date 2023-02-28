@@ -10,12 +10,12 @@ namespace RoomRunner
 {
     class Room
     {
-
+        
 
         public Texture2D background1;
         public Texture2D background2;
         public int numberOfEnemies;
-        public Enemy[] enemyArray;
+        public List<Enemy> enemyArray;
         public Random rand;
 
         public Rectangle backgroundRectangle;
@@ -28,12 +28,12 @@ namespace RoomRunner
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
             this.numberOfEnemies = numberOfEnemies;
-            enemyArray = new Enemy[numberOfEnemies];
-            rand = new Random();
+            enemyArray = new List<Enemy>();
+            rand = new Random(DateTime.Now.Millisecond);
 
-            for(int i = 0; i < enemyArray.Length; i++)
+            for(int i = 0; i < numberOfEnemies; i++)
             {
-                enemyArray[i] = new Enemy(Game1.loadImage("Enemies/Jeb", content), new Rectangle(rand.Next(1500, 3000), rand.Next(200, 500), 100, 100), graphics);
+                enemyArray.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(1500, 3000), rand.Next(200, 500), 100, 100)));
             }
 
         }
@@ -44,15 +44,15 @@ namespace RoomRunner
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
+            List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyArray)
             {
                 enemy.Update();
                 enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X < 0)
+                if(enemy.rectangle.X + enemy.rectangle.Width < 0)
                 {
-                    enemy.rectangle.X = rand.Next(1500, 3000);
-                    enemy.rectangle.Y = rand.Next(200, 500);
+                    toRemove.Add(enemy);
                 }
 
             }
