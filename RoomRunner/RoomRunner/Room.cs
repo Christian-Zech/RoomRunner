@@ -38,7 +38,7 @@ namespace RoomRunner
 
         }
 
-
+        //private void generateEnemies(int amount, )
 
 
         public void Update(int scrollSpeed)
@@ -56,6 +56,10 @@ namespace RoomRunner
                 }
 
             }
+            foreach (Enemy e in toRemove)
+                enemyArray.Remove(e);
+            
+
 
         }
 

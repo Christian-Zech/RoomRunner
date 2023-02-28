@@ -34,7 +34,7 @@ namespace RoomRunner
         static Player()
         {
             Hats = new Dictionary<PlayerHats, Texture2D>();
-            ceilingHeight = 0;
+            ceilingHeight = frameHeight;
             floorHeight = 0;
         }
         public Player(Vector2 pos, ContentManager cm, GraphicsDevice graphics) : this(cm, graphics)
@@ -104,7 +104,7 @@ namespace RoomRunner
 
             onGround = Position.Y > frameHeight - floorHeight - 100;
 
-            if (Position.Y > frameHeight - floorHeight - 100)
+            if (onGround)
             {
                 Position.Y = frameHeight - floorHeight - 100;
                 Velocity.Y = 0;
