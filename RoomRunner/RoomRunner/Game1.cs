@@ -521,6 +521,7 @@ namespace RoomRunner
             double r, g, b;
             r = g = b = 0;
             Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
             foreach (Color c in pixels)
             {
                 r += c.R;
