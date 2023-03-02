@@ -20,7 +20,7 @@ namespace RoomRunner
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Texture2D pixel;
+        public static Texture2D pixel;
         Texture2D jebSheet;
 
 
