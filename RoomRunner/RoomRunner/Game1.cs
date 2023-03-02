@@ -516,7 +516,19 @@ namespace RoomRunner
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
-
+        public static Color GetAverageColor(Texture2D texture)
+        {
+            double r, g, b;
+            r = g = b = 0;
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            foreach (Color c in pixels)
+            {
+                r += c.R;
+                g += c.G;
+                b += c.B;
+            }
+            return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
+        }
         
 
 
