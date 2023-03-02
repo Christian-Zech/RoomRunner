@@ -16,11 +16,13 @@ namespace RoomRunner
     {
         public string id;
         public int duration;
+        int durationTemp;
         public bool active;
         public PowerupItem(string name, int duration, bool active)
         {
             id = name;
             this.duration = duration;
+            durationTemp = duration;
             this.active = active;
         }
         public void Activate()
@@ -31,7 +33,11 @@ namespace RoomRunner
                 active = true;
 
             if (duration <= 0)
+            {
                 active = false;
+                duration = durationTemp;
+            }
+                
         }
     }
 }

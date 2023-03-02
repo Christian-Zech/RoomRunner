@@ -47,13 +47,17 @@ namespace RoomRunner
 
             foreach(Enemy enemy in enemyArray)
             {
-                enemy.Update();
-                enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X < 0)
+                if (enemy != null)
                 {
-                    enemy.rectangle.X = rand.Next(1500, 3000);
-                    enemy.rectangle.Y = rand.Next(200, 500);
+                    enemy.Update();
+                    enemy.rectangle.X -= scrollSpeed;
+                    if (enemy.rectangle.X < 0)
+                    {
+                        enemy.rectangle.X = rand.Next(1500, 3000);
+                        enemy.rectangle.Y = rand.Next(200, 500);
+                    }
                 }
+                
 
             }
 
@@ -63,7 +67,8 @@ namespace RoomRunner
         {
             foreach(Enemy enemy in enemyArray)
             {
-                spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
+                if (enemy != null)
+                    spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
         }
         

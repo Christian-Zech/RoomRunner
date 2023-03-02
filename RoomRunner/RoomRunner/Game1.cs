@@ -36,6 +36,10 @@ namespace RoomRunner
         Rectangle window;
         private Player jeb;
 
+        Powerups powerups;
+        int activePowerupIndex;
+        int slowTimeTemp;
+
         List<Room> roomList;
         int amountOfRooms;
 
@@ -59,6 +63,8 @@ namespace RoomRunner
         Shop shop;
 
         int menuCoolDown;
+
+        KeyboardState oldKB;
 
 
         public enum GameState
@@ -157,12 +163,13 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
 
-
-
+            powerups = new Powerups();
+            activePowerupIndex = -1;
+            slowTimeTemp = 0;
             // reads background images
-            
 
 
+            oldKB = Keyboard.GetState();
             base.Initialize();
             
 
@@ -236,6 +243,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -273,8 +281,15 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                
 
+                if (activePowerupIndex == 0)
+                {
+                    slowTimeTemp++;
+                    if (slowTimeTemp % 2 == 0)
+                        return;
 
+                }
 
                 scrollSpeed = currentRoom + 10;
 
@@ -283,18 +298,66 @@ namespace RoomRunner
 
                 foreach (Enemy enemy in roomList[currentRoom].enemyArray)
                 {
-                    if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        gameState = GameState.GameOver;
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                                gameState = GameState.GameOver;
                 }
-
-
 
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
+
+
+
+                if (keyboard.IsKeyDown(Keys.D1) && oldKB.IsKeyUp(Keys.D1))
+                {
+                    powerups.UsePowerup(0);
+                }
+                if (keyboard.IsKeyDown(Keys.D2) && oldKB.IsKeyUp(Keys.D2))
+                {
+                    powerups.UsePowerup(1);
+                }
+                if (keyboard.IsKeyDown(Keys.D3) && oldKB.IsKeyUp(Keys.D3))
+                {
+                    powerups.UsePowerup(2);
+                }
+                if (keyboard.IsKeyDown(Keys.D4) && oldKB.IsKeyUp(Keys.D4))
+                {
+                    powerups.UsePowerup(3);
+                }
+                if (powerups.ActivePowerups())
+                {
+                    activePowerupIndex = powerups.ActivePowerupsIndex();
+                    if (activePowerupIndex == 0)
+                    {
+                        //too hard
+                    }
+                    
+                    if (activePowerupIndex == 2)
+                    {
+                        
+                        Array.Clear(roomList[0].enemyArray, 0, roomList[0].enemyArray.Length);
+                        
+                    }
+                    if (activePowerupIndex == 3)
+                    {
+                        // no coins yet :(
+                    }
+                }
+                else
+                {
+                    activePowerupIndex = -1;
+                }
+
+                powerups.Update();
             }
             gameTimer++;
-            
+            if (gameState == GameState.GameOver)
+            {
+                activePowerupIndex = -1;
+                powerups.RemovePowerups();
+            }
 
             base.Update(gameTime);
         }
@@ -429,7 +492,7 @@ namespace RoomRunner
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 jeb.Draw(spriteBatch);
-
+                powerups.Draw(spriteBatch, collectableSheet, clock, skull, nuke, magnet, shopFontBold);
             }
             if(gameState == GameState.GameOver)
             {
