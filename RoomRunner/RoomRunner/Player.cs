@@ -13,7 +13,7 @@ namespace RoomRunner
     {
         public const float Gravity = -2.0f; //px per frame
         public const float JumpMovement = 40.0f; //px per frame
-        private const int InputDelay = 60;
+        private const int InputDelay = 30;
         public const int frameHeight = 1000;
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
