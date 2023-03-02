@@ -68,7 +68,7 @@ namespace RoomRunner
         private void MakePlayerAnimations(ContentManager cm, GraphicsDevice graphics)
         {
             Rectangle[] jebList = LoadSheet(4, 3, 32, 32);
-            Texture2D jebSheet = cm.Load<Texture2D>("jeb (2)");
+            Texture2D jebSheet = cm.Load<Texture2D>("jeb");
 
             Rectangle[] idle = new Rectangle[] { jebList[10], jebList[11] };
             AddAnimation(States[0], jebSheet, graphics, 30, idle);

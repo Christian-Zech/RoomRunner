@@ -11,7 +11,7 @@ namespace RoomRunner
 
     class Enemy : Animation
     {
-        public const string EnemySpritesheet = "Enemies";
+        public string EnemySpritesheet = Game1.levels + "/Enemies/Enemies";
 
         public Texture2D texture;
         public Rectangle rectangle;

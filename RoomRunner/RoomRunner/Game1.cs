@@ -23,7 +23,6 @@ namespace RoomRunner
         Texture2D pixel;
         Texture2D jebSheet;
 
-
         SpriteFont menuFont;
         SpriteFont buttonFont;
 
@@ -142,14 +141,11 @@ namespace RoomRunner
 
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-            jebList.Add(new Rectangle(0, 0, 32, 32));
-            jebList.Add(new Rectangle(32, 0, 32, 32));
-            jebList.Add(new Rectangle(0, 32, 32, 32));
-            jebList.Add(new Rectangle(32, 32, 32, 32));
-            jebList.Add(new Rectangle(0, 64, 32, 32));
+            jebList.Add(Player.LoadSheet(4, 3, 32, 32)[10]);
+            jebList.Add(Player.LoadSheet(4, 3, 32, 32)[11]);
 
-            idleAnimationRectangles.Add(jebList[3]);
-            idleAnimationRectangles.Add(jebList[4]);
+            idleAnimationRectangles.Add(jebList[0]);
+            idleAnimationRectangles.Add(jebList[1]);
 
             jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
             Player.floorHeight = 100;
@@ -181,14 +177,13 @@ namespace RoomRunner
             // TODO: use this.Content to load your game content here
 
             pixel = this.Content.Load<Texture2D>("pixel");
-            jebSheet = this.Content.Load<Texture2D>("jeb");
             menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
             buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
             collectableSheet = this.Content.Load<Texture2D>("collectables");
             cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
-            shopFont = this.Content.Load<SpriteFont>("SpriteFont1");
-            shopFontBold = this.Content.Load<SpriteFont>("SpriteFont3");
-            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFont2");
+            shopFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFont");
+            shopFontBold = this.Content.Load<SpriteFont>("SpriteFonts/shopFontBold");
+            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFontTitle");
 
             //for shop, textures have to be loaded first before they can be sent as parameters
             items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
@@ -208,6 +203,7 @@ namespace RoomRunner
             items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
             shop = new Shop(items);
 
+            jebSheet = this.Content.Load<Texture2D>("jeb");
             
             backgroundImages = loadTextures("Background", Content);
 
@@ -323,12 +319,12 @@ namespace RoomRunner
                 Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
 
 
-                // animation
+                // Title screen animation
                 if (halfSeconds % 2 == 0)
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
                 else
                     spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-        
+
                 spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
 
