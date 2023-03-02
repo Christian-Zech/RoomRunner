@@ -22,18 +22,24 @@ namespace RoomRunner
             set
             {
                 health = value;
-                BossBarPercent = health / maxHealth;
-                bossBarRect.Width = (int)((1900 - Insets * 2) / (BossBarPercent / 100.0f));
+                if (health <= 0)
+                {
+                    IsDead = true;
+                    return;
+                }
+                BossBarPercent = health / (float)maxHealth;
+                bossBarRect.Width = (int)((1900.0f - Insets * 2) * BossBarPercent);
             }
         }
         private int health, maxHealth;
         private float BossBarPercent;
         public bool IsDead;
-        public Boss(Rectangle rect, int health) : base(new string[] { "Idle" })
+        public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
         {
-            this.rect = rect;
-            maxHealth = Health = health;
-            BossBarPercent = 100.0f;
+            rect = new Rectangle(1000,500,200,200);
+            MakeAnimation(boss, sheet, gd);
+            maxHealth = this.health = health;
+            BossBarPercent = 1.0f;
             IsDead = false;
             bossBarRect = new Rectangle(Insets, 900, 1900 - Insets * 2, 50);
         }
@@ -44,18 +50,40 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
+            if (IsDead) return;
             sb.Draw(CurrentTexture, rect, Color.White);
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
         }
 
-        public void Damage(int amount) => health -= amount;
-
+        public void Damage(int amount) => Health -= amount;
+        private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
+        {
+            Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
+            switch (boss)
+            {
+                case Bosses.Demon:
+                    AddAnimation("Idle", sheet, gd, 25, rects[0], rects[1]);
+                    break;
+                case Bosses.Yeti:
+                    AddAnimation("Idle", sheet, gd, 5, rects[2], rects[3], rects[4], rects[5], rects[6]);
+                    break;
+                case Bosses.Bat:
+                    AddAnimation("Idle", sheet, gd, 15, rects[7], rects[8], rects[9], rects[10]);
+                    break;
+                case Bosses.Shark:
+                    AddAnimation("Idle", sheet, gd, 7, rects[14], rects[15], rects[16], rects[17], rects[18], rects[19]);
+                    break;
+            }
+        }
         
 
     }
     public enum Bosses
     {
-
+        Demon,
+        Yeti,
+        Bat,
+        Shark
     }
 }
