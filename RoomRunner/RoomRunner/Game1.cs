@@ -277,7 +277,7 @@ namespace RoomRunner
                 if (gameState == GameState.Play)
                     roomList[currentRoom].Update(scrollSpeed);
 
-                foreach (Enemy enemy in roomList[currentRoom].enemyArray)
+                foreach (Enemy enemy in roomList[currentRoom].enemyList)
                 {
                     if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
                         gameState = GameState.GameOver;
@@ -383,7 +383,7 @@ namespace RoomRunner
                 if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
                 {
                     currentRoom++;
-                    roomList[currentRoom].InheritEnemies(roomList[currentRoom - 1].enemyArray);
+                    roomList[currentRoom].InheritEnemies(roomList[currentRoom - 1].enemyList);
                     endCurrentRoom = false;
                     transition = false;
                 }
