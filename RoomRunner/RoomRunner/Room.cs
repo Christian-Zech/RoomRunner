@@ -12,7 +12,8 @@ namespace RoomRunner
     {
         public const int minimumNumOfEnemies = 5;
 
-        public static int ceilingHeight, floorHeight;
+        public static int ceilingHeight => Player.ceilingHeight;
+        public static int floorHeight => Player.floorHeight;
 
         public Texture2D background1;
         public Texture2D background2;
@@ -26,11 +27,6 @@ namespace RoomRunner
         private ContentManager content;
 
 
-        static Room()
-        {
-            ceilingHeight = Player.frameHeight;
-            floorHeight = 0;
-        }
 
 
         // intended for single images
