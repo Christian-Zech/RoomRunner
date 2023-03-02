@@ -39,13 +39,8 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Enemies.png">
+    <Compile Include="Level1\Enemies\Enemies.png">
       <Name>Enemies</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="jeb %282%29.png">
-      <Name>jeb %282%29</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -61,27 +56,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpriteFont1.spritefont">
-      <Name>SpriteFont1</Name>
+    <Compile Include="SpriteFonts\ShopFont.spritefont">
+      <Name>ShopFont</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>
-    <Compile Include="SpriteFont2.spritefont">
-      <Name>SpriteFont2</Name>
+    <Compile Include="SpriteFonts\ShopFontTitle.spritefont">
+      <Name>ShopFontTitle</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>
-    <Compile Include="SpriteFont3.spritefont">
-      <Name>SpriteFont3</Name>
+    <Compile Include="SpriteFonts\ShopFontBold.spritefont">
+      <Name>ShopFontBold</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Level1\Enemies\jeb.png">
-      <Name>jeb</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
