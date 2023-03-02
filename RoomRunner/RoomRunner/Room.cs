@@ -56,6 +56,12 @@ namespace RoomRunner
             enemyArray.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
             RemoveOverlap();
         }
+
+        private void generateCoints(int amount)
+        {
+
+        }
+
         public void InheritEnemies(List<Enemy> toInherit)
         {
             enemyArray.AddRange(toInherit);
