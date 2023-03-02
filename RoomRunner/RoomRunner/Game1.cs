@@ -20,7 +20,7 @@ namespace RoomRunner
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Texture2D pixel;
+        public static Texture2D pixel;
         Texture2D jebSheet;
 
         SpriteFont menuFont;
@@ -34,6 +34,7 @@ namespace RoomRunner
 
         Rectangle window;
         private Player jeb;
+        Boss currentBoss;
 
         List<Room> roomList;
         int amountOfRooms;
@@ -207,7 +208,7 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
 
-
+            //currentBoss = new Boss(Bosses.Demon, 1000, this.Content.Load<Texture2D>("Enemies"), graphics.GraphicsDevice);
 
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
@@ -270,7 +271,7 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
 
-
+                if (currentBoss != null) currentBoss.Update();
 
                 scrollSpeed = currentRoom + 10;
 
@@ -426,6 +427,7 @@ namespace RoomRunner
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 jeb.Draw(spriteBatch);
+                if (currentBoss != null) currentBoss.Draw(spriteBatch);
 
             }
             if(gameState == GameState.GameOver)
@@ -468,7 +470,7 @@ namespace RoomRunner
             for(int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,5), GraphicsDevice, Content));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content));
             }
 
             
@@ -510,7 +512,20 @@ namespace RoomRunner
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
-
+        public static Color GetAverageColor(Texture2D texture)
+        {
+            double r, g, b;
+            r = g = b = 0;
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+            foreach (Color c in pixels)
+            {
+                r += c.R;
+                g += c.G;
+                b += c.B;
+            }
+            return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
+        }
         
 
 

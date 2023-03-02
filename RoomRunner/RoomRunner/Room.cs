@@ -12,7 +12,8 @@ namespace RoomRunner
     {
         public const int minimumNumOfEnemies = 5;
 
-        public static int ceilingHeight, floorHeight;
+        public static int ceilingHeight => Player.ceilingHeight;
+        public static int floorHeight => Player.floorHeight;
 
         public Texture2D background1;
         public Texture2D background2;
@@ -26,11 +27,6 @@ namespace RoomRunner
         private ContentManager content;
 
 
-        static Room()
-        {
-            ceilingHeight = Player.frameHeight;
-            floorHeight = 0;
-        }
 
 
         // intended for single images
@@ -53,7 +49,7 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
             RemoveOverlap();
         }
         public void InheritEnemies(List<Enemy> toInherit)

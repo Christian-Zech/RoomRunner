@@ -11,7 +11,8 @@ namespace RoomRunner
 
     class Enemy : Animation
     {
-        public string EnemySpritesheet = Game1.levels + "/Enemies/Enemies";
+        public const int EnemyNames = 1;
+        public static string EnemySpritesheet = Game1.levels + "/Enemies/Enemies";
 
         public Texture2D texture;
         public Rectangle rectangle;
@@ -42,20 +43,8 @@ namespace RoomRunner
             Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
             switch (n)
             {
-                case EnemyName.Demon:
-                    AddAnimation("Idle", txt, gd, 25, rects[0], rects[1]);
-                    break;
-                case EnemyName.Yeti:
-                    AddAnimation("Idle", txt, gd, 5, rects[2], rects[3], rects[4], rects[5], rects[6]);
-                    break;
-                case EnemyName.Bat:
-                    AddAnimation("Idle", txt, gd, 15, rects[7], rects[8], rects[9], rects[10]);
-                    break;
                 case EnemyName.Bot:
                     AddAnimation("Idle", txt, gd, 12, rects[11], rects[12], rects[13]);
-                    break;
-                case EnemyName.Shark:
-                    AddAnimation("Idle", txt, gd, 7, rects[14], rects[15], rects[16], rects[17], rects[18], rects[19]);
                     break;
             }
         }
@@ -69,10 +58,6 @@ namespace RoomRunner
     }
     public enum EnemyName
     {
-        Demon,
-        Yeti,
-        Bat,
-        Bot,
-        Shark
+        Bot
     }
 }
