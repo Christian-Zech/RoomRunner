@@ -17,14 +17,14 @@ namespace RoomRunner
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
         public static Texture2D pixel;
-        Texture2D jebSheet;
+        public Texture2D jebSheet;
 
-        SpriteFont menuFont;
-        SpriteFont buttonFont;
+        public SpriteFont menuFont => fonts[1];
+        public SpriteFont buttonFont => fonts[0];
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -34,7 +34,8 @@ namespace RoomRunner
 
         Rectangle window;
         private Player jeb;
-        Boss currentBoss;
+        public Boss currentBoss;
+        public SpriteFont[] fonts;
 
         List<Room> roomList;
         int amountOfRooms;
@@ -45,17 +46,19 @@ namespace RoomRunner
         int scrollSpeed;
         bool transition;
         bool endCurrentRoom;
-        bool bossFight;
+        bool bossFight => currentBoss != null;
 
         Random rand;
 
         List<Texture2D> backgroundImages;
 
         //for shop
-        Texture2D collectableSheet, cosmeticSheet;
+        public Texture2D collectableSheet, cosmeticSheet;
         List<ShopItem> items;
         List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
-        SpriteFont shopFont, shopFontBold, shopTitleFont;
+        public SpriteFont shopFont => fonts[2];
+        public SpriteFont shopFontBold => fonts[3];
+        public SpriteFont shopTitleFont => fonts[4];
         Shop shop;
 
         int menuCoolDown;
@@ -136,7 +139,6 @@ namespace RoomRunner
 
             transition = false;
             endCurrentRoom = false;
-            bossFight = false;
 
             this.IsMouseVisible = true;
 
@@ -148,7 +150,6 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[0]);
             idleAnimationRectangles.Add(jebList[1]);
 
-            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
             Player.floorHeight = 100;
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
@@ -176,15 +177,10 @@ namespace RoomRunner
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-
+            LoadFonts();
             pixel = this.Content.Load<Texture2D>("pixel");
-            menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
-            buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
-            collectableSheet = this.Content.Load<Texture2D>("collectables");
-            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
-            shopFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFont");
-            shopFontBold = this.Content.Load<SpriteFont>("SpriteFonts/shopFontBold");
-            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFontTitle");
+            collectableSheet = this.Content.Load<Texture2D>("Shop/collectables");
+            cosmeticSheet = this.Content.Load<Texture2D>("Shop/cosmetics");
 
             //for shop, textures have to be loaded first before they can be sent as parameters
             items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
@@ -208,12 +204,20 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
 
-            //currentBoss = new Boss(Bosses.Demon, 1000, this.Content.Load<Texture2D>("Enemies"), graphics.GraphicsDevice);
-
+            jeb = new Player(new Vector2(900, 500), this);
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
 
+        }
+        private void LoadFonts()
+        {
+            string fontFolder = "SpriteFonts/";
+
+            FileInfo[] fontFiles = new DirectoryInfo("Content/"+fontFolder).GetFiles();
+            fonts = new SpriteFont[fontFiles.Length];
+            for (int i = 0; i < fontFiles.Length; i++)
+                fonts[i] = Content.Load<SpriteFont>(fontFolder + Path.GetFileNameWithoutExtension(fontFiles[i].FullName));
         }
 
         /// <summary>
@@ -415,13 +419,6 @@ namespace RoomRunner
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
                 roomList[currentRoom].Draw(spriteBatch);
-
-                if (currentRoom >= roomList.Count - 1)
-                {
-                    bossFight = true;
-                    
-
-                }
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
