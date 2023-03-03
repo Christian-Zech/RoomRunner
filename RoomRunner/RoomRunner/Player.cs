@@ -62,7 +62,7 @@ namespace RoomRunner
 
         private void MakePlayerHats(Game1 game)
         {
-            Rectangle[] rects = LoadSheet(5, 5, 32, 32, 24);
+            Rectangle[] rects = LoadSheet(5, 5, 32, 32, 1);
             Texture2D sheet = game.cosmeticSheet;
             for (int i = 1, c = 0; i < rects.Length - 1; i += 2, c++)
                 Hats[(PlayerHats)c + 1] = RectToTxt(game.graphics.GraphicsDevice, sheet, rects[i])[0];
@@ -153,10 +153,9 @@ namespace RoomRunner
             sb.Draw(Hats[currentHat], HatRectangle, Color.White);
         }
 
-        public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight, int limit = -1)
+        public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight, int extraWhitespace = 0)
         {
-            if (limit <= 0) 
-                limit = width * height;
+            int limit = width * height - extraWhitespace;
             Rectangle[] outp = new Rectangle[limit];
             for (int y = 0, i = 0, c = 0; i < height; i++, y += Sheight)
                 for (int x = 0, ii = 0; ii < width; ii++, x += Swidth, c++)
