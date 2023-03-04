@@ -32,37 +32,37 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle menuButtonRectangle;
 
-        Rectangle window;
+        public static Rectangle window;
         private Player jeb;
         public Boss currentBoss;
         public SpriteFont[] fonts;
 
-        List<Room> roomList;
-        int amountOfRooms;
+        public List<Room> roomList;
+        private int amountOfRooms;
 
-        int gameTimer;
-        int levelTimer;
-        int currentRoom;
-        int scrollSpeed;
-        bool transition;
-        bool endCurrentRoom;
-        bool bossFight => currentBoss != null;
+        private int gameTimer;
+        private int levelTimer;
+        public int currentRoom;
+        public int scrollSpeed;
+        public bool transition;
+        public bool endCurrentRoom;
+        public bool bossFight => currentBoss != null;
+        public Dictionary<Levels, Boss> bosses;
 
-        Random rand;
+        public Random rand;
 
-        List<Texture2D> backgroundImages;
+        private List<Texture2D> backgroundImages;
 
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
-        List<ShopItem> items;
-        List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
-        Rectangle[] collectableRect, cosmeticRect;
+        private List<ShopItem> items;
+        public Rectangle[] collectableRect, cosmeticRect;
         public SpriteFont shopFont => fonts[2];
         public SpriteFont shopFontBold => fonts[3];
         public SpriteFont shopTitleFont => fonts[4];
-        Shop shop;
+        private Shop shop;
 
-        int menuCoolDown;
+        public int menuCoolDown;
 
 
         public enum GameState
@@ -107,7 +107,7 @@ namespace RoomRunner
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
-            
+            bosses = new Dictionary<Levels, Boss>();
 
 
             roomList = new List<Room>();
@@ -155,6 +155,11 @@ namespace RoomRunner
             base.Initialize();
             
 
+
+        }
+
+        private void CreateBosses()
+        {
 
         }
 
@@ -353,15 +358,16 @@ namespace RoomRunner
 
 
 
-
-
+                if (levelSeconds > 10 && !bossFight)
+                    SummonBoss();
                 // tries to advance to next room every 10 seconds
-                if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
+                if (currentRoom < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
                 {
                     transition = true;
                     levelTimer = 0;
                     
                 }
+                
 
 
                 // scrolling calculations
@@ -440,7 +446,10 @@ namespace RoomRunner
 
         
 
+        private void SummonBoss()
+        {
 
+        }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
