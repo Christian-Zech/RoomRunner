@@ -76,6 +76,8 @@ namespace RoomRunner
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
+            if (Game1.bossFight) 
+                return;
             List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyArray)

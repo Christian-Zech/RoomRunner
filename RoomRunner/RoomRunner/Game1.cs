@@ -34,7 +34,7 @@ namespace RoomRunner
 
         public static Rectangle window;
         private Player jeb;
-        public Boss currentBoss;
+        public static Boss currentBoss;
         public SpriteFont[] fonts;
 
         public List<Room> roomList;
@@ -46,7 +46,7 @@ namespace RoomRunner
         public int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
-        public bool bossFight => currentBoss != null;
+        public static bool bossFight => currentBoss != null;
         public Dictionary<Levels, Boss> bosses;
 
         public Random rand;
@@ -108,6 +108,7 @@ namespace RoomRunner
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
             bosses = new Dictionary<Levels, Boss>();
+            CreateBosses();
 
 
             roomList = new List<Room>();
@@ -160,7 +161,13 @@ namespace RoomRunner
 
         private void CreateBosses()
         {
+            Texture2D sheet = loadImage("Enemies/Enemies", Content);
+            List<Boss> bos = new List<Boss>();
 
+            bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
+
+            for (int i = 0; i < bos.Count; i++)
+                bosses.Add((Levels)i, bos[i]);
         }
 
         /// <summary>
@@ -270,12 +277,14 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
 
-                if (currentBoss != null) currentBoss.Update();
+                if (bossFight) currentBoss.Update();
 
                 scrollSpeed = currentRoom + 10;
 
-                if (gameState == GameState.Play)
-                    roomList[currentRoom].Update(scrollSpeed);
+                roomList[currentRoom].Update(scrollSpeed);
+
+                if (bossFight)
+                    goto Jeb;
 
                 foreach (Enemy enemy in roomList[currentRoom].enemyArray)
                 {
@@ -284,7 +293,7 @@ namespace RoomRunner
                 }
 
 
-
+                Jeb:
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
@@ -414,7 +423,7 @@ namespace RoomRunner
 
                 spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
-                roomList[currentRoom].Draw(spriteBatch);
+                if (!bossFight) roomList[currentRoom].Draw(spriteBatch);
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
@@ -448,7 +457,7 @@ namespace RoomRunner
 
         private void SummonBoss()
         {
-
+            currentBoss = bosses[levels];
         }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
         {
