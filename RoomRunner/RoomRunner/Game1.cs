@@ -38,15 +38,17 @@ namespace RoomRunner
         public SpriteFont[] fonts;
 
         public List<Room> roomList;
+        public List<Projectile> projectileList;
         private int amountOfRooms;
 
         private int gameTimer;
         private int levelTimer;
+        private int bossCooldown;
         public int currentRoom;
         public int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
-        public static bool bossFight => currentBoss != null;
+        public static bool bossFight => currentBoss != null && !currentBoss.IsDead;
         public Dictionary<Levels, Boss> bosses;
 
         public Random rand;
@@ -113,6 +115,7 @@ namespace RoomRunner
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
+            projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
             rand = new Random();
 
@@ -120,8 +123,8 @@ namespace RoomRunner
             amountOfRooms = 5;
             scrollSpeed = 0;
             menuCoolDown = 0;
-            
-            
+            bossCooldown = 0;
+
 
             gameState = GameState.Menu;
             levels = Levels.Level1;
@@ -276,7 +279,8 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
-
+                if (bossFight && currentBoss.IsDead)
+                    currentBoss = null;
                 if (bossFight) currentBoss.Update();
 
                 scrollSpeed = currentRoom + 10;
@@ -284,7 +288,10 @@ namespace RoomRunner
                 roomList[currentRoom].Update(scrollSpeed);
 
                 if (bossFight)
+                {
+                    if (roomList[currentRoom].enemyArray.Count > 0) roomList[currentRoom].enemyArray.Clear();
                     goto Jeb;
+                }
 
                 foreach (Enemy enemy in roomList[currentRoom].enemyArray)
                 {
@@ -297,11 +304,44 @@ namespace RoomRunner
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
+
+                List<Projectile> toRemove = new List<Projectile>();
+                foreach (Projectile p in projectileList)
+                {
+                    p.Update();
+
+                    if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+                    {
+                        currentBoss.Damage(p.BossDamage);
+                        p.DeltDamage = true;
+                    }
+
+                    if (p.ToRemove) toRemove.Add(p);
+                }
+                foreach (Projectile p in toRemove)
+                    projectileList.Remove(p);
+
+                
             }
             gameTimer++;
             
 
             base.Update(gameTime);
+        }
+
+        private void Reset()
+        {
+            levels = Levels.Level1;
+            gameTimer = 0;
+            levelTimer = 0;
+            currentRoom = 0;
+            scrollSpeed = 0;
+
+            transition = false;
+            endCurrentRoom = false;
+
+            projectileList.Clear();
+            currentBoss = null;
         }
 
         /// <summary>
@@ -366,8 +406,8 @@ namespace RoomRunner
                 int levelSeconds = levelTimer / 60;
 
 
-
-                if (levelSeconds > 10 && !bossFight)
+                if (bossCooldown > 0) bossCooldown--;
+                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoom < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -428,12 +468,16 @@ namespace RoomRunner
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
+
                 jeb.Draw(spriteBatch);
                 if (currentBoss != null) currentBoss.Draw(spriteBatch);
+                foreach (Projectile p in projectileList)
+                    p.Draw(spriteBatch);
 
             }
             if(gameState == GameState.GameOver)
             {
+                if (gameTimer > 0) Reset();
                 spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
@@ -457,7 +501,8 @@ namespace RoomRunner
 
         private void SummonBoss()
         {
-            currentBoss = bosses[levels];
+            currentBoss = bosses[levels].Clone();
+            bossCooldown = 300;
         }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
         {

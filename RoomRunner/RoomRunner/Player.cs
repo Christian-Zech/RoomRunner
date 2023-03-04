@@ -12,13 +12,17 @@ namespace RoomRunner
     public class Player : Animation
     {
         public const float Gravity = -2.0f; //px per frame
-        public const float JumpMovement = 40.0f; //px per frame
-        private const int InputDelay = 20;
-        public const int frameHeight = 1000;
+        public const float InitialJumpMovement = 40.0f; //px per frame
+        public const float JumpMovement = 30.0f; //px per frame
+        private const int InputDelay = 20; //Frames
+        private const int FireDelay = 2; //Frames
+        public const int frameHeight = 1000; //px
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
         public static string[] States => statesstates;
         public static readonly Dictionary<PlayerHats, Texture2D> Hats;
+        public static float JumpMultiplier;
+        public static float GravityMultiplier;
 
         public bool IsAlive;
         public Vector2 Velocity, Position, Acceleration;
@@ -27,16 +31,17 @@ namespace RoomRunner
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
-        private int delayLeft;
+        private int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
-        private Game1 game;
+        private readonly Game1 game;
         
         static Player()
         {
             Hats = new Dictionary<PlayerHats, Texture2D>();
             ceilingHeight = frameHeight;
             floorHeight = 0;
+            JumpMultiplier = GravityMultiplier = 1.0f;
         }
         public Player(Vector2 pos, Game1 game) : this(game)
         {
@@ -50,12 +55,13 @@ namespace RoomRunner
             IsAlive = true;
             oldkb = Keyboard.GetState();
             oldms = Mouse.GetState();
-            Acceleration.Y = Gravity;
+            Acceleration.Y = Gravity * GravityMultiplier;
             wasStateSet = false;
             Idle = false;
             delayLeft = InputDelay;
             currentHat = PlayerHats.Bandana;
             Coins = 0;
+            fireCooldown = 0;
             MakePlayerAnimations(game);
             MakePlayerHats(game);
         }
@@ -75,9 +81,9 @@ namespace RoomRunner
 
             Rectangle[] idle = new Rectangle[] { jebList[10], jebList[11] };
             AddAnimation(States[0], jebSheet, graphics, 30, idle);
-            Rectangle[] jumping = new Rectangle[] { jebList[4], jebList[5], jebList[6], jebList[7], jebList[8], jebList[9], jebList[10] };
+            Rectangle[] jumping = jebList.Skip(4).Take(7).ToArray();
             AddAnimation(States[1], jebSheet, graphics, 2, jumping, false);
-            Rectangle[] running = new Rectangle[] { jebList[0], jebList[1], jebList[2], jebList[3] };
+            Rectangle[] running = jebList.Take(4).ToArray();
             AddAnimation(States[2], jebSheet, graphics, 5, running);
         }
         public new void Update()
@@ -93,13 +99,13 @@ namespace RoomRunner
 
             if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
             {
-                if (onGround) Velocity.Y = JumpMovement;
-                else Velocity.Y = JumpMovement * 3 / 4;
+                if (onGround) Velocity.Y = InitialJumpMovement * JumpMultiplier;
+                else Velocity.Y = JumpMovement * JumpMultiplier;
                 SetState("Jumping");
                 stateSet = true;
             }
             if (IsPressed(kb, Keys.S, Keys.Down))
-                Velocity.Y = -JumpMovement;
+                Velocity.Y = -JumpMovement * JumpMultiplier;
 
             Gravity:
             Velocity.Y += Acceleration.Y;
@@ -129,6 +135,17 @@ namespace RoomRunner
             if (SelectedAnimation == "Running" && (Frame == 1 || Frame == 3)) 
                 HatRectangle.Y -= 2;
 
+            if (fireCooldown > 0) fireCooldown--;
+            if (IsHeld(kb, Keys.D, Keys.LeftAlt, Keys.Right) && fireCooldown == 0)
+            {
+                Projectile toLaunch = Projectile.Defaults[Projectiles.PlayerShot].Clone();
+                toLaunch.Position = new Point((int)Position.X, (int)Position.Y+50);
+                game.projectileList.Add(toLaunch);
+                fireCooldown = FireDelay;
+            }
+            
+            
+            
             base.Update();
 
             oldkb = kb;

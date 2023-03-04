@@ -17,6 +17,7 @@ namespace RoomRunner
         public int Frame { get; private set; }
         public string SelectedAnimation { get; private set; }
         public Texture2D CurrentTexture => Animations[SelectedAnimation][Frame];
+        public Texture2D LastUsedSheet;
 
         public Animation(string[] names, string selected)
         {
@@ -56,6 +57,7 @@ namespace RoomRunner
         public void SetFrameDelay(string state, int newDelay) => TimeBetweenChanges[state] = newDelay;
         public void AddAnimation(string state, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 5, params Rectangle[] rects)
         {
+            LastUsedSheet = sheet;
             Animations[state] = RectToTxt(gd, sheet, rects);
             TimeBetweenChanges[state] = framesInbetween;
             FramesLeft[state] = framesInbetween;

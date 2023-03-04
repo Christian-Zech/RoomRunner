@@ -12,6 +12,7 @@ namespace RoomRunner
         private const int Insets = 20; //in px
 
         private Rectangle rect, bossBarRect;
+        public Rectangle Rectangle => rect;
         public Point Position => new Point(rect.X, rect.Y);
         public int Health
         {
@@ -34,8 +35,12 @@ namespace RoomRunner
         private int health, maxHealth;
         private float BossBarPercent;
         public bool IsDead;
+        public readonly Bosses Name;
+        private GraphicsDevice graphics;
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
         {
+            Name = boss;
+            graphics = gd;
             rect = new Rectangle(1000,500,200,200);
             MakeAnimation(boss, sheet, gd);
             maxHealth = this.health = health;
@@ -55,6 +60,7 @@ namespace RoomRunner
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
         }
+        public Boss Clone() => new Boss(Name, health, LastUsedSheet, graphics);
 
         public void Damage(int amount) => Health -= amount;
         private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
