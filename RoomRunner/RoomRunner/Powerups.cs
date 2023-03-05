@@ -69,8 +69,14 @@ namespace RoomRunner
                     items[i].active = false;
             }
         }
-        public void Draw(SpriteBatch spriteBatch, Texture2D textures, List<Rectangle> clock, List<Rectangle> skull, List<Rectangle> nuke, List<Rectangle> magnet, SpriteFont font)
+        
+        public void Draw(SpriteBatch spriteBatch, Texture2D textures, List<Rectangle> clock, List<Rectangle> skull, List<Rectangle> nuke, List<Rectangle> magnet, SpriteFont font, Color color)
         {
+            color = new Color(255 - color.R, 255 - color.G, 255 - color.B); //inverted font color so hopefully easy to read on every background
+            spriteBatch.DrawString(font, "" + quantities[0], new Vector2(75, 120), color);
+            spriteBatch.DrawString(font, "" + quantities[1], new Vector2(175, 120), color);
+            spriteBatch.DrawString(font, "" + quantities[2], new Vector2(275, 120), color);
+            spriteBatch.DrawString(font, "" + quantities[3], new Vector2(375, 120), color);
             spriteBatch.Draw(textures, new Rectangle(50, 40, 70, 70), clock[0], Color.White);
             spriteBatch.Draw(textures, new Rectangle(150, 40, 70, 70), skull[0], Color.White);
             spriteBatch.Draw(textures, new Rectangle(250, 40, 70, 70), nuke[0], Color.White);

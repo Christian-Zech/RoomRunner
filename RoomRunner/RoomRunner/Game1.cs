@@ -337,7 +337,7 @@ namespace RoomRunner
                     if (activePowerupIndex == 2)
                     {
                         
-                        Array.Clear(roomList[0].enemyArray, 0, roomList[0].enemyArray.Length);
+                        Array.Clear(roomList[currentRoom].enemyArray, 0, roomList[currentRoom].enemyArray.Length);
                         
                     }
                     if (activePowerupIndex == 3)
@@ -412,7 +412,11 @@ namespace RoomRunner
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (shop.leave)
+                {
                     gameState = GameState.Menu;
+                    shop.leave = false;
+                }
+                    
             }
             if (gameState == GameState.Play)
             {
@@ -492,7 +496,7 @@ namespace RoomRunner
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 jeb.Draw(spriteBatch);
-                powerups.Draw(spriteBatch, collectableSheet, clock, skull, nuke, magnet, shopFontBold);
+                powerups.Draw(spriteBatch, collectableSheet, clock, skull, nuke, magnet, shopFontBold, GetAverageColor(roomList[currentRoom].background1));
             }
             if(gameState == GameState.GameOver)
             {
@@ -577,7 +581,20 @@ namespace RoomRunner
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
 
-        
+        public static Color GetAverageColor(Texture2D texture)
+        {
+            double r, g, b;
+            r = g = b = 0;
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+            foreach (Color c in pixels)
+            {
+                r += c.R;
+                g += c.G;
+                b += c.B;
+            }
+            return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
+        }
 
 
     }
