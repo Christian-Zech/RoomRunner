@@ -8,7 +8,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    class Room
+    public class Room
     {
         public const int minimumNumOfEnemies = 5;
 
@@ -76,6 +76,8 @@ namespace RoomRunner
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
+            if (Game1.bossFight) 
+                return;
             List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyArray)

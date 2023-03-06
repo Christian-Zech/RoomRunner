@@ -9,7 +9,7 @@ using System.Text;
 namespace RoomRunner
 {
 
-    class Enemy : Animation
+    public class Enemy : Animation
     {
         public const int EnemyNames = 1;
         public static string EnemySpritesheet = Game1.levels + "/Enemies/Enemies";
