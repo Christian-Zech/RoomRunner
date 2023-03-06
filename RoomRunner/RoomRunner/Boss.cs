@@ -41,7 +41,7 @@ namespace RoomRunner
         {
             Name = boss;
             graphics = gd;
-            rect = new Rectangle(1000,500,200,200);
+            rect = new Rectangle(1500,500,200,200);
             MakeAnimation(boss, sheet, gd);
             maxHealth = this.health = health;
             BossBarPercent = 1.0f;

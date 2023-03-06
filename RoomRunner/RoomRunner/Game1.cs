@@ -43,6 +43,7 @@ namespace RoomRunner
 
         private int gameTimer;
         private int levelTimer;
+        private const int Cooldown = 300;
         private int bossCooldown;
         public int currentRoom;
         public int scrollSpeed;
@@ -145,7 +146,6 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[0]);
             idleAnimationRectangles.Add(jebList[1]);
 
-            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
             Player.floorHeight = 220;
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
@@ -408,7 +408,7 @@ namespace RoomRunner
                 int levelSeconds = levelTimer / 60;
 
 
-                if (bossCooldown > 0) bossCooldown--;
+                if (bossCooldown > 0 && !bossFight) bossCooldown--;
                 if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
