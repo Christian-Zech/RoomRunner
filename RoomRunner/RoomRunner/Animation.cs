@@ -31,6 +31,7 @@ namespace RoomRunner
             Idle = false;
         }
         public Animation(string[] names) : this(names, names[0]) { }
+        public Animation(string name) : this(new string[] { name }, name) { }
 
         public void Update()
         {

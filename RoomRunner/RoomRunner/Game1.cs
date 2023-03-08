@@ -43,7 +43,6 @@ namespace RoomRunner
 
         private int gameTimer;
         private int levelTimer;
-        private const int Cooldown = 300;
         private int bossCooldown;
         public int currentRoomIndex;
         public int scrollSpeed;
