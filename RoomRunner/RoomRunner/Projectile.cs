@@ -17,7 +17,7 @@ namespace RoomRunner
         public Point Velocity;
         public bool InFrame;
         public bool DeltDamage;
-        public bool ToRemove => !InFrame || DeltDamage;
+        public bool ToRemove { get { return !InFrame || DeltDamage; } }
 
         private readonly static int FrameWidth, FrameHeight;
         private static Game1 Game;
@@ -75,7 +75,7 @@ namespace RoomRunner
             d = Rect.Y > FrameHeight;
             InFrame = !(a || b || c || d);
         }
-        public Projectile Clone() => new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, DamagesBoss, DamagesPlayer, HasGravity);
+        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
             sb.Draw(Game1.pixel, Rect, Color.Red);

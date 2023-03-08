@@ -16,7 +16,7 @@ namespace RoomRunner
         private readonly Dictionary<string, bool> Repeat;
         public int Frame { get; private set; }
         public string SelectedAnimation { get; private set; }
-        public Texture2D CurrentTexture => Animations[SelectedAnimation][Frame];
+        public Texture2D CurrentTexture { get { return Animations[SelectedAnimation][Frame]; } }
         public Texture2D LastUsedSheet;
 
         public Animation(string[] names, string selected)
@@ -53,8 +53,8 @@ namespace RoomRunner
             FramesLeft[SelectedAnimation] = TimeBetweenChanges[SelectedAnimation];
             SelectedAnimation = state;
         }
-        public void SetState(string state) => ChangeCurrentAnimation(state);
-        public void SetFrameDelay(string state, int newDelay) => TimeBetweenChanges[state] = newDelay;
+        public void SetState(string state) { ChangeCurrentAnimation(state); }
+        public void SetFrameDelay(string state, int newDelay) { TimeBetweenChanges[state] = newDelay; }
         public void AddAnimation(string state, Texture2D sheet, GraphicsDevice gd, int framesInbetween = 5, params Rectangle[] rects)
         {
             LastUsedSheet = sheet;
