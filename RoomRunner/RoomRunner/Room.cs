@@ -72,7 +72,7 @@ namespace RoomRunner
             generateEnemies(hasOverlap.Count);
         }
 
-
+        // makes the game scroll by moving the background to the left. Also controls enemies.
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
