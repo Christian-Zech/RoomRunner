@@ -41,7 +41,7 @@ namespace RoomRunner
             Defaults = new Dictionary<Projectiles, Projectile>();
             List<Projectile> projs = new List<Projectile>();
 
-            projs.Add(new Projectile(new Rectangle(0, 0, 50, 50), 2, new Point(16, 0)));//, OnetimeAnimation.Anims[OnetimeAnims.Fireball].Clone()));
+            projs.Add(new Projectile(new Rectangle(0, 0, 50, 50), 5, new Point(8, 0), OnetimeAnimation.Anims[OnetimeAnims.Fireball].Clone()));
 
             for (int i = 0; i < projs.Count; i++)
                 Defaults.Add((Projectiles)i, projs[i]);
@@ -77,7 +77,7 @@ namespace RoomRunner
             d = Rect.Y > FrameHeight;
             InFrame = !(a || b || c || d);
         }
-        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim, DamagesBoss, DamagesPlayer, HasGravity); }
+        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
             if (anim == default) sb.Draw(Game1.pixel, Rect, Color.Red);

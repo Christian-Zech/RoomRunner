@@ -145,11 +145,11 @@ namespace RoomRunner
 
             rects = Player.LoadSheet(2, 3, 32, 32);
             sheet = game.Content.Load<Texture2D>("Projectile/Fireball");
-            Anims[OnetimeAnims.Fireball] = new OnetimeAnimation(20, game.GraphicsDevice, sheet, rects)
+            Anims[OnetimeAnims.Fireball] = new OnetimeAnimation(5, game.GraphicsDevice, sheet, rects)
             {
                 Next = new Animation("thing")
             };
-            Anims[OnetimeAnims.Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 15, rects[4], rects[5]);
+            Anims[OnetimeAnims.Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 5, rects[4], rects[5]);
         }
         public OnetimeAnimation(int framesPerFrame, params Texture2D[] frames) : base("thing")
         {
