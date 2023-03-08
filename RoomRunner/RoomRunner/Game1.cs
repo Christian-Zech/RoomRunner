@@ -496,7 +496,7 @@ namespace RoomRunner
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 jeb.Draw(spriteBatch);
-                powerups.Draw(spriteBatch, collectableSheet, clock, skull, nuke, magnet, shopFontBold, GetAverageColor(roomList[currentRoom].background1));
+                powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, GetAverageColor(roomList[currentRoom].background1));
             }
             if(gameState == GameState.GameOver)
             {
