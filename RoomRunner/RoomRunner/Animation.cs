@@ -109,8 +109,13 @@ namespace RoomRunner
     {
         public new int FramesLeft;
         public Rectangle Position;
+        public static Dictionary<OnetimeAnims, OnetimeAnimation> Anims;
         public bool Delete { get { return FramesLeft <= 0; } }
 
+        static OnetimeAnimation()
+        {
+            Anims = new Dictionary<OnetimeAnims, OnetimeAnimation>();
+        }
         public OnetimeAnimation(Rectangle pos, int framesPerFrame, params Texture2D[] frames) : base("thing")
         {
             AddAnimation("thing", framesPerFrame, frames);
@@ -131,5 +136,9 @@ namespace RoomRunner
             sb.Draw(CurrentTexture, Position, Color.White);
             FramesLeft--;
         }
+    }
+    public enum OnetimeAnims
+    {
+        Fireball
     }
 }
