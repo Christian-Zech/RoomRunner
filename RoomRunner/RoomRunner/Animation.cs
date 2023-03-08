@@ -105,4 +105,31 @@ namespace RoomRunner
             return txts;
         }
     }
+    public class OnetimeAnimation : Animation
+    {
+        public new int FramesLeft;
+        public Rectangle Position;
+        public bool Delete { get { return FramesLeft <= 0; } }
+
+        public OnetimeAnimation(Rectangle pos, int framesPerFrame, params Texture2D[] frames) : base("thing")
+        {
+            AddAnimation("thing", framesPerFrame, frames);
+            Position = pos;
+            FramesLeft = frames.Length * framesPerFrame;
+        }
+        public OnetimeAnimation(Rectangle pos, int framesPerFrame, GraphicsDevice gd, Texture2D sheet, params Rectangle[] frames) : base("thing")
+        {
+            AddAnimation("thing", sheet, gd, framesPerFrame, frames);
+            Position = pos;
+            FramesLeft = frames.Length * framesPerFrame;
+        }
+
+        public void Draw(SpriteBatch sb)
+        {
+            if (FramesLeft <= 0) return;
+            Update();
+            sb.Draw(CurrentTexture, Position, Color.White);
+            FramesLeft--;
+        }
+    }
 }
