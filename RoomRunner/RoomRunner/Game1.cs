@@ -45,7 +45,7 @@ namespace RoomRunner
         private int levelTimer;
         private const int Cooldown = 300;
         private int bossCooldown;
-        public int currentRoom;
+        public int currentRoomIndex;
         public int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
@@ -131,7 +131,7 @@ namespace RoomRunner
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
-            currentRoom = 0;
+            currentRoomIndex = 0;
 
             transition = false;
             endCurrentRoom = false;
@@ -184,7 +184,6 @@ namespace RoomRunner
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
             LoadFonts();
             pixel = this.Content.Load<Texture2D>("pixel");
             collectableSheet = this.Content.Load<Texture2D>("Shop/collectables");
@@ -252,6 +251,9 @@ namespace RoomRunner
                 this.Exit();
 
 
+
+            // controls the main menu with each gamestate representing a different portion of the game
+
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
                 gameState = GameState.Play;
@@ -278,24 +280,24 @@ namespace RoomRunner
                 menuCoolDown--;
 
 
-
+            // main game loop
             if (gameState == GameState.Play)
             {
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
                 if (bossFight) currentBoss.Update();
 
-                scrollSpeed = currentRoom + 10;
+                scrollSpeed = currentRoomIndex + 10;
 
-                roomList[currentRoom].Update(scrollSpeed);
+                roomList[currentRoomIndex].Update(scrollSpeed);
 
                 if (bossFight)
                 {
-                    if (roomList[currentRoom].enemyArray.Count > 0) roomList[currentRoom].enemyArray.Clear();
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
                 }
 
-                foreach (Enemy enemy in roomList[currentRoom].enemyArray)
+                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
                     if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
                         gameState = GameState.GameOver;
@@ -336,7 +338,7 @@ namespace RoomRunner
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
-            currentRoom = 0;
+            currentRoomIndex = 0;
             scrollSpeed = 0;
 
             transition = false;
@@ -346,22 +348,18 @@ namespace RoomRunner
             currentBoss = null;
         }
 
-        /// <summary>
         /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Gray);
 
-            // TODO: Add your drawing code here
             spriteBatch.Begin();
             
 
 
             
 
-
+            // menu
             if(gameState == GameState.Menu)
             {
                 int halfSeconds = gameTimer / 30;
@@ -380,7 +378,6 @@ namespace RoomRunner
 
 
                 // menu buttons
-
                 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
@@ -392,6 +389,8 @@ namespace RoomRunner
 
 
             }
+
+            // shop
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
@@ -412,7 +411,7 @@ namespace RoomRunner
                 if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
-                if (currentRoom < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
+                if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
                 {
                     transition = true;
                     levelTimer = 0;
@@ -423,7 +422,7 @@ namespace RoomRunner
 
                 // scrolling calculations
                 
-                bool loopImage = roomList[currentRoom].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
+                bool loopImage = roomList[currentRoomIndex].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
 
 
@@ -431,41 +430,39 @@ namespace RoomRunner
                 
 
 
-                // checks if the transition period is over
-                if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
+                // checks if the transition period is over so we can move on to the next room
+                if (currentRoomIndex < roomList.Count - 1 && loopImage && endCurrentRoom)
                 {
-                    currentRoom++;
-                    roomList[currentRoom].InheritEnemies(roomList[currentRoom - 1].enemyArray);
+                    currentRoomIndex++;
+                    roomList[currentRoomIndex].InheritEnemies(roomList[currentRoomIndex - 1].enemyArray);
                     endCurrentRoom = false;
                     transition = false;
                 }
 
 
-                // checks if we are currently transitioning to next room
+                // checks if we are currently transitioning to next room so it can draw the transition from the current room to the next room
                 if (loopImage && transition)
                 {
-                    roomList[currentRoom].background2 = roomList[currentRoom + 1].background1;
+                    roomList[currentRoomIndex].background2 = roomList[currentRoomIndex + 1].background1;
                     endCurrentRoom = true;
                 }
 
                 // checks if we have undergone a full loop of the background
                 if (loopImage)
                 {
-                    roomList[currentRoom].backgroundRectangle.X = 0;
+                    roomList[currentRoomIndex].backgroundRectangle.X = 0;
                 }
 
 
-                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
+                // draws the room
 
+                Rectangle roomRectangle = roomList[currentRoomIndex].backgroundRectangle;
 
+                spriteBatch.Draw(roomList[currentRoomIndex].background1, roomRectangle, Color.White);
+                spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
-                
-
-
-
-                spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
-                spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
-                if (!bossFight) roomList[currentRoom].Draw(spriteBatch);
+                // draws the boss
+                if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
@@ -477,6 +474,7 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
             }
+            // game over screen and meny
             if(gameState == GameState.GameOver)
             {
                 if (gameTimer > 0) Reset();
@@ -516,7 +514,7 @@ namespace RoomRunner
 
         public void GenerateRooms(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
         {
-            currentRoom = 0;
+            currentRoomIndex = 0;
             roomList.Clear();
 
             for(int i = 0; i < amountOfRooms; i++)
@@ -528,7 +526,8 @@ namespace RoomRunner
             
         }
 
-
+        // directory should be the name of a FOLDER with the images you want to load.
+        // This assumes that the stuff you want to load is in the correct level folder
         public static List<Texture2D> loadTextures(string directory, ContentManager content)
         {
             string[] files = Directory.GetFiles(@"Content\" + levels + "/" + directory + "/", "*");
@@ -560,6 +559,8 @@ namespace RoomRunner
             return images;
         }
 
+        // directory should be a a single IMAGE that you want to load.
+        // This assumes that the stuff you want to load is in the correct level folder 
         public static Texture2D loadImage(string directory, ContentManager content)
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
