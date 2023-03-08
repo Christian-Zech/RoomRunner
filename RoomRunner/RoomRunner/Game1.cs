@@ -257,7 +257,7 @@ namespace RoomRunner
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
                 gameState = GameState.Play;
-                GenerateRooms(amountOfRooms, backgroundImages, window);
+                Reset();
                 menuCoolDown = 60;
             }
                 
@@ -346,6 +346,10 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
+            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            jeb.delayLeft = Player.InputDelay;
+
+            GenerateRooms(amountOfRooms, backgroundImages, window);
         }
 
         /// This is called when the game should draw itself.
@@ -477,7 +481,6 @@ namespace RoomRunner
             // game over screen and meny
             if(gameState == GameState.GameOver)
             {
-                if (gameTimer > 0) Reset();
                 spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
