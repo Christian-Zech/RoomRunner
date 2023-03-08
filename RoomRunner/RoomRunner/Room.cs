@@ -18,21 +18,23 @@ namespace RoomRunner
         public Texture2D background2;
         public int numberOfEnemies;
         public List<Enemy> enemyList;
-        public List<Coins> coinsList;
+        public List<Coin> coinsList;
         public Random rand;
+        public Coin[,] coinsGrid;
 
         public Rectangle backgroundRectangle;
 
         private GraphicsDevice graphics;
         private ContentManager content;
+        private string collectablesPath = @"\collectables";
 
 
         public enum CoinPatterns
         {
             Straight,
             Zigzag,
-            Block,
-            HugeBlock
+            Column,
+            Block
         }
 
         static Room()
@@ -52,11 +54,13 @@ namespace RoomRunner
             this.graphics = graphics;
             this.content = content;
             enemyList = new List<Enemy>();
-            coinsList = new List<Coins>();
+            coinsList = new List<Coin>();
             rand = new Random(DateTime.Now.Millisecond);
+            this.content = content;
+            this.graphics = graphics;
 
             generateEnemies(numberOfEnemies);
-            generateCoints(rand.Next(5, 10));
+            generateCoins(rand.Next(5, 10), CoinPatterns.Straight);
 
         }
 
@@ -68,26 +72,20 @@ namespace RoomRunner
             RemoveOverlap();
         }
 
-        private void generateCoints(int amount)
+        private void generateCoins(int amount, CoinPatterns pattern)
         {
-            CoinPatterns currentPattern = (CoinPatterns)rand.Next(0, 3);
             Rectangle startRectangle = new Rectangle(rand.Next(1000, 1500), rand.Next(300, 500), 50, 50);
-            Coins[,] coinsArray = new Coins[10 * amount, 10 * amount];
+            coinsGrid = new Coin[10 * amount, 10 * amount];
 
             
-            for(int row = 0; row < coinsArray.GetLength(0); row++)
+            switch(pattern)
             {
-                for (int column = 0; column < coinsArray.GetLength(1); column++)
-                {
-
-                    switch(currentPattern)
+                case CoinPatterns.Straight:
+                    for(int i = 0; i < coinsGrid.GetLength(0); i++)
                     {
-                        case CoinPatterns.HugeBlock:
-                            coinsArray[row, column] = new Coins(new Rectangle(column, row, 50, 50), Player.LoadSheet(5, 6, 32, 32), graphics);
-                            break;
+                        coinsGrid[coinsGrid.Length, i] = new Coin(new Rectangle(startRectangle.X + (i+50), startRectangle.Y, startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
                     }
-
-                }
+                    break;
             }
 
 
@@ -146,6 +144,10 @@ namespace RoomRunner
             foreach(Enemy enemy in enemyList)
             {
                 spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
+            }
+            foreach(Coin coin in coinsGrid)
+            {
+                spriteBatch.Draw(coin.CurrentTexture, coin.Rectangle, Color.White);
             }
 
 

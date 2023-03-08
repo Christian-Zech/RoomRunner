@@ -7,20 +7,20 @@ using System.Text;
 
 namespace RoomRunner
 {
-    class Coins : Animation
+    class Coin : Animation
     {
 
-        Rectangle coinRectangle;
-        Texture2D coinTexture;
+        public Rectangle Rectangle;
+        public Texture2D Texture;
 
         
 
 
-        public Coins(Rectangle rectangle, Texture2D texture, GraphicsDevice graphics) : base(new string[] {"coin"})
+        public Coin(Rectangle rectangle, Texture2D texture, GraphicsDevice graphics) : base(new string[] {"coin"})
         {
 
-            coinRectangle = rectangle;
-            coinTexture = texture;
+            this.Rectangle = rectangle;
+            this.Texture = texture;
             AddAnimation("Idle", texture, graphics, 5, Player.LoadSheet(2, 2, 32, 32));
 
 
