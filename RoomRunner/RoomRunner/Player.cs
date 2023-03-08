@@ -14,7 +14,7 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float InitialJumpMovement = 40.0f; //px per frame
         public const float JumpMovement = 30.0f; //px per frame
-        private const int InputDelay = 20; //Frames
+        public const int InputDelay = 20; //Frames
         private const int FireDelay = 10; //Frames
         public const int frameHeight = 1000; //px
 
@@ -31,7 +31,7 @@ namespace RoomRunner
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
-        private int delayLeft, fireCooldown;
+        public int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
         private readonly Game1 game;
