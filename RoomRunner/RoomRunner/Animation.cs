@@ -7,7 +7,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    public abstract class Animation
+    public class Animation
     {
         public readonly string[] AnimationNames;
         public readonly Dictionary<string, int> FramesLeft, TimeBetweenChanges;
@@ -29,6 +29,17 @@ namespace RoomRunner
             Animations = new Dictionary<string, Texture2D[]>();
             Repeat = new Dictionary<string, bool>();
             Idle = false;
+        }
+        public Animation(Animation anim)
+        {
+            SelectedAnimation = anim.SelectedAnimation;
+            AnimationNames = (string[])anim.AnimationNames.Clone();
+            Frame = anim.Frame;
+            TimeBetweenChanges = new Dictionary<string, int>(anim.TimeBetweenChanges);
+            FramesLeft = new Dictionary<string, int>(anim.FramesLeft);
+            Animations = new Dictionary<string, Texture2D[]>(anim.Animations);
+            Repeat = new Dictionary<string, bool>(anim.Repeat);
+            Idle = anim.Idle;
         }
         public Animation(string[] names) : this(names, names[0]) { }
         public Animation(string name) : this(new string[] { name }, name) { }
@@ -86,6 +97,8 @@ namespace RoomRunner
             Repeat[state] = repeat;
         }
 
+        public Animation Clone() { return new Animation(this); }
+
         public static Texture2D[] RectToTxt(GraphicsDevice gd, Texture2D sheet, params Rectangle[] rects)
         {
             Texture2D[] txts = new Texture2D[rects.Length];
@@ -108,33 +121,55 @@ namespace RoomRunner
     public class OnetimeAnimation : Animation
     {
         public new int FramesLeft;
-        public Rectangle Position;
         public static Dictionary<OnetimeAnims, OnetimeAnimation> Anims;
         public bool Delete { get { return FramesLeft <= 0; } }
+        public Animation Next;
+        public new Texture2D CurrentTexture
+        {
+            get
+            {
+                if (Delete && Next != default) 
+                    return Next.CurrentTexture;
+                Update();
+                FramesLeft--;
+                return base.CurrentTexture;
+            }
+        }
 
         static OnetimeAnimation()
         {
             Anims = new Dictionary<OnetimeAnims, OnetimeAnimation>();
+            Game1 game = Program.Game;
+            Rectangle[] rects;
+            Texture2D sheet;
+
+            rects = Player.LoadSheet(2, 3, 32, 32);
+            sheet = game.Content.Load<Texture2D>("Projectile/Fireball");
+            Anims[OnetimeAnims.Fireball] = new OnetimeAnimation(20, game.GraphicsDevice, sheet, rects)
+            {
+                Next = new Animation("thing")
+            };
+            Anims[OnetimeAnims.Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 15, rects[4], rects[5]);
         }
-        public OnetimeAnimation(Rectangle pos, int framesPerFrame, params Texture2D[] frames) : base("thing")
+        public OnetimeAnimation(int framesPerFrame, params Texture2D[] frames) : base("thing")
         {
             AddAnimation("thing", framesPerFrame, frames);
-            Position = pos;
             FramesLeft = frames.Length * framesPerFrame;
         }
-        public OnetimeAnimation(Rectangle pos, int framesPerFrame, GraphicsDevice gd, Texture2D sheet, params Rectangle[] frames) : base("thing")
+        public OnetimeAnimation(int framesPerFrame, GraphicsDevice gd, Texture2D sheet, params Rectangle[] frames) : base("thing")
         {
             AddAnimation("thing", sheet, gd, framesPerFrame, frames);
-            Position = pos;
             FramesLeft = frames.Length * framesPerFrame;
         }
-
-        public void Draw(SpriteBatch sb)
+        private OnetimeAnimation(Animation copy, OnetimeAnimation otherCopy, int framesLeft) : base(copy)
         {
-            if (FramesLeft <= 0) return;
-            Update();
-            sb.Draw(CurrentTexture, Position, Color.White);
-            FramesLeft--;
+            FramesLeft = framesLeft;
+            if (otherCopy.Next != default) Next = otherCopy.Next.Clone();
+        }
+
+        public new OnetimeAnimation Clone()
+        {
+            return new OnetimeAnimation(base.Clone(), this, FramesLeft);
         }
     }
     public enum OnetimeAnims

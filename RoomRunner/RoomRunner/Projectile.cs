@@ -17,6 +17,7 @@ namespace RoomRunner
         public Point Velocity;
         public bool InFrame;
         public bool DeltDamage;
+        private OnetimeAnimation anim;
         public bool ToRemove { get { return !InFrame || DeltDamage; } }
 
         private readonly static int FrameWidth, FrameHeight;
@@ -40,15 +41,16 @@ namespace RoomRunner
             Defaults = new Dictionary<Projectiles, Projectile>();
             List<Projectile> projs = new List<Projectile>();
 
-            projs.Add(new Projectile(new Rectangle(0, 0, 50, 50), 2, new Point(16, 0)));
+            projs.Add(new Projectile(new Rectangle(0, 0, 50, 50), 2, new Point(16, 0)));//, OnetimeAnimation.Anims[OnetimeAnims.Fireball].Clone()));
 
             for (int i = 0; i < projs.Count; i++)
                 Defaults.Add((Projectiles)i, projs[i]);
         }
-        public Projectile(Game1 g, Rectangle rect, int bossDmg, Point velo, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, velo, dmgBoss, dmgPlayer, hasGravity)
+        public Projectile(Game1 g, Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, velo, anim, dmgBoss, dmgPlayer, hasGravity)
         { if (Game == default) Game = g; }
-        public Projectile(Rectangle rect, int bossDmg, Point velo, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
+        public Projectile(Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
         {
+            this.anim = anim;
             Rect = rect;
             BossDamage = bossDmg;
             Velocity = velo;
@@ -75,10 +77,11 @@ namespace RoomRunner
             d = Rect.Y > FrameHeight;
             InFrame = !(a || b || c || d);
         }
-        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, DamagesBoss, DamagesPlayer, HasGravity); }
+        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim, DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
-            sb.Draw(Game1.pixel, Rect, Color.Red);
+            if (anim == default) sb.Draw(Game1.pixel, Rect, Color.Red);
+            else sb.Draw(anim.CurrentTexture, Rect, Color.White);
         }
     }
     public enum Projectiles
