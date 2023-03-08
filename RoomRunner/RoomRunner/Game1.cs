@@ -23,8 +23,8 @@ namespace RoomRunner
         public static Texture2D pixel;
         public Texture2D jebSheet;
 
-        public SpriteFont menuFont => fonts[1];
-        public SpriteFont buttonFont => fonts[0];
+        public SpriteFont menuFont { get { return fonts[1]; } }
+        public SpriteFont buttonFont { get { return fonts[0]; } }
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -43,13 +43,12 @@ namespace RoomRunner
 
         private int gameTimer;
         private int levelTimer;
-        private const int Cooldown = 300;
         private int bossCooldown;
         public int currentRoomIndex;
         public int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
-        public static bool bossFight => currentBoss != null && !currentBoss.IsDead;
+        public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
         public Dictionary<Levels, Boss> bosses;
 
         public Random rand;
@@ -60,9 +59,9 @@ namespace RoomRunner
         public Texture2D collectableSheet, cosmeticSheet;
         private List<ShopItem> items;
         public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont => fonts[2];
-        public SpriteFont shopFontBold => fonts[3];
-        public SpriteFont shopTitleFont => fonts[4];
+        public SpriteFont shopFont { get { return fonts[2]; } }
+        public SpriteFont shopFontBold { get { return fonts[3]; } }
+        public SpriteFont shopTitleFont { get { return fonts[4]; } }
         private Shop shop;
 
         public int menuCoolDown;

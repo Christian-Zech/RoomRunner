@@ -12,8 +12,8 @@ namespace RoomRunner
         private const int Insets = 20; //in px
 
         private Rectangle rect, bossBarRect;
-        public Rectangle Rectangle => rect;
-        public Point Position => new Point(rect.X, rect.Y);
+        public Rectangle Rectangle { get { return rect; } }
+        public Point Position { get { return new Point(rect.X, rect.Y); } }
         public int Health
         {
             get
@@ -60,9 +60,9 @@ namespace RoomRunner
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
         }
-        public Boss Clone() => new Boss(Name, health, LastUsedSheet, graphics);
+        public Boss Clone() { return new Boss(Name, health, LastUsedSheet, graphics); }
 
-        public void Damage(int amount) => Health -= amount;
+        public void Damage(int amount) { Health -= amount; }
         private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
         {
             Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
