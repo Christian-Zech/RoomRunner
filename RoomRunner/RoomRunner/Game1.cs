@@ -33,7 +33,7 @@ namespace RoomRunner
         Rectangle menuButtonRectangle;
 
         public static Rectangle window;
-        private Player jeb;
+        public Player jeb;
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
