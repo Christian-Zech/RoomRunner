@@ -145,10 +145,8 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[0]);
             idleAnimationRectangles.Add(jebList[1]);
 
-
-
-            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
             Player.floorHeight = 220;
+
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
