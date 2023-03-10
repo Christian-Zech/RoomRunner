@@ -26,10 +26,10 @@ namespace RoomRunner
 
         private GraphicsDevice graphics;
         private ContentManager content;
-        private string collectablesPath = @"\collectables";
+        private string collectablesPath = "collectables";
 
 
-        public enum CoinPatterns
+        public enum CoinPattern
         {
             Straight,
             Zigzag,
@@ -45,7 +45,7 @@ namespace RoomRunner
 
 
         // intended for single images
-        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content)
+        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content, Rectangle window)
         {
             background1 = background;
             background2 = background;
@@ -60,7 +60,7 @@ namespace RoomRunner
             this.graphics = graphics;
 
             generateEnemies(numberOfEnemies);
-            generateCoins(rand.Next(5, 10), CoinPatterns.Straight);
+            generateCoins(rand.Next(5, 30), CoinPattern.Straight, window);
 
         }
 
@@ -68,22 +68,54 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-                enemyList.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+                enemyList.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 150), 100, 100)));
             RemoveOverlap();
         }
 
-        private void generateCoins(int amount, CoinPatterns pattern)
+        private void generateCoins(int amount, CoinPattern pattern, Rectangle window)
         {
-            Rectangle startRectangle = new Rectangle(rand.Next(1000, 1500), rand.Next(300, 500), 50, 50);
-            coinsGrid = new Coin[10 * amount, 10 * amount];
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 50, 50);
+            coinsGrid = new Coin[amount, amount];
+            int coinGap = 50; // seperation between coins (pixels)
 
-            
+            // generates each coin pattern. For future reference, GetLength(0) = rows and GetLength(1) = columns
             switch(pattern)
             {
-                case CoinPatterns.Straight:
-                    for(int i = 0; i < coinsGrid.GetLength(0); i++)
+                case CoinPattern.Straight:
+
+                    for(int column = 0; column < coinsGrid.GetLength(1); column++)
                     {
-                        coinsGrid[coinsGrid.Length, i] = new Coin(new Rectangle(startRectangle.X + (i+50), startRectangle.Y, startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
+                        coinsGrid[0, column] = new Coin(new Rectangle(startRectangle.X + (column * coinGap), startRectangle.Y, startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
+                    }
+                    break;
+
+                case CoinPattern.Zigzag:
+                    for (int row = 0; row < coinsGrid.GetLength(0); row++)
+                    {
+                        for (int column = 0; column < coinsGrid.GetLength(1); column++)
+                        {
+                            
+                        }
+                    }
+                    break;
+
+                case CoinPattern.Column:
+                    for (int row = 0; row < coinsGrid.GetLength(0); row++)
+                    {
+                        for (int column = 0; column < coinsGrid.GetLength(1); column++)
+                        {
+                            coinsGrid[coinsGrid.GetLength(0) / 2, column] = new Coin(Rectangle.Empty, content.Load<Texture2D>(collectablesPath), graphics);
+                        }
+                    }
+                    break;
+
+                case CoinPattern.Block:
+                    for (int row = 0; row < coinsGrid.GetLength(0); row++)
+                    {
+                        for (int column = 0; column < coinsGrid.GetLength(1); column++)
+                        {
+                            coinsGrid[coinsGrid.GetLength(0) / 2, column] = new Coin(Rectangle.Empty, content.Load<Texture2D>(collectablesPath), graphics);
+                        }
                     }
                     break;
             }
@@ -131,6 +163,17 @@ namespace RoomRunner
                 }
 
             }
+
+            foreach (Coin coin in coinsGrid)
+            {
+                if (coin != null)
+                {
+                    coin.Update();
+                    coin.rectangle.X -= scrollSpeed;
+                }
+
+            }
+
             foreach (Enemy e in toRemove)
                 enemyList.Remove(e);
             generateEnemies(toRemove.Count);
@@ -147,7 +190,11 @@ namespace RoomRunner
             }
             foreach(Coin coin in coinsGrid)
             {
-                spriteBatch.Draw(coin.CurrentTexture, coin.Rectangle, Color.White);
+                if(coin != null)
+                {
+                    spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
+                }
+                    
             }
 
 

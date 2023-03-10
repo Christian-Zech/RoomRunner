@@ -10,21 +10,28 @@ namespace RoomRunner
     class Coin : Animation
     {
 
-        public Rectangle Rectangle;
-        public Texture2D Texture;
+        public Rectangle rectangle;
+        public Texture2D texture;
 
         
 
 
-        public Coin(Rectangle rectangle, Texture2D texture, GraphicsDevice graphics) : base(new string[] {"coin"})
+        public Coin(Rectangle rectangle, Texture2D texture, GraphicsDevice graphics) : base(new string[] {"Coin"})
         {
 
-            this.Rectangle = rectangle;
-            this.Texture = texture;
-            AddAnimation("Idle", texture, graphics, 5, Player.LoadSheet(2, 2, 32, 32));
+            this.rectangle = rectangle;
+            this.texture = texture;
+            Rectangle[] collectablesRectangleArray = Player.LoadSheet(5, 6, 32, 32);
+
+            AddAnimation("Coin", texture, graphics, 5, collectablesRectangleArray[25], collectablesRectangleArray[26], collectablesRectangleArray[27], collectablesRectangleArray[28]);
 
 
 
+        }
+
+        public new void Update()
+        {
+            base.Update();
         }
 
     }
