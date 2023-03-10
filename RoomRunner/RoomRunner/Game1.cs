@@ -298,6 +298,14 @@ namespace RoomRunner
             // main game loop
             if (gameState == GameState.Play)
             {
+                if (activePowerupIndex == 0)
+                {
+                    slowTimeTemp++;
+                    if (slowTimeTemp % 2 == 0)
+                        return;
+
+                }
+
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
                 if (bossFight) currentBoss.Update();
@@ -307,13 +315,7 @@ namespace RoomRunner
                 roomList[currentRoomIndex].Update(scrollSpeed);
                 
 
-                if (activePowerupIndex == 0)
-                {
-                    slowTimeTemp++;
-                    if (slowTimeTemp % 2 == 0)
-                        return;
-
-                }
+                
 
                 if (bossFight)
                 {
@@ -352,8 +354,7 @@ namespace RoomRunner
                     projectileList.Remove(p);
 
                 
-                jeb.Idle = gameState != GameState.Play;
-                jeb.Update();
+                
 
 
 
@@ -376,10 +377,7 @@ namespace RoomRunner
                 if (powerups.ActivePowerups())
                 {
                     activePowerupIndex = powerups.ActivePowerupsIndex();
-                    if (activePowerupIndex == 0)
-                    {
-                        //too hard
-                    }
+                    
                     
                     if (activePowerupIndex == 2)
                     {
@@ -557,7 +555,7 @@ namespace RoomRunner
                 foreach (Projectile p in projectileList)
                     p.Draw(spriteBatch);
 
-                //powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
+                powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
             }
             // game over screen and meny
             if(gameState == GameState.GameOver)

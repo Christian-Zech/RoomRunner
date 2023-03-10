@@ -49,7 +49,7 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+                enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
             RemoveOverlap();
         }
         public void InheritEnemies(List<Enemy> toInherit)
@@ -88,36 +88,25 @@ namespace RoomRunner
                 {
                     toRemove.Add(enemy);
                     Enemy.totalEnemyCount--;
-                    if (enemy != null)
-                    {
-                        enemy.Update();
-                        enemy.rectangle.X -= scrollSpeed;
-                        if (enemy.rectangle.X < 0)
-                        {
-                            enemy.rectangle.X = rand.Next(1500, 3000);
-                            enemy.rectangle.Y = rand.Next(200, 500);
-                        }
-                    }
-
-
                 }
-                foreach (Enemy e in toRemove)
-                    enemyArray.Remove(e);
-                generateEnemies(toRemove.Count);
-                if (enemyArray.Count < minimumNumOfEnemies)
-                    generateEnemies(minimumNumOfEnemies - enemyArray.Count);
 
             }
+            foreach (Enemy e in toRemove)
+                enemyArray.Remove(e);
+            generateEnemies(toRemove.Count);
+            if (enemyArray.Count < minimumNumOfEnemies)
+                generateEnemies(minimumNumOfEnemies - enemyArray.Count);
+
         }
+
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach(Enemy enemy in enemyArray)
+            foreach (Enemy enemy in enemyArray)
             {
-                if (enemy != null)
-                    spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
+                spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
         }
-        
+
 
 
 
