@@ -80,8 +80,15 @@ namespace RoomRunner
         public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
+            Draw(sb, false);
+        }
+        public void Draw(SpriteBatch sb, bool flip)
+        {
             if (anim == default) sb.Draw(Game1.pixel, Rect, Color.Red);
-            else sb.Draw(anim.CurrentTexture, Rect, Color.White);
+            else if (flip)
+                sb.Draw(anim.CurrentTexture, Rect, null, Color.White, 0.0f, new Vector2(16, 16), SpriteEffects.FlipHorizontally, 0.0f);
+            else
+                sb.Draw(anim.CurrentTexture, Rect, Color.White);
         }
     }
     public enum Projectiles

@@ -299,7 +299,7 @@ namespace RoomRunner
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
                     if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        gameState = GameState.GameOver;
+                        jeb.Damage();
                 }
 
 
@@ -308,28 +308,41 @@ namespace RoomRunner
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
 
-                List<Projectile> toRemove = new List<Projectile>();
-                foreach (Projectile p in projectileList)
-                {
-                    p.Update();
+                if (!jeb.IsAlive)
+                    gameState = GameState.GameOver;
 
-                    if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
-                    {
-                        currentBoss.Damage(p.BossDamage);
-                        p.DeltDamage = true;
-                    }
+                UpdateProjList(projectileList);
 
-                    if (p.ToRemove) toRemove.Add(p);
-                }
-                foreach (Projectile p in toRemove)
-                    projectileList.Remove(p);
 
-                
+
             }
             gameTimer++;
             
 
             base.Update(gameTime);
+        }
+        public void UpdateProjList(List<Projectile> list)
+        {
+            List<Projectile> toRemove = new List<Projectile>();
+            foreach (Projectile p in list)
+            {
+                p.Update();
+
+                if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+                {
+                    currentBoss.Damage(p.BossDamage);
+                    p.DeltDamage = true;
+                }
+                if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
+                {
+                    jeb.Damage();
+                    p.DeltDamage = true;
+                }
+
+                if (p.ToRemove) toRemove.Add(p);
+            }
+            foreach (Projectile p in toRemove)
+                list.Remove(p);
         }
 
         private void Reset()
@@ -339,6 +352,8 @@ namespace RoomRunner
             levelTimer = 0;
             currentRoomIndex = 0;
             scrollSpeed = 0;
+            jeb.Health = Player.MaxHealth;
+            jeb.IsAlive = true;
 
             transition = false;
             endCurrentRoom = false;
