@@ -181,6 +181,7 @@ namespace RoomRunner
             }
             selectedItem = new List<bool> { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
             selectedItem[(4 * selectionIndexX) + selectionIndexY] = true;
+           
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
