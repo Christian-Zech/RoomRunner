@@ -34,5 +34,11 @@ namespace RoomRunner
             base.Update();
         }
 
+
+        public void Destroy()
+        {
+            rectangle = Rectangle.Empty;
+        }
+
     }
 }

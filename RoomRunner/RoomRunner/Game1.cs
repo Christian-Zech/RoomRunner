@@ -283,6 +283,15 @@ namespace RoomRunner
                         gameState = GameState.GameOver;
                 }
 
+                foreach(Coin coin in roomList[currentRoom].coinsGrid)
+                {
+                    if(coin != null && jeb.PlayerRectangle.Intersects(coin.rectangle))
+                    {
+                        jeb.Coins++;
+                        coin.Destroy();
+                    }
+
+                }
 
 
 

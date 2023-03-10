@@ -12,7 +12,8 @@ namespace RoomRunner
     {
         public const int minimumNumOfEnemies = 5;
 
-        public static int ceilingHeight, floorHeight;
+        public static int ceilingHeight { get { return Player.ceilingHeight; } }
+        public static int floorHeight { get { return Player.floorHeight; } }
 
         public Texture2D background1;
         public Texture2D background2;
@@ -37,11 +38,6 @@ namespace RoomRunner
             Block
         }
 
-        static Room()
-        {
-            ceilingHeight = Player.frameHeight;
-            floorHeight = 0;
-        }
 
 
         // intended for single images
@@ -74,12 +70,14 @@ namespace RoomRunner
 
         private void generateCoins(int amount, CoinPattern pattern, Rectangle window)
         {
-            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(100, Player.frameHeight - floorHeight - amount), 50, 50);
+            
             coinsGrid = new Coin[amount, amount];
             int coinGap = 50; // seperation between coins (pixels)
 
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(100, Player.frameHeight - floorHeight - (amount * coinGap)), 50, 50);
+
             // generates each coin pattern. For future reference, GetLength(0) = rows and GetLength(1) = columns
-            switch(pattern)
+            switch (pattern)
             {
                 case CoinPattern.Straight:
 
@@ -165,7 +163,6 @@ namespace RoomRunner
                 {
                     coin.Update();
                     coin.rectangle.X -= scrollSpeed;
-                    Console.WriteLine(coin.rectangle);
                 }
 
                
