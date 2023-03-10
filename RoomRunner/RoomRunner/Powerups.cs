@@ -74,7 +74,7 @@ namespace RoomRunner
             }
         }
         
-        public void Draw(SpriteBatch spriteBatch, Texture2D textures, Texture2D pixel, List<Rectangle> clock, List<Rectangle> skull, List<Rectangle> nuke, List<Rectangle> magnet, SpriteFont font, SpriteFont font2, Color color)
+        public void Draw(SpriteBatch spriteBatch, Texture2D textures, Texture2D pixel, List<Rectangle> clock, List<Rectangle> skull, List<Rectangle> nuke, List<Rectangle> magnet, SpriteFont font, SpriteFont font2)
         {
             currentFrameIndex1 = items[0].AnimateLinear(clock, currentFrameIndex1);
             currentFrameIndex2 = items[1].AnimateReverse(skull, currentFrameIndex2);
@@ -82,7 +82,6 @@ namespace RoomRunner
             currentFrameIndex4 = items[3].AnimateLinear(magnet, currentFrameIndex4);
 
             spriteBatch.Draw(pixel, new Rectangle(40, 20, 390, 130), Color.Black*.3f);
-            color = new Color(255 - color.R, 255 - color.G, 255 - color.B); 
             spriteBatch.DrawString(font, "" + quantities[0], new Vector2(75, 120), Color.White);
             spriteBatch.DrawString(font, "" + quantities[1], new Vector2(175, 120), Color.White);
             spriteBatch.DrawString(font, "" + quantities[2], new Vector2(275, 120), Color.White);

@@ -76,39 +76,39 @@ namespace RoomRunner
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
-            if (Game1.bossFight) 
+            if (Game1.bossFight)
                 return;
             List<Enemy> toRemove = new List<Enemy>();
 
-            foreach(Enemy enemy in enemyArray)
+            foreach (Enemy enemy in enemyArray)
             {
                 enemy.Update();
                 enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X + enemy.rectangle.Width < 0)
+                if (enemy.rectangle.X + enemy.rectangle.Width < 0)
                 {
                     toRemove.Add(enemy);
                     Enemy.totalEnemyCount--;
-                if (enemy != null)
-                {
-                    enemy.Update();
-                    enemy.rectangle.X -= scrollSpeed;
-                    if (enemy.rectangle.X < 0)
+                    if (enemy != null)
                     {
-                        enemy.rectangle.X = rand.Next(1500, 3000);
-                        enemy.rectangle.Y = rand.Next(200, 500);
+                        enemy.Update();
+                        enemy.rectangle.X -= scrollSpeed;
+                        if (enemy.rectangle.X < 0)
+                        {
+                            enemy.rectangle.X = rand.Next(1500, 3000);
+                            enemy.rectangle.Y = rand.Next(200, 500);
+                        }
                     }
+
+
                 }
-                
+                foreach (Enemy e in toRemove)
+                    enemyArray.Remove(e);
+                generateEnemies(toRemove.Count);
+                if (enemyArray.Count < minimumNumOfEnemies)
+                    generateEnemies(minimumNumOfEnemies - enemyArray.Count);
 
             }
-            foreach (Enemy e in toRemove)
-                enemyArray.Remove(e);
-            generateEnemies(toRemove.Count);
-            if (enemyArray.Count < minimumNumOfEnemies) 
-                generateEnemies(minimumNumOfEnemies - enemyArray.Count);
-
         }
-
         public void Draw(SpriteBatch spriteBatch)
         {
             foreach(Enemy enemy in enemyArray)
