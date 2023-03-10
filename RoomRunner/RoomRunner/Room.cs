@@ -60,7 +60,7 @@ namespace RoomRunner
             this.graphics = graphics;
 
             generateEnemies(numberOfEnemies);
-            generateCoins(rand.Next(5, 30), CoinPattern.Straight, window);
+            generateCoins(rand.Next(5, 10), (CoinPattern)rand.Next(0, 5), window);
 
         }
 
@@ -74,7 +74,7 @@ namespace RoomRunner
 
         private void generateCoins(int amount, CoinPattern pattern, Rectangle window)
         {
-            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 50, 50);
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(100, Player.frameHeight - floorHeight - amount), 50, 50);
             coinsGrid = new Coin[amount, amount];
             int coinGap = 50; // seperation between coins (pixels)
 
@@ -83,29 +83,24 @@ namespace RoomRunner
             {
                 case CoinPattern.Straight:
 
-                    for(int column = 0; column < coinsGrid.GetLength(1); column++)
+                    for(int i = 0; i < coinsGrid.GetLength(1); i++)
                     {
-                        coinsGrid[0, column] = new Coin(new Rectangle(startRectangle.X + (column * coinGap), startRectangle.Y, startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
+                        coinsGrid[0, i] = new Coin(new Rectangle(startRectangle.X + (i * coinGap), startRectangle.Y, startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
                     }
                     break;
 
                 case CoinPattern.Zigzag:
-                    for (int row = 0; row < coinsGrid.GetLength(0); row++)
-                    {
-                        for (int column = 0; column < coinsGrid.GetLength(1); column++)
-                        {
-                            
-                        }
+                    for (int i = 0; i < coinsGrid.GetLength(0); i++)
+                    { 
+                        coinsGrid[i, i] = new Coin(new Rectangle(startRectangle.X + (i * coinGap), startRectangle.Y + (i * coinGap), startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
+                        coinsGrid[coinsGrid.GetLength(0) - i - 1, i] = new Coin(new Rectangle(startRectangle.X + (i * coinGap), startRectangle.Y + ((coinsGrid.GetLength(0) - i - 1) * coinGap), startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
                     }
                     break;
 
                 case CoinPattern.Column:
-                    for (int row = 0; row < coinsGrid.GetLength(0); row++)
+                    for (int i = 0; i < coinsGrid.GetLength(1); i++)
                     {
-                        for (int column = 0; column < coinsGrid.GetLength(1); column++)
-                        {
-                            coinsGrid[coinsGrid.GetLength(0) / 2, column] = new Coin(Rectangle.Empty, content.Load<Texture2D>(collectablesPath), graphics);
-                        }
+                        coinsGrid[i, coinsGrid.GetLength(1) - i - 1] = new Coin(new Rectangle(startRectangle.X, startRectangle.Y + (i * coinGap), startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
                     }
                     break;
 
@@ -114,7 +109,7 @@ namespace RoomRunner
                     {
                         for (int column = 0; column < coinsGrid.GetLength(1); column++)
                         {
-                            coinsGrid[coinsGrid.GetLength(0) / 2, column] = new Coin(Rectangle.Empty, content.Load<Texture2D>(collectablesPath), graphics);
+                            coinsGrid[row, column] = new Coin(new Rectangle(startRectangle.X + (column * coinGap), startRectangle.Y + (row * coinGap), startRectangle.Width, startRectangle.Height), content.Load<Texture2D>(collectablesPath), graphics);
                         }
                     }
                     break;
@@ -170,7 +165,10 @@ namespace RoomRunner
                 {
                     coin.Update();
                     coin.rectangle.X -= scrollSpeed;
+                    Console.WriteLine(coin.rectangle);
                 }
+
+               
 
             }
 
