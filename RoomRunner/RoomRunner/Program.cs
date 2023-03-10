@@ -3,15 +3,17 @@ using System;
 namespace RoomRunner
 {
 #if WINDOWS || XBOX
-    public static class Program
+    static class Program
     {
-        public static Game1 Game = new Game1();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         static void Main(string[] args)
         {
-            Game.Run();
+            using (Game1 game = new Game1())
+            {
+                game.Run();
+            }
         }
     }
 #endif
