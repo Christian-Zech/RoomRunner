@@ -40,6 +40,12 @@ namespace RoomRunner
         public List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
+        Powerups powerups;
+        int activePowerupIndex;
+        int slowTimeTemp;
+
+        List<Room> roomList;
+        int amountOfRooms;
 
         private int gameTimer;
         private int levelTimer;
@@ -65,6 +71,8 @@ namespace RoomRunner
         private Shop shop;
 
         public int menuCoolDown;
+
+        KeyboardState oldKB;
 
 
         public enum GameState
@@ -151,12 +159,13 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
 
-
-
+            powerups = new Powerups();
+            activePowerupIndex = -1;
+            slowTimeTemp = 0;
             // reads background images
-            
 
 
+            oldKB = Keyboard.GetState();
             base.Initialize();
             
 
@@ -242,6 +251,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -289,6 +299,15 @@ namespace RoomRunner
                 scrollSpeed = currentRoomIndex + 10;
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
+                
+
+                if (activePowerupIndex == 0)
+                {
+                    slowTimeTemp++;
+                    if (slowTimeTemp % 2 == 0)
+                        return;
+
+                }
 
                 if (bossFight)
                 {
@@ -298,8 +317,10 @@ namespace RoomRunner
 
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
-                    if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        gameState = GameState.GameOver;
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                                gameState = GameState.GameOver;
                 }
 
 
@@ -325,9 +346,59 @@ namespace RoomRunner
                     projectileList.Remove(p);
 
                 
+                jeb.Idle = gameState != GameState.Play;
+                jeb.Update();
+
+
+
+                if (keyboard.IsKeyDown(Keys.D1) && oldKB.IsKeyUp(Keys.D1))
+                {
+                    powerups.UsePowerup(0);
+                }
+                if (keyboard.IsKeyDown(Keys.D2) && oldKB.IsKeyUp(Keys.D2))
+                {
+                    powerups.UsePowerup(1);
+                }
+                if (keyboard.IsKeyDown(Keys.D3) && oldKB.IsKeyUp(Keys.D3))
+                {
+                    powerups.UsePowerup(2);
+                }
+                if (keyboard.IsKeyDown(Keys.D4) && oldKB.IsKeyUp(Keys.D4))
+                {
+                    powerups.UsePowerup(3);
+                }
+                if (powerups.ActivePowerups())
+                {
+                    activePowerupIndex = powerups.ActivePowerupsIndex();
+                    if (activePowerupIndex == 0)
+                    {
+                        //too hard
+                    }
+                    
+                    if (activePowerupIndex == 2)
+                    {
+                        
+                        Array.Clear(roomList[currentRoom].enemyArray, 0, roomList[currentRoom].enemyArray.Length);
+                        
+                    }
+                    if (activePowerupIndex == 3)
+                    {
+                        // no coins yet :(
+                    }
+                }
+                else
+                {
+                    activePowerupIndex = -1;
+                }
+
+                powerups.Update();
             }
             gameTimer++;
-            
+            if (gameState == GameState.GameOver)
+            {
+                activePowerupIndex = -1;
+                powerups.RemovePowerups();
+            }
 
             base.Update(gameTime);
         }
@@ -398,7 +469,11 @@ namespace RoomRunner
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (shop.leave)
+                {
                     gameState = GameState.Menu;
+                    shop.leave = false;
+                }
+                    
             }
             if (gameState == GameState.Play)
             {
@@ -476,6 +551,7 @@ namespace RoomRunner
                 foreach (Projectile p in projectileList)
                     p.Draw(spriteBatch);
 
+                powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont, GetAverageColor(roomList[currentRoom].background1));
             }
             // game over screen and meny
             if(gameState == GameState.GameOver)
@@ -567,6 +643,7 @@ namespace RoomRunner
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
+
         public static Color GetAverageColor(Texture2D texture)
         {
             double r, g, b;
@@ -581,7 +658,7 @@ namespace RoomRunner
             }
             return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
         }
-        
+
 
 
     }
