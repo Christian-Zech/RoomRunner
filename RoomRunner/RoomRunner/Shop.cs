@@ -186,7 +186,6 @@ namespace RoomRunner
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
             updateSelection();
-            spriteBatch.Draw(pixel, new Rectangle(mouseX, mouseY, 5, 5), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle(selection.X - 5, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Red);

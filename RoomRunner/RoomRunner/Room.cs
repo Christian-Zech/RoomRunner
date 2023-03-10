@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -64,7 +64,7 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-                enemyList.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 150), 100, 100)));
+              enemyList.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 150), 100, 100)));
             RemoveOverlap();
         }
 
@@ -146,10 +146,12 @@ namespace RoomRunner
             List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyList)
+            if (Game1.bossFight)
+                return;
             {
                 enemy.Update();
                 enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X + enemy.rectangle.Width < 0)
+                if (enemy.rectangle.X + enemy.rectangle.Width < 0)
                 {
                     toRemove.Add(enemy);
                     Enemy.totalEnemyCount--;
@@ -194,7 +196,7 @@ namespace RoomRunner
 
 
         }
-        
+
 
 
 

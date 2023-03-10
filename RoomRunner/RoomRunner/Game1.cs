@@ -28,6 +28,7 @@ namespace RoomRunner
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
+        List<Rectangle> clock, skull, nuke, magnet;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
         Rectangle menuButtonRectangle;
@@ -35,9 +36,12 @@ namespace RoomRunner
         Rectangle window;
         private Player jeb;
 
-        List<Room> roomList;
-        int amountOfRooms;
-
+        public List<Room> roomList;
+        public List<Projectile> projectileList;
+        private int amountOfRooms;
+        Powerups powerups;
+        int activePowerupIndex;
+        int slowTimeTemp;
         int gameTimer;
         int levelTimer;
         int currentRoom;
@@ -58,6 +62,8 @@ namespace RoomRunner
         Shop shop;
 
         int menuCoolDown;
+
+        KeyboardState oldKB;
 
 
         public enum GameState
@@ -97,6 +103,13 @@ namespace RoomRunner
             // TODO: Add your initialization logic here
 
             //for shop
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
+            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
+            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
+            
+
+            //I'm fixing you're stupid hard-coded mess, Owen - Samuel
             items = new List<ShopItem>();
             clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
             skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
@@ -153,12 +166,13 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
 
-
-
+            powerups = new Powerups();
+            activePowerupIndex = -1;
+            slowTimeTemp = 0;
             // reads background images
-            
 
 
+            oldKB = Keyboard.GetState();
             base.Initialize();
             
 
@@ -232,6 +246,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -269,8 +284,20 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                if (activePowerupIndex == 0)
+                {
+                    slowTimeTemp++;
+                    if (slowTimeTemp % 2 == 0)
+                        return;
 
+                }
 
+                if (bossFight && currentBoss.IsDead)
+                    currentBoss = null;
+                if (bossFight) currentBoss.Update();
+
+                roomList[currentRoomIndex].Update(scrollSpeed);
+                
 
                 scrollSpeed = currentRoom + 10;
 
@@ -279,8 +306,10 @@ namespace RoomRunner
 
                 foreach (Enemy enemy in roomList[currentRoom].enemyList)
                 {
-                    if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        gameState = GameState.GameOver;
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                                gameState = GameState.GameOver;
                 }
 
                 foreach(Coin coin in roomList[currentRoom].coinsGrid)
@@ -297,9 +326,52 @@ namespace RoomRunner
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
+                
+                if (keyboard.IsKeyDown(Keys.D1) && oldKB.IsKeyUp(Keys.D1))
+                {
+                    powerups.UsePowerup(0);
+                }
+                if (keyboard.IsKeyDown(Keys.D2) && oldKB.IsKeyUp(Keys.D2))
+                {
+                    powerups.UsePowerup(1);
+                }
+                if (keyboard.IsKeyDown(Keys.D3) && oldKB.IsKeyUp(Keys.D3))
+                {
+                    powerups.UsePowerup(2);
+                }
+                if (keyboard.IsKeyDown(Keys.D4) && oldKB.IsKeyUp(Keys.D4))
+                {
+                    powerups.UsePowerup(3);
+                }
+                if (powerups.ActivePowerups())
+                {
+                    activePowerupIndex = powerups.ActivePowerupsIndex();
+                    
+                    
+                    if (activePowerupIndex == 2)
+                    {
+
+                        roomList[currentRoomIndex].enemyArray.Clear();
+                        
+                    }
+                    if (activePowerupIndex == 3)
+                    {
+                        // no coins yet :(
+                    }
+                }
+                else
+                {
+                    activePowerupIndex = -1;
+                }
+
+                powerups.Update();
             }
             gameTimer++;
-            
+            if (gameState == GameState.GameOver)
+            {
+                activePowerupIndex = -1;
+                powerups.RemovePowerups();
+            }
 
             base.Update(gameTime);
         }
@@ -354,7 +426,11 @@ namespace RoomRunner
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (shop.leave)
+                {
                     gameState = GameState.Menu;
+                    shop.leave = false;
+                }
+                    
             }
             if (gameState == GameState.Play)
             {
@@ -436,6 +512,7 @@ namespace RoomRunner
 
                 jeb.Draw(spriteBatch);
 
+                powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
             }
             if(gameState == GameState.GameOver)
             {
@@ -520,7 +597,20 @@ namespace RoomRunner
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
 
-        
+        public static Color GetAverageColor(Texture2D texture)
+        {
+            double r, g, b;
+            r = g = b = 0;
+            Color[] pixels = new Color[texture.Width * texture.Height];
+            texture.GetData(pixels);
+            foreach (Color c in pixels)
+            {
+                r += c.R;
+                g += c.G;
+                b += c.B;
+            }
+            return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
+        }
 
 
     }
