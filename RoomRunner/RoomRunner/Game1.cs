@@ -17,14 +17,14 @@ namespace RoomRunner
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        public GraphicsDeviceManager graphics;
+        GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        public static Texture2D pixel;
-        public Texture2D jebSheet;
+        Texture2D pixel;
+        Texture2D jebSheet;
 
-        public SpriteFont menuFont { get { return fonts[1]; } }
-        public SpriteFont buttonFont { get { return fonts[0]; } }
+        SpriteFont menuFont;
+        SpriteFont buttonFont;
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -32,39 +32,32 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle menuButtonRectangle;
 
-        public static Rectangle window;
+        Rectangle window;
         private Player jeb;
-        public static Boss currentBoss;
-        public SpriteFont[] fonts;
 
-        public List<Room> roomList;
-        public List<Projectile> projectileList;
-        private int amountOfRooms;
+        List<Room> roomList;
+        int amountOfRooms;
 
-        private int gameTimer;
-        private int levelTimer;
-        private int bossCooldown;
-        public int currentRoomIndex;
-        public int scrollSpeed;
-        public bool transition;
-        public bool endCurrentRoom;
-        public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
-        public Dictionary<Levels, Boss> bosses;
+        int gameTimer;
+        int levelTimer;
+        int currentRoom;
+        int scrollSpeed;
+        bool transition;
+        bool endCurrentRoom;
+        bool bossFight;
 
-        public Random rand;
+        Random rand;
 
-        private List<Texture2D> backgroundImages;
+        List<Texture2D> backgroundImages;
 
         //for shop
-        public Texture2D collectableSheet, cosmeticSheet;
-        private List<ShopItem> items;
-        public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont { get { return fonts[2]; } }
-        public SpriteFont shopFontBold { get { return fonts[3]; } }
-        public SpriteFont shopTitleFont { get { return fonts[4]; } }
-        private Shop shop;
+        Texture2D collectableSheet, cosmeticSheet;
+        List<ShopItem> items;
+        List<Rectangle> clock, skull, nuke, magnet, coin, skiMask, construction, hair, headphones, santa, headband, fire, army, redBand, blueBand;
+        SpriteFont shopFont, shopFontBold, shopTitleFont;
+        Shop shop;
 
-        public int menuCoolDown;
+        int menuCoolDown;
 
 
         public enum GameState
@@ -104,18 +97,26 @@ namespace RoomRunner
             // TODO: Add your initialization logic here
 
             //for shop
-            //I'm fixing you're stupid hard-coded mess, Owen - Samuel
             items = new List<ShopItem>();
-            collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
-            cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
-
-            bosses = new Dictionary<Levels, Boss>();
-            CreateBosses();
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
+            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
+            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
+            coin = new List<Rectangle> { new Rectangle(0, 160, 32, 32), new Rectangle(32, 160, 32, 32), new Rectangle(64, 160, 32, 32), new Rectangle(96, 160, 32, 32) };
+            skiMask = new List<Rectangle> { new Rectangle(0, 0, 32, 32) };
+            construction = new List<Rectangle> { new Rectangle(64, 0, 32, 32) };
+            hair = new List<Rectangle> { new Rectangle(128, 0, 32, 32) };
+            headphones = new List<Rectangle> { new Rectangle(32, 32, 32, 32) };
+            santa = new List<Rectangle> { new Rectangle(96, 32, 32, 32) };
+            headband = new List<Rectangle> { new Rectangle(0, 64, 32, 32) };
+            fire = new List<Rectangle> { new Rectangle(64, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(32, 96, 32, 32) };
+            army = new List<Rectangle> { new Rectangle(96, 96, 32, 32) };
+            redBand = new List<Rectangle> { new Rectangle(0, 128, 32, 32) };
+            blueBand = new List<Rectangle> { new Rectangle(64, 128, 32, 32) };
 
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
-            projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
             rand = new Random();
 
@@ -123,17 +124,18 @@ namespace RoomRunner
             amountOfRooms = 5;
             scrollSpeed = 0;
             menuCoolDown = 0;
-            bossCooldown = 0;
-
+            
+            
 
             gameState = GameState.Menu;
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
-            currentRoomIndex = 0;
+            currentRoom = 0;
 
             transition = false;
             endCurrentRoom = false;
+            bossFight = false;
 
             this.IsMouseVisible = true;
 
@@ -145,6 +147,7 @@ namespace RoomRunner
             idleAnimationRectangles.Add(jebList[0]);
             idleAnimationRectangles.Add(jebList[1]);
 
+            jeb = new Player(new Vector2(900, 500), Content, GraphicsDevice);
             Player.floorHeight = 220;
 
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
@@ -163,17 +166,6 @@ namespace RoomRunner
 
         }
 
-        private void CreateBosses()
-        {
-            Texture2D sheet = loadImage("Enemies/Enemies", Content);
-            List<Boss> bos = new List<Boss>();
-
-            bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
-
-            for (int i = 0; i < bos.Count; i++)
-                bosses.Add((Levels)i, bos[i]);
-        }
-
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
@@ -183,46 +175,45 @@ namespace RoomRunner
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            LoadFonts();
+            // TODO: use this.Content to load your game content here
+
             pixel = this.Content.Load<Texture2D>("pixel");
-            collectableSheet = this.Content.Load<Texture2D>("Shop/collectables");
-            cosmeticSheet = this.Content.Load<Texture2D>("Shop/cosmetics");
+            menuFont = this.Content.Load<SpriteFont>("SpriteFonts/menuFont");
+            buttonFont = this.Content.Load<SpriteFont>("SpriteFonts/buttonFont");
+            collectableSheet = this.Content.Load<Texture2D>("collectables");
+            cosmeticSheet = this.Content.Load<Texture2D>("cosmetics");
+            shopFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFont");
+            shopFontBold = this.Content.Load<SpriteFont>("SpriteFonts/shopFontBold");
+            shopTitleFont = this.Content.Load<SpriteFont>("SpriteFonts/shopFontTitle");
 
             //for shop, textures have to be loaded first before they can be sent as parameters
-            int[] collectNums = new int[] { 8, 5, 8, 4 };
-            string[] itemNames = new string[] { "Time Control", "Can't Die", "Instakill", "Magnet", "Ski Mask", "Construction", "Hair", "Headphones", "Santa Hat", "Headband", "Army Hat", "Red Headband", "Blue Headband" };
-            for (int i = 0, c = 0; i < collectNums.Length; c += collectNums[i], i++)
-                items.Add(new ShopItem(50, itemNames[i], collectableRect.Skip(c).Take(collectNums[i]).ToList(), collectableSheet));
-            for (int i = collectNums.Length, c = 0; i < itemNames.Length; i++, c += 2)
-            {
-                if (c == 12) //fire has multiple frames, so had to add a specific case for it
-                {
-                    items.Add(new ShopItem(50, "Fire", new List<Rectangle> { cosmeticRect[12], cosmeticRect[14], cosmeticRect[16] }, cosmeticSheet));
-                    c += 6;
-                }
-                items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
-            }
-            items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
+            items.Add(new ShopItem(50, "Time Control", clock, collectableSheet));
+            items.Add(new ShopItem(50, "Can't Die", skull, collectableSheet));
+            items.Add(new ShopItem(50, "Instakill", nuke, collectableSheet));
+            items.Add(new ShopItem(50, "Magnet", magnet, collectableSheet));
+            items.Add(new ShopItem(50, "Ski Mask", skiMask, cosmeticSheet));
+            items.Add(new ShopItem(50, "Construction", construction, cosmeticSheet));
+            items.Add(new ShopItem(50, "Hair", hair, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headphones", headphones, cosmeticSheet));
+            items.Add(new ShopItem(50, "Santa Hat", santa, cosmeticSheet));
+            items.Add(new ShopItem(50, "Headband", headband, cosmeticSheet));
+            items.Add(new ShopItem(50, "Fire", fire, cosmeticSheet));
+            items.Add(new ShopItem(50, "Army Hat", army, cosmeticSheet));
+            items.Add(new ShopItem(50, "Red Headband", redBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Blue Headband", blueBand, cosmeticSheet));
+            items.Add(new ShopItem(50, "Coin", coin, collectableSheet));
             shop = new Shop(items);
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             
             backgroundImages = loadTextures("Background", Content);
 
-            jeb = new Player(new Vector2(900, 500), this);
+
+
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
 
-        }
-        private void LoadFonts()
-        {
-            string fontFolder = "SpriteFonts/";
-
-            FileInfo[] fontFiles = new DirectoryInfo("Content/"+fontFolder).GetFiles();
-            fonts = new SpriteFont[fontFiles.Length];
-            for (int i = 0; i < fontFiles.Length; i++)
-                fonts[i] = Content.Load<SpriteFont>(fontFolder + Path.GetFileNameWithoutExtension(fontFiles[i].FullName));
         }
 
         /// <summary>
@@ -250,13 +241,10 @@ namespace RoomRunner
                 this.Exit();
 
 
-
-            // controls the main menu with each gamestate representing a different portion of the game
-
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
                 gameState = GameState.Play;
-                Reset();
+                GenerateRooms(amountOfRooms, backgroundImages, window);
                 menuCoolDown = 60;
             }
                 
@@ -279,52 +267,28 @@ namespace RoomRunner
                 menuCoolDown--;
 
 
-            // main game loop
+
             if (gameState == GameState.Play)
             {
-                if (bossFight && currentBoss.IsDead)
-                    currentBoss = null;
-                if (bossFight) currentBoss.Update();
 
-                scrollSpeed = currentRoomIndex + 10;
 
-                roomList[currentRoomIndex].Update(scrollSpeed);
 
-                if (bossFight)
-                {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
-                    goto Jeb;
-                }
+                scrollSpeed = currentRoom + 10;
 
-                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
+                if (gameState == GameState.Play)
+                    roomList[currentRoom].Update(scrollSpeed);
+
+                foreach (Enemy enemy in roomList[currentRoom].enemyList)
                 {
                     if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
                         gameState = GameState.GameOver;
                 }
 
 
-                Jeb:
+
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
-
-                List<Projectile> toRemove = new List<Projectile>();
-                foreach (Projectile p in projectileList)
-                {
-                    p.Update();
-
-                    if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
-                    {
-                        currentBoss.Damage(p.BossDamage);
-                        p.DeltDamage = true;
-                    }
-
-                    if (p.ToRemove) toRemove.Add(p);
-                }
-                foreach (Projectile p in toRemove)
-                    projectileList.Remove(p);
-
-                
             }
             gameTimer++;
             
@@ -332,37 +296,22 @@ namespace RoomRunner
             base.Update(gameTime);
         }
 
-        private void Reset()
-        {
-            levels = Levels.Level1;
-            gameTimer = 0;
-            levelTimer = 0;
-            currentRoomIndex = 0;
-            scrollSpeed = 0;
-
-            transition = false;
-            endCurrentRoom = false;
-
-            projectileList.Clear();
-            currentBoss = null;
-            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
-            jeb.delayLeft = Player.InputDelay;
-
-            GenerateRooms(amountOfRooms, backgroundImages, window);
-        }
-
+        /// <summary>
         /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Gray);
 
+            // TODO: Add your drawing code here
             spriteBatch.Begin();
             
 
 
             
 
-            // menu
+
             if(gameState == GameState.Menu)
             {
                 int halfSeconds = gameTimer / 30;
@@ -381,6 +330,7 @@ namespace RoomRunner
 
 
                 // menu buttons
+
                 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
@@ -392,8 +342,6 @@ namespace RoomRunner
 
 
             }
-
-            // shop
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
@@ -410,22 +358,21 @@ namespace RoomRunner
                 int levelSeconds = levelTimer / 60;
 
 
-                if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
-                    SummonBoss();
+
+
+
                 // tries to advance to next room every 10 seconds
-                if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
+                if (currentRoom < roomList.Count - 1 && levelSeconds > 10)
                 {
                     transition = true;
                     levelTimer = 0;
                     
                 }
-                
 
 
                 // scrolling calculations
                 
-                bool loopImage = roomList[currentRoomIndex].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
+                bool loopImage = roomList[currentRoom].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
 
 
@@ -433,51 +380,55 @@ namespace RoomRunner
                 
 
 
-                // checks if the transition period is over so we can move on to the next room
-                if (currentRoomIndex < roomList.Count - 1 && loopImage && endCurrentRoom)
+                // checks if the transition period is over
+                if (currentRoom < roomList.Count - 1 && loopImage && endCurrentRoom)
                 {
-                    currentRoomIndex++;
-                    roomList[currentRoomIndex].InheritEnemies(roomList[currentRoomIndex - 1].enemyArray);
+                    currentRoom++;
+                    roomList[currentRoom].InheritEnemies(roomList[currentRoom - 1].enemyList);
                     endCurrentRoom = false;
                     transition = false;
                 }
 
 
-                // checks if we are currently transitioning to next room so it can draw the transition from the current room to the next room
+                // checks if we are currently transitioning to next room
                 if (loopImage && transition)
                 {
-                    roomList[currentRoomIndex].background2 = roomList[currentRoomIndex + 1].background1;
+                    roomList[currentRoom].background2 = roomList[currentRoom + 1].background1;
                     endCurrentRoom = true;
                 }
 
                 // checks if we have undergone a full loop of the background
                 if (loopImage)
                 {
-                    roomList[currentRoomIndex].backgroundRectangle.X = 0;
+                    roomList[currentRoom].backgroundRectangle.X = 0;
                 }
 
 
-                // draws the room
+                Rectangle roomRectangle = roomList[currentRoom].backgroundRectangle;
 
-                Rectangle roomRectangle = roomList[currentRoomIndex].backgroundRectangle;
 
-                spriteBatch.Draw(roomList[currentRoomIndex].background1, roomRectangle, Color.White);
-                spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
-                // draws the boss
-                if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
+                
+
+
+
+                spriteBatch.Draw(roomList[currentRoom].background1, roomRectangle, Color.White);
+                spriteBatch.Draw(roomList[currentRoom].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+                roomList[currentRoom].Draw(spriteBatch);
+
+                if (currentRoom >= roomList.Count - 1)
+                {
+                    bossFight = true;
+                    
+
+                }
 
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
-
                 jeb.Draw(spriteBatch);
-                if (currentBoss != null) currentBoss.Draw(spriteBatch);
-                foreach (Projectile p in projectileList)
-                    p.Draw(spriteBatch);
 
             }
-            // game over screen and meny
             if(gameState == GameState.GameOver)
             {
                 spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
@@ -501,11 +452,7 @@ namespace RoomRunner
 
         
 
-        private void SummonBoss()
-        {
-            currentBoss = bosses[levels].Clone();
-            bossCooldown = 300;
-        }
+
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
         {
             if (x < inputRectangle.Right && x > inputRectangle.Left && y < inputRectangle.Bottom && y > inputRectangle.Top)
@@ -516,20 +463,19 @@ namespace RoomRunner
 
         public void GenerateRooms(int amountOfRooms, List<Texture2D> textures, Rectangle dimensions)
         {
-            currentRoomIndex = 0;
+            currentRoom = 0;
             roomList.Clear();
 
             for(int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,5), GraphicsDevice, Content, window));
             }
 
             
         }
 
-        // directory should be the name of a FOLDER with the images you want to load.
-        // This assumes that the stuff you want to load is in the correct level folder
+
         public static List<Texture2D> loadTextures(string directory, ContentManager content)
         {
             string[] files = Directory.GetFiles(@"Content\" + levels + "/" + directory + "/", "*");
@@ -561,26 +507,11 @@ namespace RoomRunner
             return images;
         }
 
-        // directory should be a a single IMAGE that you want to load.
-        // This assumes that the stuff you want to load is in the correct level folder 
         public static Texture2D loadImage(string directory, ContentManager content)
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
-        public static Color GetAverageColor(Texture2D texture)
-        {
-            double r, g, b;
-            r = g = b = 0;
-            Color[] pixels = new Color[texture.Width * texture.Height];
-            texture.GetData(pixels);
-            foreach (Color c in pixels)
-            {
-                r += c.R;
-                g += c.G;
-                b += c.B;
-            }
-            return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
-        }
+
         
 
 

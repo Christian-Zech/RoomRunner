@@ -8,12 +8,11 @@ using System.Text;
 
 namespace RoomRunner
 {
-    public class Room
+    class Room
     {
         public const int minimumNumOfEnemies = 5;
 
-        public static int ceilingHeight { get { return Player.ceilingHeight; } }
-        public static int floorHeight { get { return Player.floorHeight; } }
+        public static int ceilingHeight, floorHeight;
 
         public Texture2D background1;
         public Texture2D background2;
@@ -49,7 +48,7 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+                enemyList.Add(new Enemy((EnemyName)rand.Next(0, 5), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 150), 100, 100)));
             RemoveOverlap();
         }
         public void InheritEnemies(List<Enemy> toInherit)
@@ -72,12 +71,10 @@ namespace RoomRunner
             generateEnemies(hasOverlap.Count);
         }
 
-        // makes the game scroll by moving the background to the left. Also controls enemies.
+
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
-            if (Game1.bossFight) 
-                return;
             List<Enemy> toRemove = new List<Enemy>();
 
             foreach(Enemy enemy in enemyArray)
