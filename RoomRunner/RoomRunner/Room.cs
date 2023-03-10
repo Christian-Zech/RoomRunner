@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -49,7 +49,7 @@ namespace RoomRunner
         {
             Enemy.totalEnemyCount += amount;
             while (amount-- > 0) //same thing as: for(int i=0;i<amount;i++)
-            enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
+                enemyArray.Add(new Enemy((EnemyName)rand.Next(0, Enemy.EnemyNames), content, graphics, new Rectangle(rand.Next(2000, 4000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - 100), 100, 100)));
             RemoveOverlap();
         }
         public void InheritEnemies(List<Enemy> toInherit)
@@ -76,15 +76,15 @@ namespace RoomRunner
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
-            if (Game1.bossFight) 
+            if (Game1.bossFight)
                 return;
             List<Enemy> toRemove = new List<Enemy>();
 
-            foreach(Enemy enemy in enemyArray)
+            foreach (Enemy enemy in enemyArray)
             {
                 enemy.Update();
                 enemy.rectangle.X -= scrollSpeed;
-                if(enemy.rectangle.X + enemy.rectangle.Width < 0)
+                if (enemy.rectangle.X + enemy.rectangle.Width < 0)
                 {
                     toRemove.Add(enemy);
                     Enemy.totalEnemyCount--;
@@ -94,19 +94,19 @@ namespace RoomRunner
             foreach (Enemy e in toRemove)
                 enemyArray.Remove(e);
             generateEnemies(toRemove.Count);
-            if (enemyArray.Count < minimumNumOfEnemies) 
+            if (enemyArray.Count < minimumNumOfEnemies)
                 generateEnemies(minimumNumOfEnemies - enemyArray.Count);
 
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach(Enemy enemy in enemyArray)
+            foreach (Enemy enemy in enemyArray)
             {
                 spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
         }
-        
+
 
 
 
