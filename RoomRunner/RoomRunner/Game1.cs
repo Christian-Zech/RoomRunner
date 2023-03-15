@@ -31,6 +31,7 @@ namespace RoomRunner
         List<Rectangle> clock, skull, nuke, magnet;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
+        Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
 
         public static Rectangle window;
@@ -74,12 +75,15 @@ namespace RoomRunner
 
         KeyboardState oldKB;
 
+        FileDialogue files = new FileDialogue();
+        int fileOpenCount = 0;
 
         public enum GameState
         {
             Menu,
             Shop,
             Play,
+            Music,
             GameOver
         }
         
@@ -164,6 +168,7 @@ namespace RoomRunner
             startButtonRectangle = new Rectangle(window.Width / 2 - 140, 400, 350, 100);
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
+            MusicButtonRectangle = new Rectangle(window.Width / 2 - 140, 800, 350, 100);
 
             powerups = new Powerups();
             activePowerupIndex = -1;
@@ -275,7 +280,12 @@ namespace RoomRunner
                 Reset();
                 menuCoolDown = 60;
             }
-                
+
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0)
+            {
+                gameState = GameState.Music;
+            }
+
 
             if (gameState == GameState.GameOver && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, menuButtonRectangle) && menuCoolDown == 0)
             {
@@ -296,8 +306,24 @@ namespace RoomRunner
 
 
             // main game loop
+            if (gameState == GameState.Music)
+            {
+                if (fileOpenCount == 0)
+                {
+                    Console.WriteLine(files.Show());
+                    fileOpenCount++;
+                }
+                if (files.done)
+                {
+                    gameState = GameState.Play;
+                    fileOpenCount = 0;
+                }
+                return;
+            }
+
             if (gameState == GameState.Play)
             {
+                
                 if (activePowerupIndex == 0)
                 {
                     slowTimeTemp++;
@@ -397,6 +423,7 @@ namespace RoomRunner
 
                 powerups.Update();
             }
+            
             gameTimer++;
             if (gameState == GameState.GameOver)
             {
@@ -464,7 +491,8 @@ namespace RoomRunner
                 spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
 
-
+                spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
+                spriteBatch.DrawString(buttonFont, "Add Music", new Vector2(MusicButtonRectangle.X+60, MusicButtonRectangle.Y+20), Color.White);
 
             }
 
@@ -478,6 +506,10 @@ namespace RoomRunner
                     shop.leave = false;
                 }
                     
+            }
+            if (gameState == GameState.Music)
+            {
+
             }
             if (gameState == GameState.Play)
             {
