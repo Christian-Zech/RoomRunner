@@ -75,8 +75,11 @@ namespace RoomRunner
 
         KeyboardState oldKB;
 
-        FileDialogue files = new FileDialogue();
-        MusicScreen musicScreen = new MusicScreen();
+        //for music and sounds
+        FileDialogue files;
+        MusicScreen musicScreen;
+        List<Song> customSongs;
+        List<Song> gameSongs;
         int fileOpenCount = 0;
 
         public enum GameState
@@ -96,7 +99,7 @@ namespace RoomRunner
         }
 
         public static Levels levels;
-        GameState gameState;
+        public static GameState gameState;
 
         public Game1()
         {
@@ -174,8 +177,11 @@ namespace RoomRunner
             powerups = new Powerups();
             activePowerupIndex = -1;
             slowTimeTemp = 0;
-            // reads background images
 
+            files = new FileDialogue();
+            musicScreen = new MusicScreen();
+            customSongs = new List<Song>();
+            gameSongs = new List<Song>();
 
             oldKB = Keyboard.GetState();
             base.Initialize();
@@ -244,6 +250,10 @@ namespace RoomRunner
             fonts = new SpriteFont[fontFiles.Length];
             for (int i = 0; i < fontFiles.Length; i++)
                 fonts[i] = Content.Load<SpriteFont>(fontFolder + Path.GetFileNameWithoutExtension(fontFiles[i].FullName));
+        }
+        public void LoadCustomSongs()
+        {
+
         }
 
         /// <summary>
@@ -493,7 +503,7 @@ namespace RoomRunner
                 spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
 
                 spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Add Music", new Vector2(MusicButtonRectangle.X+60, MusicButtonRectangle.Y+20), Color.White);
+                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
 
             }
 

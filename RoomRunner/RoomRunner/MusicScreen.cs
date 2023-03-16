@@ -21,6 +21,7 @@ namespace RoomRunner
         Rectangle sliderLineMusic;
         Rectangle sliderHandleSound;
         Rectangle sliderLineSound;
+        Rectangle exitRect;
 
         double dXMusic;
         double dXSound;
@@ -52,6 +53,7 @@ namespace RoomRunner
             selectedButtonBorder = new Rectangle(0, 0, 0, 0);
             customMusicButton = new Rectangle(1010, 300, 170, 100);
             addMusic = new Rectangle(1470, 300, 150, 100);
+            exitRect = new Rectangle(200, 70, 250, 100);
             dXMusic = 0;
             dXSound = 0;
             musicVolume = 1;
@@ -64,7 +66,7 @@ namespace RoomRunner
         public void GetInput()
         {
             mouse = Mouse.GetState();
-            Rectangle mouseRect = new Rectangle(mouse.X, mouse.Y, 50, 50);
+            Rectangle mouseRect = new Rectangle(mouse.X-40, mouse.Y-40, 80, 80);
             if (mouseRect.Intersects(sliderHandleMusic) && mouse.LeftButton == ButtonState.Pressed)
             {
                 if (mouse.X < 1175 && mouse.X > 675)
@@ -109,7 +111,8 @@ namespace RoomRunner
             }
             if (mouseRect.Intersects(addMusic) && customMusic && mouse.LeftButton == ButtonState.Pressed)
             {
-                customMusicNames.Add(fileExplorer.Show());
+                string temp = fileExplorer.Show();
+                customMusicNames.Add(temp);
             }
             else if (mouseRect.Intersects(addMusic) && customMusic)
             {
@@ -142,7 +145,11 @@ namespace RoomRunner
                 selectedButtonBorder = new Rectangle(0, 0, 0, 0);
             }
                 
-            
+            //for exiting
+            if (mouseRect.Intersects(exitRect) && mouse.LeftButton == ButtonState.Pressed)
+            {
+                Game1.gameState = Game1.GameState.Menu;
+            }
         }
         
         public void Draw(SpriteBatch spriteBatch, Texture2D pixel, SpriteFont titleFont, SpriteFont boldFont, SpriteFont smallFont)
@@ -154,6 +161,10 @@ namespace RoomRunner
             string strSVolume = sVolume + "%";
             //drawing title
             spriteBatch.DrawString(titleFont, "SOUNDS", new Vector2(770, 40), Color.Black);
+
+            //drawing back button
+            spriteBatch.Draw(pixel, exitRect, Color.Green);
+            spriteBatch.DrawString(boldFont, "    Menu", new Vector2(exitRect.X + 55, exitRect.Y + 20), Color.White);
 
             //drawing music selection buttons
             spriteBatch.Draw(pixel, selectedButtonBorder, Color.Black);
