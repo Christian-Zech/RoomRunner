@@ -60,6 +60,7 @@
     <Compile Include="Animation.cs" />
     <Compile Include="Boss.cs" />
     <Compile Include="FileDialogue.cs" />
+    <Compile Include="MusicScreen.cs" />
     <Compile Include="Projectile.cs" />
     <Compile Include="Cutscene.cs" />
     <Compile Include="Enemy.cs" />

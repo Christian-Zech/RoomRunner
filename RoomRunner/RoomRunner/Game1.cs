@@ -76,6 +76,7 @@ namespace RoomRunner
         KeyboardState oldKB;
 
         FileDialogue files = new FileDialogue();
+        MusicScreen musicScreen = new MusicScreen();
         int fileOpenCount = 0;
 
         public enum GameState
@@ -308,17 +309,17 @@ namespace RoomRunner
             // main game loop
             if (gameState == GameState.Music)
             {
-                if (fileOpenCount == 0)
-                {
-                    Console.WriteLine(files.Show());
-                    fileOpenCount++;
-                }
-                if (files.done)
-                {
-                    gameState = GameState.Play;
-                    fileOpenCount = 0;
-                }
-                return;
+                //if (fileOpenCount == 0)
+                //{
+                //    Console.WriteLine(files.Show());
+                //    fileOpenCount++;
+                //}
+                //if (files.done)
+                //{
+                //    gameState = GameState.Menu;
+                //    fileOpenCount = 0;
+                //}
+                //return;
             }
 
             if (gameState == GameState.Play)
@@ -509,7 +510,7 @@ namespace RoomRunner
             }
             if (gameState == GameState.Music)
             {
-
+                musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
             }
             if (gameState == GameState.Play)
             {
