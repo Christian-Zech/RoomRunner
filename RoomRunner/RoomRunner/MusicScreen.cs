@@ -39,7 +39,7 @@ namespace RoomRunner
         Color gameColor;
         Color customColor;
 
-        List<string> customMusicNames;
+        public List<string> customMusicNames;
 
         public MusicScreen()
         {
