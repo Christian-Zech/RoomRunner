@@ -78,10 +78,10 @@ namespace RoomRunner
         //for music and sounds
         FileDialogue files;
         MusicScreen musicScreen;
-        List<Song> customSongList;
+        List<SoundEffect> customSongList;
         int customSongIndex;
         SongCollection customSongs;
-        List<Song> gameSongList;
+        List<SoundEffect> gameSongList;
         int fileOpenCount = 0;
 
         public enum GameState
@@ -182,9 +182,9 @@ namespace RoomRunner
 
             files = new FileDialogue();
             musicScreen = new MusicScreen();
-            customSongList = new List<Song>();
+            customSongList = new List<SoundEffect>();
             customSongIndex = 0;
-            gameSongList = new List<Song>();
+            gameSongList = new List<SoundEffect>();
 
             oldKB = Keyboard.GetState();
             base.Initialize();
@@ -260,7 +260,10 @@ namespace RoomRunner
             List<string> names = musicScreen.customMusicNames;
             foreach (string name in names)
             {
-                customSongList.Add(this.Content.Load<Song>(name));
+                System.IO.FileStream fs = new System.IO.FileStream(name, System.IO.FileMode.Open);
+                SoundEffect temp = SoundEffect.FromStream(fs);
+                customSongList.Add(temp);
+                Console.WriteLine(name);
             }
         }
 
@@ -323,7 +326,12 @@ namespace RoomRunner
             if (menuCoolDown > 0)
                 menuCoolDown--;
 
-
+            if (gameState == GameState.Menu)
+            {
+                LoadCustomSongs();
+                
+            }
+                
             
 
             if (gameState == GameState.Play)
