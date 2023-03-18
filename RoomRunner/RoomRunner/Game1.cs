@@ -80,8 +80,8 @@ namespace RoomRunner
         MusicScreen musicScreen;
         List<SoundEffect> customSongList;
         int customSongIndex;
-        SongCollection customSongs;
         List<SoundEffect> gameSongList;
+        int songTimeElapsed;
         int fileOpenCount = 0;
 
         public enum GameState
@@ -184,6 +184,7 @@ namespace RoomRunner
             musicScreen = new MusicScreen();
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
+            songTimeElapsed = 0;
             gameSongList = new List<SoundEffect>();
 
             oldKB = Keyboard.GetState();
@@ -328,7 +329,8 @@ namespace RoomRunner
 
             if (gameState == GameState.Menu)
             {
-                LoadCustomSongs();
+                if (musicScreen.customMusic)
+                    LoadCustomSongs();
                 
             }
                 
@@ -336,6 +338,30 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                if (musicScreen.customMusic) //if custom music is selected
+                {
+                    if (songTimeElapsed == 0 && customSongIndex == 0)
+                        customSongList[customSongIndex].Play();
+                    if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
+                    {
+                        customSongIndex++;
+                        if (customSongIndex >= customSongList.Count)
+                        {
+                            customSongIndex = 0;
+                        }
+                        songTimeElapsed = 0;
+                        customSongList[customSongIndex].Play();
+                    }
+                    else
+                    {
+                        songTimeElapsed++;
+                    }
+                }
+                else //regular game music
+                {
+
+                }
+
                 if (activePowerupIndex == 0)
                 {
                     slowTimeTemp++;

@@ -25,15 +25,15 @@ namespace RoomRunner
 
         double dXMusic;
         double dXSound;
-        
-        double musicVolume;
-        double soundVolume;
+
+        public double musicVolume;
+        public double soundVolume;
 
         Rectangle gameMusicButton;
         Rectangle customMusicButton;
         Rectangle selectedButtonBorder;
 
-        bool customMusic;
+        public bool customMusic;
         Rectangle addMusic;
 
         Color gameColor;
@@ -112,7 +112,8 @@ namespace RoomRunner
             if (mouseRect.Intersects(addMusic) && customMusic && mouse.LeftButton == ButtonState.Pressed)
             {
                 string temp = fileExplorer.Show();
-                customMusicNames.Add(temp);
+                if (!temp.Equals(""))
+                    customMusicNames.Add(temp);
             }
             else if (mouseRect.Intersects(addMusic) && customMusic)
             {
