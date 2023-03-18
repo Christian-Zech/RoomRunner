@@ -257,12 +257,10 @@ namespace RoomRunner
         }
         public void LoadCustomSongs()
         {
-            int i = 0;
             while (customSongList.Count != 0)
             {
-                customSongList[i].Dispose();
-                customSongList.RemoveAt(i);
-                i++;
+                customSongList[0].Dispose();
+                customSongList.RemoveAt(0);
             }
             List<string> names = musicScreen.customMusicNames;
             foreach (string name in names)
