@@ -20,7 +20,7 @@ namespace RoomRunner
         public int numberOfEnemies;
         public List<Enemy> enemyArray;
         public Random rand;
-        public Coin[,] coinsGrid;
+        public List<Coin[,]> coinsGridList;
 
         public Rectangle backgroundRectangle;
 
@@ -49,8 +49,22 @@ namespace RoomRunner
             enemyArray = new List<Enemy>();
             rand = new Random(DateTime.Now.Millisecond);
 
+            // determines amount of coin patches in the room
+            coinsGridList = new List<Coin[,]>();
+            for(int i = 0; i < rand.Next(2,6); i++)
+            {
+                int amountOfCoins = rand.Next(5, 10);
+                coinsGridList.Add(new Coin[amountOfCoins,amountOfCoins]);
+            }
+
             generateEnemies(numberOfEnemies);
-            generateCoins(rand.Next(5, 10), (CoinPattern)rand.Next(0, 5), window);
+
+            // generates random amount of coins in a random pattern per coin patch
+            for(int i = 0; i < coinsGridList.Count; i++)
+            {
+                generateCoins(coinsGridList[i], (CoinPattern)rand.Next(0, 5), window);
+            }
+            
         }
 
         private void generateEnemies(int amount)
@@ -62,13 +76,11 @@ namespace RoomRunner
         }
 
 
-        private void generateCoins(int amount, CoinPattern pattern, Rectangle window)
+        private void generateCoins(Coin[,] coinsGrid, CoinPattern pattern, Rectangle window)
         {
-
-            coinsGrid = new Coin[amount, amount];
             int coinGap = 50; // seperation between coins (pixels)
 
-            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 1000), rand.Next(100, Player.frameHeight - floorHeight - (amount * coinGap)), 50, 50);
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 5000), rand.Next(100, Player.frameHeight - floorHeight - (coinsGrid.GetLength(0) * coinGap)), 50, 50);
 
             // generates each coin pattern. For future reference, GetLength(0) = rows and GetLength(1) = columns
             switch (pattern)
@@ -150,12 +162,15 @@ namespace RoomRunner
 
             }
 
-            foreach (Coin coin in coinsGrid)
+            foreach (Coin[,] coinGrid in coinsGridList)
             {
-                if (coin != null)
+                foreach(Coin coin in coinGrid)
                 {
-                    coin.rectangle.X -= scrollSpeed;
-                    coin.Update();
+                    if (coin != null)
+                    {
+                        coin.rectangle.X -= scrollSpeed;
+                        coin.Update();
+                    }
                 }
             }
 
@@ -173,10 +188,13 @@ namespace RoomRunner
             {
                 spriteBatch.Draw(enemy.CurrentTexture, enemy.rectangle, Color.White);
             }
-            foreach(Coin coin in coinsGrid)
+            foreach(Coin[,] coinGrid in coinsGridList)
             {
-                if(coin != null)
-                    spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
+                foreach(Coin coin in coinGrid)
+                {
+                    if (coin != null)
+                        spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
+                }
             }
         }
 

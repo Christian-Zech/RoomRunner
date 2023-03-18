@@ -315,12 +315,15 @@ namespace RoomRunner
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
                 // player coin collection
-                foreach (Coin coin in roomList[currentRoomIndex].coinsGrid)
+                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
                 {
-                    if(coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                    foreach(Coin coin in coinGrid)
                     {
-                        coin.Destroy();
-                        jeb.Coins++;
+                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        {
+                            coin.Destroy();
+                            jeb.Coins++;
+                        }
                     }
                 }
 
