@@ -8,7 +8,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    public class Room
+    class Room
     {
         public const int minimumNumOfEnemies = 5;
 
@@ -20,7 +20,7 @@ namespace RoomRunner
         public int numberOfEnemies;
         public List<Enemy> enemyArray;
         public Random rand;
-        Coin[,] coinsGrid;
+        public Coin[,] coinsGrid;
 
         public Rectangle backgroundRectangle;
 
@@ -51,7 +51,6 @@ namespace RoomRunner
 
             generateEnemies(numberOfEnemies);
             generateCoins(rand.Next(5, 10), (CoinPattern)rand.Next(0, 5), window);
-
         }
 
         private void generateEnemies(int amount)
