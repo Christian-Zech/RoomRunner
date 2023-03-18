@@ -58,10 +58,12 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Boss.cs" />
+    <Compile Include="Coin.cs" />
     <Compile Include="Projectile.cs" />
     <Compile Include="Cutscene.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Powerups.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
@@ -74,6 +76,7 @@
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
+    <Compile Include="PowerupItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RoomRunnerContent\RoomRunnerContent.contentproj">

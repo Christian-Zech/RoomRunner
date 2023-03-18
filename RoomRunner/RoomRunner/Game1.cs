@@ -23,11 +23,12 @@ namespace RoomRunner
         public static Texture2D pixel;
         public Texture2D jebSheet;
 
-        public SpriteFont menuFont => fonts[1];
-        public SpriteFont buttonFont => fonts[0];
+        public SpriteFont menuFont { get { return fonts[1]; } }
+        public SpriteFont buttonFont { get { return fonts[0]; } }
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
+        List<Rectangle> clock, skull, nuke, magnet;
         Rectangle startButtonRectangle;
         Rectangle shopButtonRectangle;
         Rectangle menuButtonRectangle;
@@ -37,19 +38,23 @@ namespace RoomRunner
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
-        public List<Room> roomList;
+        List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
+        Powerups powerups;
+        int activePowerupIndex;
+        int slowTimeTemp;
+
+
 
         private int gameTimer;
         private int levelTimer;
-        private const int Cooldown = 300;
         private int bossCooldown;
         public int currentRoomIndex;
         public int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
-        public static bool bossFight => currentBoss != null && !currentBoss.IsDead;
+        public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
         public Dictionary<Levels, Boss> bosses;
 
         public Random rand;
@@ -60,12 +65,14 @@ namespace RoomRunner
         public Texture2D collectableSheet, cosmeticSheet;
         private List<ShopItem> items;
         public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont => fonts[2];
-        public SpriteFont shopFontBold => fonts[3];
-        public SpriteFont shopTitleFont => fonts[4];
+        public SpriteFont shopFont { get { return fonts[2]; } }
+        public SpriteFont shopFontBold { get { return fonts[3]; } }
+        public SpriteFont shopTitleFont { get { return fonts[4]; } }
         private Shop shop;
 
         public int menuCoolDown;
+
+        KeyboardState oldKB;
 
 
         public enum GameState
@@ -105,6 +112,12 @@ namespace RoomRunner
             // TODO: Add your initialization logic here
 
             //for shop
+            clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
+            skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
+            nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
+            magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
+            
+
             //I'm fixing you're stupid hard-coded mess, Owen - Samuel
             items = new List<ShopItem>();
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
@@ -152,12 +165,13 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
 
-
-
+            powerups = new Powerups();
+            activePowerupIndex = -1;
+            slowTimeTemp = 0;
             // reads background images
-            
 
 
+            oldKB = Keyboard.GetState();
             base.Initialize();
             
 
@@ -243,6 +257,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -257,7 +272,7 @@ namespace RoomRunner
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
                 gameState = GameState.Play;
-                GenerateRooms(amountOfRooms, backgroundImages, window);
+                Reset();
                 menuCoolDown = 60;
             }
                 
@@ -283,6 +298,14 @@ namespace RoomRunner
             // main game loop
             if (gameState == GameState.Play)
             {
+                if (activePowerupIndex == 0)
+                {
+                    slowTimeTemp++;
+                    if (slowTimeTemp % 2 == 0)
+                        return;
+
+                }
+
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
                 if (bossFight) currentBoss.Update();
@@ -291,7 +314,23 @@ namespace RoomRunner
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
-                if (bossFight)
+                // player coin collection
+                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                {
+                    foreach(Coin coin in coinGrid)
+                    {
+                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        {
+                            coin.Destroy();
+                            jeb.Coins++;
+                        }
+                    }
+                }
+
+
+
+
+                    if (bossFight)
                 {
                     if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
@@ -299,8 +338,10 @@ namespace RoomRunner
 
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
-                    if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        gameState = GameState.GameOver;
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                                gameState = GameState.GameOver;
                 }
 
 
@@ -326,9 +367,55 @@ namespace RoomRunner
                     projectileList.Remove(p);
 
                 
+                
+
+
+
+                if (keyboard.IsKeyDown(Keys.D1) && oldKB.IsKeyUp(Keys.D1))
+                {
+                    powerups.UsePowerup(0);
+                }
+                if (keyboard.IsKeyDown(Keys.D2) && oldKB.IsKeyUp(Keys.D2))
+                {
+                    powerups.UsePowerup(1);
+                }
+                if (keyboard.IsKeyDown(Keys.D3) && oldKB.IsKeyUp(Keys.D3))
+                {
+                    powerups.UsePowerup(2);
+                }
+                if (keyboard.IsKeyDown(Keys.D4) && oldKB.IsKeyUp(Keys.D4))
+                {
+                    powerups.UsePowerup(3);
+                }
+                if (powerups.ActivePowerups())
+                {
+                    activePowerupIndex = powerups.ActivePowerupsIndex();
+                    
+                    
+                    if (activePowerupIndex == 2)
+                    {
+
+                        roomList[currentRoomIndex].enemyArray.Clear();
+                        
+                    }
+                    if (activePowerupIndex == 3)
+                    {
+                        // no coins yet :(
+                    }
+                }
+                else
+                {
+                    activePowerupIndex = -1;
+                }
+
+                powerups.Update();
             }
             gameTimer++;
-            
+            if (gameState == GameState.GameOver)
+            {
+                activePowerupIndex = -1;
+                powerups.RemovePowerups();
+            }
 
             base.Update(gameTime);
         }
@@ -346,6 +433,10 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
+            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            jeb.delayLeft = Player.InputDelay;
+
+            GenerateRooms(amountOfRooms, backgroundImages, window);
         }
 
         /// This is called when the game should draw itself.
@@ -395,11 +486,18 @@ namespace RoomRunner
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (shop.leave)
+                {
                     gameState = GameState.Menu;
+                    shop.leave = false;
+                }
+                    
             }
             if (gameState == GameState.Play)
             {
                 
+                
+
+
 
                 if (!transition)
                     levelTimer++;
@@ -473,11 +571,11 @@ namespace RoomRunner
                 foreach (Projectile p in projectileList)
                     p.Draw(spriteBatch);
 
+                powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
             }
             // game over screen and meny
             if(gameState == GameState.GameOver)
             {
-                if (gameTimer > 0) Reset();
                 spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
 
                 spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
@@ -520,7 +618,7 @@ namespace RoomRunner
             for(int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content, window));
             }
 
             
@@ -565,6 +663,7 @@ namespace RoomRunner
         {
             return content.Load<Texture2D>(@".\" + levels + "/" + directory);
         }
+
         public static Color GetAverageColor(Texture2D texture)
         {
             double r, g, b;
@@ -579,7 +678,7 @@ namespace RoomRunner
             }
             return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
         }
-        
+
 
 
     }

@@ -27,7 +27,6 @@ namespace RoomRunner
             items = itemList;
             leave = false;
             selectedItem = new List<bool> { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-            Console.WriteLine(items.Count); Console.WriteLine(selectedItem.Count);
             grid = new Rectangle[4, 4];
             int x = 650;
             int y = 250;
@@ -182,17 +181,12 @@ namespace RoomRunner
             }
             selectedItem = new List<bool> { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
             selectedItem[(4 * selectionIndexX) + selectionIndexY] = true;
-            for (int i = 0; i < selectedItem.Count; i++)
-            {
-                Console.Write(selectedItem[i] + " ");
-            }
-            Console.WriteLine();
+           
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
             updateSelection();
-            spriteBatch.Draw(pixel, new Rectangle(mouseX, mouseY, 5, 5), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle(selection.X - 5, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Red);

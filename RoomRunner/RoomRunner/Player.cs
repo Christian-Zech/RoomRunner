@@ -14,12 +14,12 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float InitialJumpMovement = 40.0f; //px per frame
         public const float JumpMovement = 30.0f; //px per frame
-        private const int InputDelay = 20; //Frames
-        private const int FireDelay = 2; //Frames
+        public const int InputDelay = 20; //Frames
+        private const int FireDelay = 10; //Frames
         public const int frameHeight = 1000; //px
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
-        public static string[] States => statesstates;
+        public static string[] States { get { return statesstates; } }
         public static readonly Dictionary<PlayerHats, Texture2D> Hats;
         public static float JumpMultiplier;
         public static float GravityMultiplier;
@@ -31,7 +31,7 @@ namespace RoomRunner
         private KeyboardState oldkb;
         private MouseState oldms;
         public int Coins;
-        private int delayLeft, fireCooldown;
+        public int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
         private readonly Game1 game;
@@ -151,13 +151,13 @@ namespace RoomRunner
             oldkb = kb;
             oldms = ms;
         }
-        private bool IsPressed(KeyboardState kb, Keys k) => kb.IsKeyDown(k) && !oldkb.IsKeyDown(k);
+        private bool IsPressed(KeyboardState kb, Keys k) { return kb.IsKeyDown(k) && !oldkb.IsKeyDown(k); }
         public bool IsPressed(KeyboardState kb, params Keys[] keys)
         {
             foreach (Keys k in keys) if (IsPressed(kb, k)) return true;
             return false;
         }
-        private bool IsHeld(KeyboardState kb, Keys k) => kb.IsKeyDown(k);
+        private bool IsHeld(KeyboardState kb, Keys k) { return kb.IsKeyDown(k); }
         public bool IsHeld(KeyboardState kb, params Keys[] keys)
         {
             foreach (Keys k in keys) if (IsHeld(kb, k)) return true;
