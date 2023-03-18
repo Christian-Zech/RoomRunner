@@ -257,7 +257,13 @@ namespace RoomRunner
         }
         public void LoadCustomSongs()
         {
-            customSongList.Clear();
+            int i = 0;
+            while (customSongList.Count != 0)
+            {
+                customSongList[i].Dispose();
+                customSongList.RemoveAt(i);
+                i++;
+            }
             List<string> names = musicScreen.customMusicNames;
             foreach (string name in names)
             {
@@ -465,6 +471,14 @@ namespace RoomRunner
             gameTimer++;
             if (gameState == GameState.GameOver)
             {
+                if (musicScreen.customMusic)
+                {
+                    LoadCustomSongs();
+                    customSongIndex = 0;
+                    songTimeElapsed = 0;
+                }
+                //else
+
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
             }
