@@ -64,7 +64,9 @@ namespace RoomRunner
             {
                 generateCoins(coinsGridList[i], (CoinPattern)rand.Next(0, 5), window);
             }
-            
+
+            RemoveCoinOverLap();
+
         }
 
         private void generateEnemies(int amount)
@@ -152,6 +154,29 @@ namespace RoomRunner
             if (hasOverlap.Count == 0) return;
             foreach (Rectangle e in hasOverlap)
                 list.Remove(e);
+        }
+
+        public void RemoveCoinOverLap()
+        {
+            for(int i = 0; i < coinsGridList.Count; i++)
+            {
+                for(int j = i+1; j < coinsGridList.Count; j++)
+                {
+                    foreach(Coin coin in coinsGridList[i])
+                    {
+                        foreach(Coin coin2 in coinsGridList[j])
+                        {
+                            if(coin != null && coin2 != null && coin.rectangle.Intersects(coin2.rectangle))
+                            {
+                                coin.Destroy();
+
+                            }
+                        }
+                    }
+                }
+
+                
+            }
         }
 
         // makes the game scroll by moving the background to the left. Also controls enemies.
