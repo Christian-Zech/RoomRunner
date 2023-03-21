@@ -39,7 +39,7 @@ namespace RoomRunner
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
-        public List<Room> roomList;
+        List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
         Powerups powerups;
@@ -381,11 +381,24 @@ namespace RoomRunner
                 scrollSpeed = currentRoomIndex + 10;
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
-                
 
-                
+                // player coin collection
+                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                {
+                    foreach(Coin coin in coinGrid)
+                    {
+                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        {
+                            coin.Destroy();
+                            jeb.Coins++;
+                        }
+                    }
+                }
 
-                if (bossFight)
+
+
+
+                    if (bossFight)
                 {
                     if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
@@ -564,6 +577,9 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
                 
+                
+
+
 
                 if (!transition)
                     levelTimer++;
@@ -684,7 +700,7 @@ namespace RoomRunner
             for(int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content, window));
             }
 
             
