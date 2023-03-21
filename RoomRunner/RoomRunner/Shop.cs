@@ -43,7 +43,7 @@ namespace RoomRunner
                 y += 170;
                 x = 650;
             }
-            backButton = new Rectangle(180, 120, 130, 80);
+            backButton = new Rectangle(200, 70, 250, 100);
             pressedKeys = new List<Keys>();
             oldKeys = new List<Keys>();
             selection = grid[0, 0];
@@ -59,26 +59,28 @@ namespace RoomRunner
         {
             if (item.name.Equals("Time Control") && item.name.Equals("Can't Die") && item.name.Equals("Instakill") && item.name.Equals("Magnet")) //powerups can only be bought
             {
-
+                if (item.name.Equals("Time Control"))
+                    Game1.powerups.quantities[0]++;
+                if (item.name.Equals("Can't Die"))
+                    Game1.powerups.quantities[1]++;
+                if (item.name.Equals("Instakill"))
+                    Game1.powerups.quantities[2]++;
+                if (item.name.Equals("Magnet"))
+                    Game1.powerups.quantities[3]++;
             }
             else //it's a cosmetic
             {
+                if (jeb.ownedHats.Contains(selectedItem.IndexOf(true))) //already owned
+                {
 
+                }
             }
             
         }
         
         public void updateSelection()
         {
-            if (leave)
-            {
-                leave = false;
-            }
-            if (pressedKeys.Contains(Keys.Back))
-            {
-                leave = true;
-                pressedKeys.Clear();
-            }
+            
                 
             oldKeys = pressedKeys;
             MouseState mouse = Mouse.GetState();
@@ -86,7 +88,12 @@ namespace RoomRunner
             mouseX = mouse.X;
             mouseY = mouse.Y;
             pressedKeys = kb.GetPressedKeys().ToList();
-            Rectangle temp = new Rectangle(mouseX, mouseY, 35, 35);
+            
+            Rectangle temp = new Rectangle(mouseX-15, mouseY-15, 30, 30);
+            if (temp.Intersects(backButton) && mouse.LeftButton == ButtonState.Pressed)
+            {
+                Game1.gameState = Game1.GameState.Menu;
+            }
             for (int r = 0; r < 4; r++)
             {
                 for (int c = 0; c < 4; c++)
@@ -98,6 +105,11 @@ namespace RoomRunner
                             selection = grid[r, c];
                             selectionIndexX = r;
                             selectionIndexY = c;
+                            if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                            {
+                                int index = selectedItem.IndexOf(true);
+                                BuyOrEquip(items[index]);
+                            }
                         }
                     }
                     else if (r == 3 && c != 0)
@@ -109,6 +121,11 @@ namespace RoomRunner
                                 selection = grid[r, c];
                                 selectionIndexX = r;
                                 selectionIndexY = c;
+                                if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                                {
+                                    int index = selectedItem.IndexOf(true);
+                                    BuyOrEquip(items[index]);
+                                }
                             }
                         }
 
@@ -198,12 +215,8 @@ namespace RoomRunner
             selectedItem = new List<bool> { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
             selectedItem[(4 * selectionIndexX) + selectionIndexY] = true;
 
-            if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
-            {
-                int index = selectedItem.IndexOf(true);
-                BuyOrEquip(items[index]);
-            }
-            else if (pressedKeys.Contains(Keys.Space) && !oldKeys.Contains(Keys.Space))
+            
+            if (pressedKeys.Contains(Keys.Space) && !oldKeys.Contains(Keys.Space))
             {
                 int index = selectedItem.IndexOf(true);
                 BuyOrEquip(items[index]);
@@ -217,9 +230,9 @@ namespace RoomRunner
             updateSelection();
             spriteBatch.Draw(pixel, new Rectangle(selection.X - 5, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
 
-            spriteBatch.Draw(pixel, backButton, Color.Red);
-            spriteBatch.DrawString(bold, "Back", new Vector2(backButton.X + 40, backButton.Y + 15), Color.Black);
-            spriteBatch.DrawString(font, "(backspace)", new Vector2(backButton.X + 5, backButton.Y + 40), Color.Black);
+            spriteBatch.Draw(pixel, backButton, Color.Green);
+            spriteBatch.DrawString(bold, "Menu", new Vector2(backButton.X + 90, backButton.Y + 30), Color.White);
+            //spriteBatch.DrawString(font, "(backspace)", new Vector2(backButton.X + 5, backButton.Y + 40), Color.Black);
 
             int x = 0;
             int y = 0;

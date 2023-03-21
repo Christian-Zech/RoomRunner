@@ -42,7 +42,7 @@ namespace RoomRunner
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        Powerups powerups;
+        public static Powerups powerups;
         int activePowerupIndex;
         int slowTimeTemp;
 
@@ -563,11 +563,7 @@ namespace RoomRunner
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                if (shop.leave)
-                {
-                    gameState = GameState.Menu;
-                    shop.leave = false;
-                }
+                
                     
             }
             if (gameState == GameState.Music)

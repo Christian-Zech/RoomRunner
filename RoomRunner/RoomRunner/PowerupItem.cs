@@ -12,7 +12,7 @@ using System.Linq;
 namespace RoomRunner
 {
     
-    class PowerupItem
+    public class PowerupItem
     {
         public string id;
         public int duration;
