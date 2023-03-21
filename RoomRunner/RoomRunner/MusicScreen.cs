@@ -39,6 +39,7 @@ namespace RoomRunner
         Color gameColor;
         Color customColor;
 
+
         public List<string> customMusicNames;
 
         public MusicScreen()
@@ -113,7 +114,10 @@ namespace RoomRunner
             {
                 string temp = fileExplorer.Show();
                 if (!temp.Equals(""))
+                {
                     customMusicNames.Add(temp);
+                }
+                    
             }
             else if (mouseRect.Intersects(addMusic) && customMusic)
             {
@@ -202,6 +206,7 @@ namespace RoomRunner
                     
                     count++;
                 }
+                
                 addMusic.Y = 50 + y;
                 spriteBatch.Draw(pixel, addMusic, new Color(75, 75, 75));
                 spriteBatch.DrawString(boldFont, "Add Music", new Vector2(1490, 80+y), Color.Black);
