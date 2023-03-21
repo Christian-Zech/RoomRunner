@@ -468,7 +468,25 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        // no coins yet :(
+                        // pulls coins toward player
+                        foreach(Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
+                        {
+                            foreach(Coin coin in coinsGrid)
+                            {
+                                if(coin != null)
+                                {
+                                    if (coin.rectangle.X > jeb.PlayerRectangle.X)
+                                        coin.rectangle.X -= scrollSpeed + 3;
+                                    if (coin.rectangle.Y > jeb.PlayerRectangle.Y)
+                                        coin.rectangle.Y -= scrollSpeed + 3;
+
+                                    if (coin.rectangle.X < jeb.PlayerRectangle.X)
+                                        coin.rectangle.X += scrollSpeed + 3;
+                                    if (coin.rectangle.Y < jeb.PlayerRectangle.Y)
+                                        coin.rectangle.Y += scrollSpeed + 3;
+                                }
+                            }
+                        }
                     }
                 }
                 else
