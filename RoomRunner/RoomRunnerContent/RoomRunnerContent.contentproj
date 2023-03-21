@@ -111,6 +111,8 @@
   <ItemGroup>
     <Compile Include="Level1\Enemies\Obstacles.png">
       <Name>Obstacles</Name>
+    <Compile Include="Heart.png">
+      <Name>Heart</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -118,6 +120,13 @@
   <ItemGroup>
     <Compile Include="Projectile\Fireball.png">
       <Name>Fireball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Projectile\Inverted Fireball.png">
+      <Name>Inverted Fireball</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
