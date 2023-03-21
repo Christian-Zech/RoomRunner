@@ -104,10 +104,8 @@ namespace RoomRunner
 
                     for (int i = 0; i < numOfProjs; i++)
                     {
-                        int rdmNum = -1;
-                        while (!availablePoints.Contains(rdmNum))
-                            rdmNum = Program.Game.rand.Next(0, Player.frameHeight - Player.floorHeight - 100);
-                        for (int ii = rdmNum - 100; ii < rdmNum; ii++)
+                        int rdmNum = Program.Game.rand.Next(0, availablePoints.Count);
+                        for (int ii = rdmNum - 100; ii < rdmNum && ii <= 0; ii++)
                             availablePoints.Remove(ii);
                         projList.Add(new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-8, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
