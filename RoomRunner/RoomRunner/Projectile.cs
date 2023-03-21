@@ -17,11 +17,11 @@ namespace RoomRunner
         public Point Velocity;
         public bool InFrame;
         public bool DeltDamage;
+        public int Lifespan;
         private OnetimeAnimation anim;
         public bool ToRemove { get { return !InFrame || DeltDamage; } }
 
         private readonly static int FrameWidth, FrameHeight;
-        private static Game1 Game;
 
         public bool DamagesPlayer, DamagesBoss;
         public Point Position
@@ -39,21 +39,33 @@ namespace RoomRunner
             FrameHeight = Game1.window.Height;
 
             Defaults = new Dictionary<Projectiles, Projectile>();
-            List<Projectile> projs = new List<Projectile>();
-
-            projs.Add(new Projectile(new Rectangle(0, 0, 50, 50), 5, new Point(8, 0), OnetimeAnimation.Anims[OnetimeAnims.Fireball].Clone()));
+            List<Projectile> projs = new List<Projectile>
+            {
+                new Projectile(new Rectangle(0, 0, 50, 50), 5, new Point(8, 0), OnetimeAnimation.Anims[OnetimeAnims.Fireball].Clone())
+            };
 
             for (int i = 0; i < projs.Count; i++)
                 Defaults.Add((Projectiles)i, projs[i]);
         }
-        public Projectile(Game1 g, Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, velo, anim, dmgBoss, dmgPlayer, hasGravity)
-        { if (Game == default) Game = g; }
         public Projectile(Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
         {
             this.anim = anim;
             Rect = rect;
             BossDamage = bossDmg;
             Velocity = velo;
+            Lifespan = -1;
+            HasGravity = hasGravity;
+            DamagesBoss = dmgBoss;
+            DamagesPlayer = dmgPlayer;
+            InFrame = true;
+        }
+        public Projectile(Rectangle rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
+        {
+            this.anim = anim;
+            Rect = rect;
+            BossDamage = bossDmg;
+            Velocity = Point.Zero;
+            Lifespan = lifespan;
             HasGravity = hasGravity;
             DamagesBoss = dmgBoss;
             DamagesPlayer = dmgPlayer;
@@ -63,7 +75,9 @@ namespace RoomRunner
         public void Update()
         {
             if (!InFrame) return;
+            if (Lifespan > 0) Lifespan--;
             IsInFrame();
+            if (Lifespan == 0) { InFrame = false; DeltDamage = true; }
             Rect.X += Velocity.X;
             Rect.Y += Velocity.Y;
         }

@@ -10,7 +10,7 @@ namespace RoomRunner
     public class Boss : Animation
     {
         private const int Insets = 20; //in px
-        public const int TimeBetweenPatterns = 30; //in frames
+        public const int TimeBetweenPatterns = 150; //in frames
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;
         public bool DoingPattern;
@@ -18,8 +18,8 @@ namespace RoomRunner
         public static Dictionary<BossPattern, int> PatternTimes;
 
         private Rectangle rect, bossBarRect;
-        public Rectangle Rectangle => rect;
-        public Point Position => new Point(rect.X, rect.Y);
+        public Rectangle Rectangle { get { return rect; } }
+        public Point Position { get { return new Point(rect.X, rect.Y); } }
         public int Health
         {
             get
@@ -39,17 +39,19 @@ namespace RoomRunner
             }
         }
         private int health, maxHealth;
+        private int timer1;
         private float BossBarPercent;
         public bool IsDead;
         public readonly Bosses Name;
         private GraphicsDevice graphics;
-        public List<Projectile> projList;
+        public List<Projectile> projList, projBuffer;
 
         static Boss()
         {
             PatternTimes = new Dictionary<BossPattern, int>
             {
-                [BossPattern.Attack] = 90
+                [BossPattern.Attack] = 90,
+                [BossPattern.Pound] = 180
             };
         }
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
@@ -59,6 +61,7 @@ namespace RoomRunner
             TimeLeftInPattern = 0;
             DoingPattern = false;
             projList = new List<Projectile>();
+            projBuffer = new List<Projectile>();
             graphics = gd;
             rect = new Rectangle(1500,500,200,200);
             MakeAnimation(boss, sheet, gd);
@@ -81,7 +84,7 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = TimeBetweenPatterns;
                 DoingPattern = true;
-                CurrentPattern = BossPattern.Attack;
+                CurrentPattern = BossPattern.Pound;//(BossPattern)Program.Game.rand.Next(0,2);
                 TimeLeftInPattern = PatternTimes[CurrentPattern];
                 InitPattern();
             }
@@ -90,25 +93,44 @@ namespace RoomRunner
         }
         private void FinishPattern()
         {
-
+            DoingPattern = false;
+            switch (CurrentPattern)
+            {
+                case BossPattern.Attack:
+                    projBuffer.Clear();
+                    projList.Clear();
+                    break;
+            }
+            CurrentPattern = default;
         }
         private void InitPattern()
         {
             switch (CurrentPattern)
             {
                 case BossPattern.Attack:
-                    const int numOfProjs = 10;
-                    HashSet<int> availablePoints = new HashSet<int>();
-                    for (int i = 0; i < Player.frameHeight - Player.floorHeight - 100; i++)
+                    timer1 = 0;
+                    const int numOfProjs = 3;
+                    List<int> availablePoints = new List<int>();
+                    for (int i = 10; i < Player.frameHeight - Player.floorHeight - 10; i++)
                         availablePoints.Add(i);
 
-                    for (int i = 0; i < numOfProjs; i++)
+                    for (int i = 0; i < numOfProjs && availablePoints.Count > 0; i++)
                     {
-                        int rdmNum = Program.Game.rand.Next(0, availablePoints.Count);
-                        for (int ii = rdmNum - 100; ii < rdmNum && ii <= 0; ii++)
+                        int rdmNum = availablePoints.ElementAt(Program.Game.rand.Next(0, availablePoints.Count));
+                        for (int ii = rdmNum - 100; ii <= rdmNum + 100; ii++)
                             availablePoints.Remove(ii);
-                        projList.Add(new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-8, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-24, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
+                    }
+                    break;
+                case BossPattern.Pound:
+                    timer1 = 0;
+                    int floor = Game1.window.Height - Player.floorHeight;
+                    for (int x = Game1.window.Width; x > 0; x -= 100)
+                    {
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-30, 100, 30), 0, 3, default, false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-60, 100, 60), 0, 3, default, false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-90, 100, 90), 0, 3, default, false, true));
                     }
                     break;
             }
@@ -118,7 +140,36 @@ namespace RoomRunner
             switch (CurrentPattern)
             {
                 case BossPattern.Attack:
+                    if (timer1 > 0) timer1--;
+                    else
+                    {
+                        timer1 = 30;
+                        for (int i = 0; i < projBuffer.Count; i++)
+                            if (projBuffer[i] != null)
+                            {
+                                projList.Add(projBuffer[i]);
+                                projBuffer[i] = null;
+                                break;
+                            }
+                    }
                     Program.Game.UpdateProjList(projList);
+                    break;
+                case BossPattern.Pound:
+                    if (timer1 > 0) timer1--;
+                    else
+                    {
+                        timer1 = 3;
+                        for (int i = 0; i < projBuffer.Count; i++)
+                            if (projBuffer[i] != null)
+                            {
+                                projList.Add(projBuffer[i]);
+                                projBuffer[i] = null;
+                                break;
+                            }
+                    }
+                    Program.Game.UpdateProjList(projList);
+                    break;
+                default:
                     break;
             }
         }
@@ -168,6 +219,7 @@ namespace RoomRunner
     }
     public enum BossPattern
     {
-        Attack
+        Attack,
+        Pound
     }
 }
