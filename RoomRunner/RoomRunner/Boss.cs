@@ -125,12 +125,14 @@ namespace RoomRunner
                     break;
                 case BossPattern.Pound:
                     timer1 = 0;
-                    int floor = Game1.window.Height - Player.floorHeight;
+                    int floor = Game1.window.Height - Player.floorHeight - 30;
+                    Texture2D sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
+                    Rectangle[] rects = Player.LoadSheet(3, 3, 32, 32, 1);
                     for (int x = Game1.window.Width; x > 0; x -= 100)
                     {
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-30, 100, 30), 0, 3, default, false, true));
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-60, 100, 60), 0, 3, default, false, true));
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-90, 100, 90), 0, 3, default, false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-30, 100, 30), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-60, 100, 60), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
+                        projBuffer.Add(new Projectile(new Rectangle(x, floor-90, 100, 90), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
                     }
                     break;
             }

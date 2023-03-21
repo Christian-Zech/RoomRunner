@@ -109,8 +109,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Level1\Enemies\Obstacles.png">
-      <Name>Obstacles</Name>
+	  <Compile Include="Level1\Enemies\Obstacles.png">
+		  <Name>Obstacles</Name>
+	  </Compile>
     <Compile Include="Heart.png">
       <Name>Heart</Name>
       <Importer>TextureImporter</Importer>
