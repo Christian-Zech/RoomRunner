@@ -34,10 +34,12 @@ namespace RoomRunner
         public int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
+        public List<PlayerHats> ownedHats;
         private readonly Game1 game;
         
         static Player()
         {
+            
             Hats = new Dictionary<PlayerHats, Texture2D>();
             ceilingHeight = frameHeight;
             floorHeight = 0;
@@ -50,6 +52,7 @@ namespace RoomRunner
         public Player(Game1 game) : base(States)
         {
             this.game = game;
+            ownedHats = new List<PlayerHats>();
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
             IsAlive = true;

@@ -234,7 +234,7 @@ namespace RoomRunner
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
             items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-            shop = new Shop(items);
+            shop = new Shop(items, jeb);
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             

@@ -21,9 +21,12 @@ namespace RoomRunner
         public bool leave;
         int mouseX, mouseY, selectionIndexX, selectionIndexY;
         List<Keys> pressedKeys, oldKeys;
+        public MouseState oldMouse;
+        Player jeb;
 
-        public Shop(List<ShopItem> itemList)
+        public Shop(List<ShopItem> itemList, Player j)
         {
+            jeb = j;
             items = itemList;
             leave = false;
             selectedItem = new List<bool> { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
@@ -46,12 +49,25 @@ namespace RoomRunner
             selection = grid[0, 0];
             selectionIndexX = 0;
             selectionIndexY = 0;
+            oldMouse = Mouse.GetState();
         }
-        //public void Buy(ShopItem item, Player jeb)
-        //{
-        //if jeb's money is greater than or equal to the items price
-        //add it to players item list and subtract their money
-        //}
+        public void updateJeb(Player j) //keeping the shop's version of jeb up to date
+        {
+            jeb = j;
+        }
+        public void BuyOrEquip(ShopItem item)
+        {
+            if (item.name.Equals("Time Control") && item.name.Equals("Can't Die") && item.name.Equals("Instakill") && item.name.Equals("Magnet")) //powerups can only be bought
+            {
+
+            }
+            else //it's a cosmetic
+            {
+
+            }
+            
+        }
+        
         public void updateSelection()
         {
             if (leave)
@@ -181,7 +197,19 @@ namespace RoomRunner
             }
             selectedItem = new List<bool> { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
             selectedItem[(4 * selectionIndexX) + selectionIndexY] = true;
-           
+
+            if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+            {
+                int index = selectedItem.IndexOf(true);
+                BuyOrEquip(items[index]);
+            }
+            else if (pressedKeys.Contains(Keys.Space) && !oldKeys.Contains(Keys.Space))
+            {
+                int index = selectedItem.IndexOf(true);
+                BuyOrEquip(items[index]);
+            }
+
+            oldMouse = mouse;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
