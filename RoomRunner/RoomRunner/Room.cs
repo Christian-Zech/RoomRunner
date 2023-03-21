@@ -139,6 +139,20 @@ namespace RoomRunner
                 enemyArray.Remove(e);
             generateEnemies(hasOverlap.Count);
         }
+        public void RemoveOverlap(List<Rectangle> list)
+        {
+            List<Rectangle> hasOverlap = new List<Rectangle>();
+            for (int i1 = 0; i1 < list.Count; i1++)
+                for (int i2 = i1 + 1; i2 < list.Count; i2++)
+                    if (list[i1].Intersects(list[i2]))
+                    {
+                        hasOverlap.Add(list[i1]);
+                        hasOverlap.Add(list[i2]);
+                    }
+            if (hasOverlap.Count == 0) return;
+            foreach (Rectangle e in hasOverlap)
+                list.Remove(e);
+        }
 
         // makes the game scroll by moving the background to the left. Also controls enemies.
         public void Update(int scrollSpeed)
