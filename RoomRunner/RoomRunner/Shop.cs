@@ -17,6 +17,7 @@ namespace RoomRunner
         public List<ShopItem> items;
         public List<bool> selectedItem;
         public Rectangle[,] grid;
+        public int[,] boughtItems; //0 for nothing, 1 for bought, 2 for equipped
         public Rectangle selection; //highlights background of currently selected item
         public Rectangle backButton;
         public bool leave;
@@ -27,6 +28,7 @@ namespace RoomRunner
 
         public Shop(List<ShopItem> itemList, Player j)
         {
+            boughtItems = new int[4, 4];
             timeBuffer = 30;
             jeb = j;
             items = itemList;
@@ -39,6 +41,7 @@ namespace RoomRunner
             {
                 for (int c = 0; c < 4; c++)
                 {
+                    boughtItems[r, c] = 0;
                     grid[r, c] = new Rectangle(x, y, 80, 80);
                     x += 150;
                 }
@@ -80,6 +83,17 @@ namespace RoomRunner
             {
                 if ((selectedItem.IndexOf(true) < 11 && jeb.ownedHats.Contains(selectedItem.IndexOf(true)-3)) || (selectedItem.IndexOf(true) == 11 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 1)) || (selectedItem.IndexOf(true) == 13 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 2)) || (selectedItem.IndexOf(true) == 14 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 2))) //already owned
                 {
+                    for (int r = 0; r < 4; r++)
+                    {
+                        for (int c = 0; c < 4; c++)
+                        {
+                            if (boughtItems[r,c] == 2)
+                            {
+                                boughtItems[r, c] = 1;
+                            }
+                        }
+                    }
+                    boughtItems[selectionIndexX, selectionIndexY] = 2;
                     if (selectedItem.IndexOf(true) < 11)
                         jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true)-3;
                     if (selectedItem.IndexOf(true) == 11)
@@ -91,6 +105,17 @@ namespace RoomRunner
                 {
                     if (jeb.Coins >= item.price) //has enough coins to buy
                     {
+                        for (int r = 0; r < 4; r++)
+                        {
+                            for (int c = 0; c < 4; c++)
+                            {
+                                if (boughtItems[r, c] == 2)
+                                {
+                                    boughtItems[r, c] = 1;
+                                }
+                            }
+                        }
+                        boughtItems[selectionIndexX, selectionIndexY] = 2;
                         jeb.Coins -= item.price;
                         //special cases because when i first set up the selection index i was stupid
                         if (selectedItem.IndexOf(true) == 11)
@@ -273,7 +298,7 @@ namespace RoomRunner
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
             updateSelection();
-            spriteBatch.Draw(pixel, new Rectangle(selection.X - 5, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
+            spriteBatch.Draw(pixel, new Rectangle(selection.X - 10, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Green);
             spriteBatch.DrawString(bold, "Menu", new Vector2(backButton.X + 90, backButton.Y + 30), Color.White);
@@ -283,6 +308,21 @@ namespace RoomRunner
             int temp = 0;
             spriteBatch.DrawString(title, "SHOP", new Vector2(780, 40), Color.Black);
             spriteBatch.DrawString(font, "(space/click to buy)", new Vector2(790, 170), Color.Black);
+
+            //drawing green background for owned items
+            for (int r = 0; r < 4; r++)
+            {
+                for (int c = 0; c < 4; c++)
+                {
+                    if (boughtItems[r, c] == 1)
+                        spriteBatch.Draw(pixel, new Rectangle(grid[r, c].X-10, grid[r,c].Y-10, grid[r,c].Width+10, grid[r,c].Height+20), new Color(0, 60, 0, 110));
+                    if (boughtItems[r, c] == 2)
+                        spriteBatch.Draw(pixel, new Rectangle(grid[r, c].X - 10, grid[r, c].Y - 10, grid[r, c].Width + 10, grid[r, c].Height + 20), new Color(0, 60, 0, 160));
+                    Console.WriteLine(boughtItems[r, c]);
+                }
+            }
+
+            //drawing items n stuff
             for (int i = 0; i < items.Count; i++)
             {
                 temp = 0;
@@ -340,7 +380,7 @@ namespace RoomRunner
 
             }
 
-
+            
 
 
         }
