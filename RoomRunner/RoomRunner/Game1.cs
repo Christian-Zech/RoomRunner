@@ -84,6 +84,8 @@ namespace RoomRunner
         int songTimeElapsed;
         int fileOpenCount = 0;
 
+
+
         public enum GameState
         {
             Menu,
@@ -342,6 +344,7 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
@@ -468,6 +471,7 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
+                        
                         // pulls coins toward player
                         foreach(Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
                         {
@@ -475,15 +479,25 @@ namespace RoomRunner
                             {
                                 if(coin != null)
                                 {
+
+                                    int distanceX = Math.Abs(coin.rectangle.X - jeb.PlayerRectangle.X);
+                                    int distanceY = Math.Abs(coin.rectangle.Y - jeb.PlayerRectangle.Y);
+                                    Console.WriteLine(distanceY);
+                                    Console.WriteLine(distanceX);
+
                                     if (coin.rectangle.X > jeb.PlayerRectangle.X)
-                                        coin.rectangle.X -= scrollSpeed + 3;
+                                        coin.rectangle.X -= (3 + scrollSpeed) / distanceX;
                                     if (coin.rectangle.Y > jeb.PlayerRectangle.Y)
-                                        coin.rectangle.Y -= scrollSpeed + 3;
+                                        coin.rectangle.Y -= (3 + scrollSpeed) / distanceY;
 
                                     if (coin.rectangle.X < jeb.PlayerRectangle.X)
-                                        coin.rectangle.X += scrollSpeed + 3;
+                                        coin.rectangle.X += (3 + scrollSpeed) / distanceX;
                                     if (coin.rectangle.Y < jeb.PlayerRectangle.Y)
-                                        coin.rectangle.Y += scrollSpeed + 3;
+                                        coin.rectangle.Y += (3 + scrollSpeed) / distanceY;
+
+
+
+
                                 }
                             }
                         }
