@@ -11,6 +11,7 @@ namespace RoomRunner
     {
         private const int Insets = 20; //in px
         public const int TimeBetweenPatterns = 150; //in frames
+        public const double SpeedMultiplier = 2;
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;
         public bool DoingPattern;
@@ -41,7 +42,7 @@ namespace RoomRunner
         private int health, maxHealth;
         private int timer1;
         private float BossBarPercent;
-        public bool IsDead, FlipProj;
+        public bool IsDead, FlipProjX, FlipProjY;
         public readonly Bosses Name;
         private GraphicsDevice graphics;
         public List<ProjectileClump> projList, projBuffer;
@@ -51,13 +52,15 @@ namespace RoomRunner
             PatternTimes = new Dictionary<BossPattern, int>
             {
                 [BossPattern.Attack] = 90,
-                [BossPattern.Pound] = 300
+                [BossPattern.Pound] = 300,
+                [BossPattern.BigPound_Bottom] = 300,
+                [BossPattern.BigPound_Top] = 300
             };
         }
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
         {
             Name = boss;
-            TimeBeforeNextPattern = TimeBetweenPatterns;
+            TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
             TimeLeftInPattern = 0;
             DoingPattern = false;
             projList = new List<ProjectileClump>();
@@ -68,7 +71,7 @@ namespace RoomRunner
             maxHealth = this.health = health;
             BossBarPercent = 1.0f;
             IsDead = false;
-            FlipProj = false;
+            FlipProjX = FlipProjY = false;
             bossBarRect = new Rectangle(Insets, 900, 1900 - Insets * 2, 50);
         }
 
@@ -81,12 +84,12 @@ namespace RoomRunner
                 if (TimeLeftInPattern == 0)
                     FinishPattern();
             }
-            if (TimeBeforeNextPattern-- <= 0)
+            else if (TimeBeforeNextPattern-- <= 0)
             {
-                TimeBeforeNextPattern = TimeBetweenPatterns;
+                TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = BossPattern.Pound;//(BossPattern)Program.Game.rand.Next(0,2);
-                TimeLeftInPattern = PatternTimes[CurrentPattern];
+                CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 4);
+                TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }
             if (DoingPattern)
@@ -98,21 +101,30 @@ namespace RoomRunner
             switch (CurrentPattern)
             {
                 case BossPattern.Attack:
-                    projBuffer.Clear();
-                    projList.Clear();
+                    break;
+                case BossPattern.Pound:
+                    break;
+                case BossPattern.BigPound_Bottom:
                     break;
             }
+            projBuffer.Clear();
+            projList.Clear();
             CurrentPattern = default;
         }
         private void InitPattern()
         {
+            int numOfProjs, floor, ceiling, frames;
+            List<int> availablePoints;
+            Rectangle[] rects;
+            Texture2D sheet;
             switch (CurrentPattern)
             {
                 case BossPattern.Attack:
                     timer1 = 0;
-                    FlipProj = true;
-                    const int numOfProjs = 3;
-                    List<int> availablePoints = new List<int>();
+                    FlipProjX = true;
+                    FlipProjY = false;
+                    numOfProjs = 3;
+                    availablePoints = new List<int>();
                     for (int i = 10; i < Player.frameHeight - Player.floorHeight - 10; i++)
                         availablePoints.Add(i);
 
@@ -121,27 +133,69 @@ namespace RoomRunner
                         int rdmNum = availablePoints.ElementAt(Program.Game.rand.Next(0, availablePoints.Count));
                         for (int ii = rdmNum - 100; ii <= rdmNum + 100; ii++)
                             availablePoints.Remove(ii);
-                        projBuffer.Add(new ProjectileClump(FlipProj, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-24, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
+                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point((int)(-24 * SpeedMultiplier), 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
                     }
                     break;
                 case BossPattern.Pound:
                     timer1 = 0;
-                    FlipProj = false;
-                    int floor = Game1.window.Height - Player.floorHeight;
-                    Texture2D sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
-                    Rectangle[] rects = Player.LoadSheet(3, 3, 32, 32, 1);
+                    FlipProjX = false;
+                    FlipProjY = false;
+                    floor = Game1.window.Height - Player.floorHeight;
+                    sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
+                    rects = Player.LoadSheet(3, 3, 32, 32, 1);
+                    frames = (int)(6 / SpeedMultiplier);
                     for (int x = Game1.window.Width; x > 0; x -= 100)
                     {
                         List<Projectile> toClump = new List<Projectile>
                         {
-                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 90, 100, 90), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 90, 100, 90), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
                         };
-                        projBuffer.Add(new ProjectileClump(FlipProj, toClump.ToArray()));
+                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
+                    }
+                    break;
+                case BossPattern.BigPound_Bottom:
+                    FlipProjX = false;
+                    FlipProjY = false;
+                    floor = Game1.window.Height - Player.floorHeight;
+                    sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
+                    rects = Player.LoadSheet(3, 3, 32, 32, 1);
+                    frames = (int)(12 / SpeedMultiplier);
+                    for (int x = Game1.window.Width; x >= 0; x -= 100)
+                    {
+                        List<Projectile> toClump = new List<Projectile>
+                        {
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 180, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                        };
+                        projList.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
+                    }
+                    break;
+                case BossPattern.BigPound_Top:
+                    FlipProjX = false;
+                    FlipProjY = true;
+                    ceiling = Game1.window.Height - Player.ceilingHeight + 20; //20 for inset
+                    sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
+                    rects = Player.LoadSheet(3, 3, 32, 32, 1);
+                    frames = (int)(12 / SpeedMultiplier);
+                    for (int x = Game1.window.Width; x >= 0; x -= 100)
+                    {
+                        List<Projectile> toClump = new List<Projectile>
+                        {
+                            new Projectile(new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, ceiling, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                        };
+                        projList.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
                     }
                     break;
             }
@@ -154,7 +208,7 @@ namespace RoomRunner
                     if (timer1 > 0) timer1--;
                     else
                     {
-                        timer1 = 30;
+                        timer1 = (int)(30 / SpeedMultiplier);
                         for (int i = 0; i < projBuffer.Count; i++)
                             if (projBuffer[i] != null)
                             {
@@ -168,7 +222,7 @@ namespace RoomRunner
                     if (timer1 > 0) timer1--;
                     else
                     {
-                        timer1 = 10;
+                        timer1 = (int)(10 / SpeedMultiplier);
                         for (int i = 0; i < projBuffer.Count; i++)
                             if (projBuffer[i] != null)
                             {
@@ -178,7 +232,7 @@ namespace RoomRunner
                             }
                     }
                     break;
-                default:
+                case BossPattern.BigPound_Bottom:
                     break;
             }
         }
@@ -229,6 +283,8 @@ namespace RoomRunner
     public enum BossPattern
     {
         Attack,
-        Pound
+        Pound,
+        BigPound_Bottom,
+        BigPound_Top
     }
 }

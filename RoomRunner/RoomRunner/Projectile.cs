@@ -17,6 +17,7 @@ namespace RoomRunner
         public Point Velocity;
         public bool InFrame;
         public bool DeltDamage;
+        public bool Persists;
         public int Lifespan;
         private OnetimeAnimation anim;
         public bool ToRemove { get { return !InFrame || DeltDamage; } }
@@ -59,6 +60,10 @@ namespace RoomRunner
             DamagesPlayer = dmgPlayer;
             InFrame = true;
         }
+        public Projectile(bool persists, Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, velo, anim, dmgBoss, dmgPlayer, hasGravity)
+        {
+            Persists = persists;
+        }
         public Projectile(Rectangle rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
         {
             this.anim = anim;
@@ -69,7 +74,12 @@ namespace RoomRunner
             HasGravity = hasGravity;
             DamagesBoss = dmgBoss;
             DamagesPlayer = dmgPlayer;
+            Persists = false;
             InFrame = true;
+        }
+        public Projectile(bool persists, Rectangle rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, lifespan, anim, dmgBoss, dmgPlayer, hasGravity)
+        {
+            Persists = persists;
         }
 
         public void Update()
@@ -83,7 +93,7 @@ namespace RoomRunner
         }
         private void IsInFrame()
         {
-            if (!InFrame) return;
+            if (!InFrame || Persists) return;
             bool a, b, c, d;
             a = Rect.X + Rect.Width < 0;
             b = Rect.X > FrameWidth;
@@ -94,13 +104,15 @@ namespace RoomRunner
         public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
-            Draw(sb, false);
+            Draw(sb, false, false);
         }
-        public void Draw(SpriteBatch sb, bool flip)
+        public void Draw(SpriteBatch sb, bool flipX, bool flipY)
         {
             if (anim == default) sb.Draw(Game1.pixel, Rect, Color.Red);
-            else if (flip)
+            else if (flipX)
                 sb.Draw(anim.CurrentTexture, Rect, null, Color.White, 0.0f, new Vector2(16, 16), SpriteEffects.FlipHorizontally, 0.0f);
+            else if (flipY)
+                sb.Draw(anim.CurrentTexture, Rect, null, Color.White, 0.0f, new Vector2(16, 16), SpriteEffects.FlipVertically, 0.0f);
             else
                 sb.Draw(anim.CurrentTexture, Rect, Color.White);
         }
@@ -108,13 +120,14 @@ namespace RoomRunner
     public class ProjectileClump
     {
         public Queue<Projectile> projs;
-        public bool Flip, Delete;
+        public bool FlipX, FlipY, Delete;
         public Projectile Current { get { return projs.Peek(); } }
 
-        public ProjectileClump(bool flip, params Projectile[] projs)
+        public ProjectileClump(bool flipX, bool flipY, params Projectile[] projs)
         {
             this.projs = new Queue<Projectile>(projs);
-            Flip = flip;
+            FlipX = flipX;
+            FlipY = flipY;
             Delete = false;
         }
 
@@ -128,7 +141,7 @@ namespace RoomRunner
                 Delete = true;
                 return;
             }
-            Current.Draw(sb, Flip);
+            Current.Draw(sb, FlipX, FlipY);
         }
     }
     public enum Projectiles
