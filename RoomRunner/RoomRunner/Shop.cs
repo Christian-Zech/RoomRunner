@@ -13,6 +13,7 @@ namespace RoomRunner
 {
     class Shop
     {
+        int timeBuffer;
         public List<ShopItem> items;
         public List<bool> selectedItem;
         public Rectangle[,] grid;
@@ -26,6 +27,7 @@ namespace RoomRunner
 
         public Shop(List<ShopItem> itemList, Player j)
         {
+            timeBuffer = 30;
             jeb = j;
             items = itemList;
             leave = false;
@@ -57,30 +59,72 @@ namespace RoomRunner
         }
         public void BuyOrEquip(ShopItem item)
         {
-            if (item.name.Equals("Time Control") && item.name.Equals("Can't Die") && item.name.Equals("Instakill") && item.name.Equals("Magnet")) //powerups can only be bought
+            if (item.name.Equals("Time Control") || item.name.Equals("Can't Die") || item.name.Equals("Instakill") || item.name.Equals("Magnet")) //powerups can only be bought
             {
-                if (item.name.Equals("Time Control"))
-                    Game1.powerups.quantities[0]++;
-                if (item.name.Equals("Can't Die"))
-                    Game1.powerups.quantities[1]++;
-                if (item.name.Equals("Instakill"))
-                    Game1.powerups.quantities[2]++;
-                if (item.name.Equals("Magnet"))
-                    Game1.powerups.quantities[3]++;
+                if (jeb.Coins >= item.price) //all of this works
+                {
+                    if (item.name.Equals("Time Control"))
+                        Game1.powerups.quantities[0]++;
+                    if (item.name.Equals("Can't Die"))
+                        Game1.powerups.quantities[1]++;
+                    if (item.name.Equals("Instakill"))
+                        Game1.powerups.quantities[2]++;
+                    if (item.name.Equals("Magnet"))
+                        Game1.powerups.quantities[3]++;
+                    jeb.Coins -= item.price;
+                }
+                
+                return;
             }
             else //it's a cosmetic
             {
-                if (jeb.ownedHats.Contains(selectedItem.IndexOf(true))) //already owned
+                if ((selectedItem.IndexOf(true) < 11 && jeb.ownedHats.Contains(selectedItem.IndexOf(true)-3)) || (selectedItem.IndexOf(true) == 11 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 1)) || (selectedItem.IndexOf(true) == 13 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 2)) || (selectedItem.IndexOf(true) == 14 && jeb.ownedHats.Contains(selectedItem.IndexOf(true) - 2))) //already owned
                 {
+                    if (selectedItem.IndexOf(true) < 11)
+                        jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true)-3;
+                    if (selectedItem.IndexOf(true) == 11)
+                        jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 1;
+                    else
+                        jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 2;
+                }
+                else
+                {
+                    if (jeb.Coins >= item.price) //has enough coins to buy
+                    {
+                        jeb.Coins -= item.price;
+                        //special cases because when i first set up the selection index i was stupid
+                        if (selectedItem.IndexOf(true) == 11)
+                        {
+                            jeb.ownedHats.Add(selectedItem.IndexOf(true) - 1);
+                            jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 1;
+                        }
+                        else if (selectedItem.IndexOf(true) == 13)
+                        {
+                            jeb.ownedHats.Add(selectedItem.IndexOf(true) - 2);
+                            jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 2;
+                        }
+                        else if (selectedItem.IndexOf(true) == 14)
+                        {
+                            jeb.ownedHats.Add(selectedItem.IndexOf(true) - 2);
+                            jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 2;
+                        }
+                        else
+                        {
+                            jeb.ownedHats.Add(selectedItem.IndexOf(true) - 3);
+                            jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 3;
+                        }
+                            
 
+                    }
                 }
             }
-            
+            //Console.WriteLine(jeb.ownedHats);
         }
         
         public void updateSelection()
         {
-            
+            if (timeBuffer != 0)
+                timeBuffer--;
                 
             oldKeys = pressedKeys;
             MouseState mouse = Mouse.GetState();
@@ -92,6 +136,7 @@ namespace RoomRunner
             Rectangle temp = new Rectangle(mouseX-15, mouseY-15, 30, 30);
             if (temp.Intersects(backButton) && mouse.LeftButton == ButtonState.Pressed)
             {
+                timeBuffer = 30;
                 Game1.gameState = Game1.GameState.Menu;
             }
             for (int r = 0; r < 4; r++)
@@ -105,7 +150,7 @@ namespace RoomRunner
                             selection = grid[r, c];
                             selectionIndexX = r;
                             selectionIndexY = c;
-                            if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                            if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released && timeBuffer == 0)
                             {
                                 int index = selectedItem.IndexOf(true);
                                 BuyOrEquip(items[index]);
@@ -232,7 +277,6 @@ namespace RoomRunner
 
             spriteBatch.Draw(pixel, backButton, Color.Green);
             spriteBatch.DrawString(bold, "Menu", new Vector2(backButton.X + 90, backButton.Y + 30), Color.White);
-            //spriteBatch.DrawString(font, "(backspace)", new Vector2(backButton.X + 5, backButton.Y + 40), Color.Black);
 
             int x = 0;
             int y = 0;
@@ -256,7 +300,7 @@ namespace RoomRunner
                 if (items[i].name.Equals("Coin"))
                 {
                     spriteBatch.Draw(items[i].tex, new Rectangle(1650, 120, 60, 60), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
-                    spriteBatch.DrawString(font, "Current coins:", new Vector2(1600, 180), Color.Black);
+                    spriteBatch.DrawString(font, "   Coins: " + jeb.Coins, new Vector2(1600, 190), Color.Black);
                 }
                 else
                 {
