@@ -79,7 +79,7 @@ namespace RoomRunner
         {
             Rectangle[] rects = LoadSheet(5, 5, 32, 32, 1);
             Texture2D sheet = game.cosmeticSheet;
-            for (int i = 1, c = 0; i < rects.Length - 1; i += 2, c++)
+            for (int i = 1, c = 0; i < rects.Length; i += 2, c++)
                 Hats[(PlayerHats)c + 1] = RectToTxt(game.graphics.GraphicsDevice, sheet, rects[i])[0];
         }
         private void MakePlayerAnimations(Game1 game)

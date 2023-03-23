@@ -41,17 +41,17 @@ namespace RoomRunner
         private int health, maxHealth;
         private int timer1;
         private float BossBarPercent;
-        public bool IsDead;
+        public bool IsDead, FlipProj;
         public readonly Bosses Name;
         private GraphicsDevice graphics;
-        public List<Projectile> projList, projBuffer;
+        public List<ProjectileClump> projList, projBuffer;
 
         static Boss()
         {
             PatternTimes = new Dictionary<BossPattern, int>
             {
                 [BossPattern.Attack] = 90,
-                [BossPattern.Pound] = 180
+                [BossPattern.Pound] = 300
             };
         }
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
@@ -60,14 +60,15 @@ namespace RoomRunner
             TimeBeforeNextPattern = TimeBetweenPatterns;
             TimeLeftInPattern = 0;
             DoingPattern = false;
-            projList = new List<Projectile>();
-            projBuffer = new List<Projectile>();
+            projList = new List<ProjectileClump>();
+            projBuffer = new List<ProjectileClump>();
             graphics = gd;
             rect = new Rectangle(1500,500,200,200);
             MakeAnimation(boss, sheet, gd);
             maxHealth = this.health = health;
             BossBarPercent = 1.0f;
             IsDead = false;
+            FlipProj = false;
             bossBarRect = new Rectangle(Insets, 900, 1900 - Insets * 2, 50);
         }
 
@@ -109,6 +110,7 @@ namespace RoomRunner
             {
                 case BossPattern.Attack:
                     timer1 = 0;
+                    FlipProj = true;
                     const int numOfProjs = 3;
                     List<int> availablePoints = new List<int>();
                     for (int i = 10; i < Player.frameHeight - Player.floorHeight - 10; i++)
@@ -119,20 +121,27 @@ namespace RoomRunner
                         int rdmNum = availablePoints.ElementAt(Program.Game.rand.Next(0, availablePoints.Count));
                         for (int ii = rdmNum - 100; ii <= rdmNum + 100; ii++)
                             availablePoints.Remove(ii);
-                        projBuffer.Add(new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-24, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true));
+                        projBuffer.Add(new ProjectileClump(FlipProj, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point(-24, 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
                     }
                     break;
                 case BossPattern.Pound:
                     timer1 = 0;
-                    int floor = Game1.window.Height - Player.floorHeight - 30;
+                    FlipProj = false;
+                    int floor = Game1.window.Height - Player.floorHeight;
                     Texture2D sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
                     Rectangle[] rects = Player.LoadSheet(3, 3, 32, 32, 1);
                     for (int x = Game1.window.Width; x > 0; x -= 100)
                     {
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-30, 100, 30), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-60, 100, 60), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
-                        projBuffer.Add(new Projectile(new Rectangle(x, floor-90, 100, 90), 0, 4, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true));
+                        List<Projectile> toClump = new List<Projectile>
+                        {
+                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 90, 100, 90), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, 6, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                        };
+                        projBuffer.Add(new ProjectileClump(FlipProj, toClump.ToArray()));
                     }
                     break;
             }
@@ -154,13 +163,12 @@ namespace RoomRunner
                                 break;
                             }
                     }
-                    Program.Game.UpdateProjList(projList);
                     break;
                 case BossPattern.Pound:
                     if (timer1 > 0) timer1--;
                     else
                     {
-                        timer1 = 3;
+                        timer1 = 10;
                         for (int i = 0; i < projBuffer.Count; i++)
                             if (projBuffer[i] != null)
                             {
@@ -169,7 +177,6 @@ namespace RoomRunner
                                 break;
                             }
                     }
-                    Program.Game.UpdateProjList(projList);
                     break;
                 default:
                     break;
@@ -182,9 +189,9 @@ namespace RoomRunner
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
 
-            foreach (Projectile p in projList)
+            foreach (ProjectileClump p in projList)
             {
-                p.Draw(sb, true);
+                p.DrawAndUpdate(sb);
             }
         }
         public new Boss Clone() { return new Boss(Name, health, LastUsedSheet, graphics); }

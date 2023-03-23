@@ -487,23 +487,27 @@ namespace RoomRunner
             List<Projectile> toRemove = new List<Projectile>();
             foreach (Projectile p in list)
             {
-                p.Update();
-
-                if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
-                {
-                    currentBoss.Damage(p.BossDamage);
-                    p.DeltDamage = true;
-                }
-                if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
-                {
-                    jeb.Damage();
-                    p.DeltDamage = true;
-                }
+                UpdateProjectile(p);
 
                 if (p.ToRemove) toRemove.Add(p);
             }
             foreach (Projectile p in toRemove)
                 list.Remove(p);
+        }
+        public void UpdateProjectile(Projectile p)
+        {
+            p.Update();
+
+            if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+            {
+                currentBoss.Damage(p.BossDamage);
+                p.DeltDamage = true;
+            }
+            if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
+            {
+                jeb.Damage();
+                p.DeltDamage = true;
+            }
         }
 
         private void Reset()
@@ -599,7 +603,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)

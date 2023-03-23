@@ -105,6 +105,32 @@ namespace RoomRunner
                 sb.Draw(anim.CurrentTexture, Rect, Color.White);
         }
     }
+    public class ProjectileClump
+    {
+        public Queue<Projectile> projs;
+        public bool Flip, Delete;
+        public Projectile Current { get { return projs.Peek(); } }
+
+        public ProjectileClump(bool flip, params Projectile[] projs)
+        {
+            this.projs = new Queue<Projectile>(projs);
+            Flip = flip;
+            Delete = false;
+        }
+
+        public void DrawAndUpdate(SpriteBatch sb)
+        {
+            if (Delete) return;
+            Program.Game.UpdateProjectile(Current);
+            if (!Current.InFrame || Current.DeltDamage) projs.Dequeue();
+            if (projs.Count == 0)
+            {
+                Delete = true;
+                return;
+            }
+            Current.Draw(sb, Flip);
+        }
+    }
     public enum Projectiles
     {
         PlayerShot
