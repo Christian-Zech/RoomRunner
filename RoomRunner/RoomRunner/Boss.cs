@@ -10,7 +10,7 @@ namespace RoomRunner
     public class Boss : Animation
     {
         private const int Insets = 20; //in px
-        public const int TimeBetweenPatterns = 150; //in frames
+        public const int TimeBetweenPatterns = 50; //in frames
         public const double SpeedMultiplier = 2;
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;

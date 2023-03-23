@@ -241,6 +241,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
+            jeb.Invulnerable = true;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 

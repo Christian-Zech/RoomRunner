@@ -27,7 +27,7 @@ namespace RoomRunner
         public static float JumpMultiplier;
         public static float GravityMultiplier;
 
-        public bool IsAlive, Shown;
+        public bool IsAlive, Shown, Invulnerable;
         public Vector2 Velocity, Position, Acceleration;
         public Rectangle PlayerRectangle, HatRectangle;
         private bool wasStateSet, onGround;
@@ -65,6 +65,7 @@ namespace RoomRunner
             Acceleration.Y = Gravity * GravityMultiplier;
             wasStateSet = false;
             Idle = false;
+            Invulnerable = false;
             delayLeft = InputDelay;
             currentHat = PlayerHats.Bandana;
             Coins = 0;
@@ -202,7 +203,7 @@ namespace RoomRunner
         }
         public void Damage()
         {
-            if (InvinciblityTimer > 0) return;
+            if (InvinciblityTimer > 0 || Invulnerable) return;
             Health--;
             if (Health <= 0)
                 IsAlive = false;
