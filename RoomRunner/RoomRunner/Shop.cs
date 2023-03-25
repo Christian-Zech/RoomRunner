@@ -24,12 +24,21 @@ namespace RoomRunner
         int mouseX, mouseY, selectionIndexX, selectionIndexY;
         List<Keys> pressedKeys, oldKeys;
         public MouseState oldMouse;
+        Texture2D texture;
+        Rectangle source;
+        string currentHatName;
+        Texture2D equippedHat;
+        Rectangle equippedRect;
         Player jeb;
 
-        public Shop(List<ShopItem> itemList, Player j)
+        public Shop(List<ShopItem> itemList, Player j, Texture2D tex, Rectangle s)
         {
+            equippedRect = new Rectangle(300, 410, 100, 100);
+            source = s;
+            texture = tex;
             boughtItems = new int[4, 4];
             timeBuffer = 30;
+            currentHatName = "None";
             jeb = j;
             items = itemList;
             leave = false;
@@ -55,6 +64,7 @@ namespace RoomRunner
             selectionIndexX = 0;
             selectionIndexY = 0;
             oldMouse = Mouse.GetState();
+            
         }
         public void updateJeb(Player j) //keeping the shop's version of jeb up to date
         {
@@ -90,13 +100,14 @@ namespace RoomRunner
                             if (boughtItems[r,c] == 2)
                             {
                                 boughtItems[r, c] = 1;
+                                break;
                             }
                         }
                     }
                     boughtItems[selectionIndexX, selectionIndexY] = 2;
                     if (selectedItem.IndexOf(true) < 11)
                         jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true)-3;
-                    if (selectedItem.IndexOf(true) == 11)
+                    else if (selectedItem.IndexOf(true) == 11)
                         jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 1;
                     else
                         jeb.currentHat = (PlayerHats)selectedItem.IndexOf(true) - 2;
@@ -143,7 +154,8 @@ namespace RoomRunner
                     }
                 }
             }
-            //Console.WriteLine(jeb.ownedHats);
+            equippedHat = Player.Hats[jeb.currentHat];
+            
         }
         
         public void updateSelection()
@@ -298,10 +310,22 @@ namespace RoomRunner
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
             updateSelection();
+            spriteBatch.Draw(texture, new Rectangle(300, 410, 100, 100), source, Color.White);
+            if (equippedHat != null)
+                spriteBatch.Draw(equippedHat, equippedRect, new Rectangle(0, 0, 32, 32), Color.White);
+            string[] name = currentHatName.Split('_');
+            if (name[0].Contains("1") || name[0].Contains("2") || name[0].Contains("3"))
+            {
+                name[0] = name[0].Substring(0, name[0].Length - 1);
+            }
+            if (name.Length > 1)
+                spriteBatch.DrawString(font, "Equipped: " + name[0] + " " + name[1], new Vector2(290-(3*(name[0].Length+name[1].Length)), 540), Color.Black);
+            else
+                spriteBatch.DrawString(font, "Equipped: " + name[0], new Vector2(290-3*name[0].Length, 540), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle(selection.X - 10, selection.Y - 10, 90, 100), new Color(200, 200, 200, 255));
 
             spriteBatch.Draw(pixel, backButton, Color.Green);
-            spriteBatch.DrawString(bold, "Menu", new Vector2(backButton.X + 90, backButton.Y + 30), Color.White);
+            spriteBatch.DrawString(bold, "Menu", new Vector2(backButton.X + 95, backButton.Y + 30), Color.White);
 
             int x = 0;
             int y = 0;
@@ -339,8 +363,8 @@ namespace RoomRunner
                 }
                 if (items[i].name.Equals("Coin"))
                 {
-                    spriteBatch.Draw(items[i].tex, new Rectangle(1650, 120, 60, 60), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
-                    spriteBatch.DrawString(font, "   Coins: " + jeb.Coins, new Vector2(1600, 190), Color.Black);
+                    spriteBatch.Draw(items[i].tex, new Rectangle(1500, 120, 60, 60), items[i].sourceRects[(int)items[i].currentFrameIndex], Color.White);
+                    spriteBatch.DrawString(font, "   Coins: " + jeb.Coins, new Vector2(1450, 200), Color.Black);
                 }
                 else
                 {

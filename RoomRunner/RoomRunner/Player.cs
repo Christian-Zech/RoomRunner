@@ -62,7 +62,7 @@ namespace RoomRunner
             wasStateSet = false;
             Idle = false;
             delayLeft = InputDelay;
-            currentHat = PlayerHats.Bandana;
+            currentHat = PlayerHats.None;
             Coins = 1000;
             fireCooldown = 0;
             MakePlayerAnimations(game);
@@ -190,17 +190,17 @@ namespace RoomRunner
     public enum PlayerHats
     {
         None,
-        Robber,
-        Builder,
+        Ski_Mask,
+        Construction,
         Hair,
         Headphones,
-        Santa,
-        Bandana,
+        Santa_Hat,
+        Headband,
         Fire1,
         Fire2,
         Fire3,
-        Military,
-        RedHat,
-        BlueHat
+        Army_Hat,
+        Red_Bandana,
+        Blue_Bandana
     }
 }

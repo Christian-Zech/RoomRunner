@@ -241,7 +241,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
-            shop = new Shop(items, jeb);
+            shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
