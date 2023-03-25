@@ -155,6 +155,7 @@ namespace RoomRunner
                 }
             }
             equippedHat = Player.Hats[jeb.currentHat];
+            currentHatName = "" + jeb.currentHat;
             
         }
         
