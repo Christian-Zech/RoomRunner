@@ -42,7 +42,7 @@ namespace RoomRunner
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        Powerups powerups;
+        public static Powerups powerups;
         int activePowerupIndex;
         int slowTimeTemp;
 
@@ -234,13 +234,14 @@ namespace RoomRunner
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
             items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-            shop = new Shop(items);
+            
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
+            shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
@@ -563,11 +564,7 @@ namespace RoomRunner
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                if (shop.leave)
-                {
-                    gameState = GameState.Menu;
-                    shop.leave = false;
-                }
+                
                     
             }
             if (gameState == GameState.Music)

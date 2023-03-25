@@ -34,10 +34,12 @@ namespace RoomRunner
         public int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
+        public List<int> ownedHats;
         private readonly Game1 game;
         
         static Player()
         {
+            
             Hats = new Dictionary<PlayerHats, Texture2D>();
             ceilingHeight = frameHeight;
             floorHeight = 0;
@@ -50,6 +52,7 @@ namespace RoomRunner
         public Player(Game1 game) : base(States)
         {
             this.game = game;
+            ownedHats = new List<int>();
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
             IsAlive = true;
@@ -59,8 +62,8 @@ namespace RoomRunner
             wasStateSet = false;
             Idle = false;
             delayLeft = InputDelay;
-            currentHat = PlayerHats.Bandana;
-            Coins = 0;
+            currentHat = PlayerHats.None;
+            Coins = 1000;
             fireCooldown = 0;
             MakePlayerAnimations(game);
             MakePlayerHats(game);
@@ -70,7 +73,7 @@ namespace RoomRunner
         {
             Rectangle[] rects = LoadSheet(5, 5, 32, 32, 1);
             Texture2D sheet = game.cosmeticSheet;
-            for (int i = 1, c = 0; i < rects.Length - 1; i += 2, c++)
+            for (int i = 1, c = 0; i < rects.Length; i += 2, c++)
                 Hats[(PlayerHats)c + 1] = RectToTxt(game.graphics.GraphicsDevice, sheet, rects[i])[0];
         }
         private void MakePlayerAnimations(Game1 game)
@@ -187,17 +190,17 @@ namespace RoomRunner
     public enum PlayerHats
     {
         None,
-        Robber,
-        Builder,
+        Ski_Mask,
+        Construction,
         Hair,
         Headphones,
-        Santa,
-        Bandana,
+        Santa_Hat,
+        Headband,
         Fire1,
         Fire2,
         Fire3,
-        Military,
-        RedHat,
-        BlueHat
+        Army_Hat,
+        Red_Bandana,
+        Blue_Bandana
     }
 }
