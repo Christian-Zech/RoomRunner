@@ -43,7 +43,7 @@ namespace RoomRunner
         public List<Projectile> projectileList;
         private int amountOfRooms;
         Powerups powerups;
-        int activePowerupIndex;
+        public static int activePowerupIndex;
         int slowTimeTemp;
 
 
@@ -270,7 +270,6 @@ namespace RoomRunner
                 System.IO.FileStream fs = new System.IO.FileStream(name, System.IO.FileMode.Open);
                 SoundEffect temp = SoundEffect.FromStream(fs);
                 customSongList.Add(temp);
-                Console.WriteLine(name);
             }
         }
 
@@ -471,7 +470,6 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        
                         // pulls coins toward player
                         foreach(Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
                         {
@@ -479,25 +477,7 @@ namespace RoomRunner
                             {
                                 if(coin != null)
                                 {
-
-                                    int distanceX = Math.Abs(coin.rectangle.X - jeb.PlayerRectangle.X);
-                                    int distanceY = Math.Abs(coin.rectangle.Y - jeb.PlayerRectangle.Y);
-                                    Console.WriteLine(distanceY);
-                                    Console.WriteLine(distanceX);
-
-                                    if (coin.rectangle.X > jeb.PlayerRectangle.X)
-                                        coin.rectangle.X -= (3 + scrollSpeed) / distanceX;
-                                    if (coin.rectangle.Y > jeb.PlayerRectangle.Y)
-                                        coin.rectangle.Y -= (3 + scrollSpeed) / distanceY;
-
-                                    if (coin.rectangle.X < jeb.PlayerRectangle.X)
-                                        coin.rectangle.X += (3 + scrollSpeed) / distanceX;
-                                    if (coin.rectangle.Y < jeb.PlayerRectangle.Y)
-                                        coin.rectangle.Y += (3 + scrollSpeed) / distanceY;
-
-
-
-
+                                    coin.ApplyMagnetForce(gameTime);
                                 }
                             }
                         }
@@ -542,7 +522,7 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
-            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            Player.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
             jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);

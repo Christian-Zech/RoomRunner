@@ -67,6 +67,17 @@ namespace RoomRunner
 
             RemoveCoinOverLap();
 
+            foreach(Coin[,] coinGrid in coinsGridList)
+            {
+                foreach(Coin coin in coinGrid)
+                {
+                    if(coin != null && (coin.Position.Y < 0 || coin.Position.Y > Player.frameHeight || coin.Position.X < 100))
+                    {
+                        Console.WriteLine(coin.Position.Y);
+                    }
+                }
+            }
+
         }
 
         private void generateEnemies(int amount)
@@ -82,7 +93,7 @@ namespace RoomRunner
         {
             int coinGap = 50; // seperation between coins (pixels)
 
-            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 5000), rand.Next(100, Player.frameHeight - floorHeight - (coinsGrid.GetLength(0) * coinGap)), 50, 50);
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 3000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - (coinsGrid.GetLength(0) * coinGap)), 50, 50);
 
             // generates each coin pattern. For future reference, GetLength(0) = rows and GetLength(1) = columns
             switch (pattern)
@@ -207,7 +218,8 @@ namespace RoomRunner
                 {
                     if (coin != null)
                     {
-                        coin.rectangle.X -= scrollSpeed;
+                        if(Game1.activePowerupIndex != 3) // 3rd index = magnet powerup
+                            coin.Position.X -= scrollSpeed;
                         coin.Update();
                     }
                 }
@@ -232,7 +244,7 @@ namespace RoomRunner
                 foreach(Coin coin in coinGrid)
                 {
                     if (coin != null)
-                        spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
+                        spriteBatch.Draw(coin.CurrentTexture, coin.Position, null, Color.White, 0f, new Vector2(coin.CurrentTexture.Width / 2, coin.CurrentTexture.Height / 2), 1.5f,SpriteEffects.None, 0f);
                 }
             }
         }

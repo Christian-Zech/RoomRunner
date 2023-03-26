@@ -43,7 +43,6 @@ namespace RoomRunner
             if (ActivePowerups())
             {
                 items[ActivePowerupsIndex()].Activate();
-                Console.WriteLine("powerup is Active");
             }
         }
 
