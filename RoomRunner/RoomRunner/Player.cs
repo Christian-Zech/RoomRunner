@@ -37,11 +37,13 @@ namespace RoomRunner
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
+        public List<int> ownedHats;
         private readonly Game1 game;
         public static Texture2D Heart;
         
         static Player()
         {
+            
             Hats = new Dictionary<PlayerHats, Texture2D>();
             ceilingHeight = frameHeight;
             floorHeight = 0;
@@ -55,6 +57,7 @@ namespace RoomRunner
         public Player(Game1 game) : base(States)
         {
             this.game = game;
+            ownedHats = new List<int>();
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
             IsAlive = true;
@@ -67,10 +70,10 @@ namespace RoomRunner
             Idle = false;
             Invulnerable = false;
             delayLeft = InputDelay;
-            currentHat = PlayerHats.Bandana;
-            Coins = 0;
             InvinciblityTimer = MaxInvinciblity;
             FlashTimer = 0;
+            currentHat = PlayerHats.None;
+            Coins = 1000;
             fireCooldown = 0;
             MakePlayerAnimations(game);
             MakePlayerHats(game);
@@ -197,6 +200,7 @@ namespace RoomRunner
                 sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
                 sb.Draw(Hats[currentHat], HatRectangle, Color.White);
             }
+            if (Idle) return;
 
             for (int i = 0, x = 0; i < Health; i++, x += 55)
                 sb.Draw(Heart, new Rectangle(x, 0, 50, 50), Color.White);
@@ -227,17 +231,17 @@ namespace RoomRunner
     public enum PlayerHats
     {
         None,
-        Robber,
-        Builder,
+        Ski_Mask,
+        Construction,
         Hair,
         Headphones,
-        Santa,
-        Bandana,
+        Santa_Hat,
+        Headband,
         Fire1,
         Fire2,
         Fire3,
-        Military,
-        RedHat,
-        BlueHat
+        Army_Hat,
+        Red_Bandana,
+        Blue_Bandana
     }
 }

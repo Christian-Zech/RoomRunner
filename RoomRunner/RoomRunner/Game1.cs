@@ -42,7 +42,7 @@ namespace RoomRunner
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        Powerups powerups;
+        public static Powerups powerups;
         int activePowerupIndex;
         int slowTimeTemp;
 
@@ -81,6 +81,8 @@ namespace RoomRunner
         List<SoundEffect> customSongList;
         int customSongIndex;
         List<SoundEffect> gameSongList;
+        double musicVolume;
+        double soundVolume;
         int songTimeElapsed;
         int fileOpenCount = 0;
 
@@ -182,6 +184,7 @@ namespace RoomRunner
 
             files = new FileDialogue();
             musicScreen = new MusicScreen();
+            musicVolume = 1;
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
             songTimeElapsed = 0;
@@ -234,7 +237,7 @@ namespace RoomRunner
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
             items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-            shop = new Shop(items);
+            
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             
@@ -242,6 +245,7 @@ namespace RoomRunner
 
             jeb = new Player(new Vector2(900, 500), this);
             jeb.Invulnerable = true;
+            shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
@@ -343,10 +347,11 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                musicVolume = musicScreen.musicVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play();
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
                     if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
                     {
                         customSongIndex++;
@@ -355,7 +360,7 @@ namespace RoomRunner
                             customSongIndex = 0;
                         }
                         songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play();
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
                     }
                     else
                     {
@@ -579,11 +584,7 @@ namespace RoomRunner
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                if (shop.leave)
-                {
-                    gameState = GameState.Menu;
-                    shop.leave = false;
-                }
+                
                     
             }
             if (gameState == GameState.Music)
