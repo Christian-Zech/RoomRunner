@@ -81,6 +81,8 @@ namespace RoomRunner
         List<SoundEffect> customSongList;
         int customSongIndex;
         List<SoundEffect> gameSongList;
+        double musicVolume;
+        double soundVolume;
         int songTimeElapsed;
         int fileOpenCount = 0;
 
@@ -182,6 +184,7 @@ namespace RoomRunner
 
             files = new FileDialogue();
             musicScreen = new MusicScreen();
+            musicVolume = 1;
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
             songTimeElapsed = 0;
@@ -343,10 +346,11 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                musicVolume = musicScreen.musicVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play();
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
                     if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
                     {
                         customSongIndex++;
@@ -355,7 +359,7 @@ namespace RoomRunner
                             customSongIndex = 0;
                         }
                         songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play();
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
                     }
                     else
                     {
