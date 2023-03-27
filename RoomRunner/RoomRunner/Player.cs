@@ -170,7 +170,8 @@ namespace RoomRunner
         {
             if (Idle) return;
             sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
-            sb.Draw(Hats[currentHat], HatRectangle, Color.White);
+            if (currentHat != PlayerHats.None)
+                sb.Draw(Hats[currentHat], HatRectangle, Color.White);
         }
 
         public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight, int extraWhitespace = 0)
