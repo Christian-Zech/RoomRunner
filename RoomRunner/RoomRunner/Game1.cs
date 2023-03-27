@@ -42,7 +42,7 @@ namespace RoomRunner
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        Powerups powerups;
+        public static Powerups powerups;
         public static int activePowerupIndex;
         int slowTimeTemp;
 
