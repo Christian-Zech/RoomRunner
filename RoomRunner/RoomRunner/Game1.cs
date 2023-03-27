@@ -384,25 +384,16 @@ namespace RoomRunner
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
-                // player coin collection
-                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                
+
+
+
+
+                if (bossFight)
                 {
-                    foreach(Coin coin in coinGrid)
-                    {
-                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
-                        {
-                            coin.Destroy();
-                            jeb.Coins++;
-                        }
-                    }
-                }
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
+                        roomList[currentRoomIndex].enemyArray.Clear();
 
-
-
-
-                    if (bossFight)
-                {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
                 }
 
@@ -414,8 +405,21 @@ namespace RoomRunner
                                 gameState = GameState.GameOver;
                 }
 
+                // player coin collection
+                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                {
+                    foreach (Coin coin in coinGrid)
+                    {
+                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        {
+                            coin.Destroy();
+                            jeb.Coins++;
+                        }
+                    }
+                }
 
-                Jeb:
+
+            Jeb:
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
