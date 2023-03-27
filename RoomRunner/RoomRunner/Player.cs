@@ -14,11 +14,8 @@ namespace RoomRunner
         public const float Gravity = -2.0f; //px per frame
         public const float InitialJumpMovement = 40.0f; //px per frame
         public const float JumpMovement = 30.0f; //px per frame
-        public const int InputDelay = 20; //In Frames
-        private const int FireDelay = 10; //In Frames
-        public const int FrameBetweenFlash = 5; //In Frames
-        public const int MaxHealth = 3;
-        public const int MaxInvinciblity = 120; //In Frames
+        public const int InputDelay = 20; //Frames
+        private const int FireDelay = 10; //Frames
         public const int frameHeight = 1000; //px
 
         private static readonly string[] statesstates = new string[] { "Idle", "Jumping", "Running" }; //NEVER USE THIS VARIABLE!!!!
@@ -27,19 +24,18 @@ namespace RoomRunner
         public static float JumpMultiplier;
         public static float GravityMultiplier;
 
-        public bool IsAlive, Shown, Invulnerable;
-        public Vector2 Velocity, Position, Acceleration;
+        public bool IsAlive;
+        public static Vector2 Velocity, Position, Acceleration;
         public Rectangle PlayerRectangle, HatRectangle;
         private bool wasStateSet, onGround;
         private KeyboardState oldkb;
         private MouseState oldms;
-        public int Coins, Health;
-        public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
+        public int Coins;
+        public int delayLeft, fireCooldown;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
         public List<int> ownedHats;
         private readonly Game1 game;
-        public static Texture2D Heart;
         
         static Player()
         {
@@ -48,7 +44,6 @@ namespace RoomRunner
             ceilingHeight = frameHeight;
             floorHeight = 0;
             JumpMultiplier = GravityMultiplier = 1.0f;
-            Heart = Program.Game.Content.Load<Texture2D>("Heart");
         }
         public Player(Vector2 pos, Game1 game) : this(game)
         {
@@ -61,17 +56,12 @@ namespace RoomRunner
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
             IsAlive = true;
-            Shown = true;
-            Health = MaxHealth;
             oldkb = Keyboard.GetState();
             oldms = Mouse.GetState();
             Acceleration.Y = Gravity * GravityMultiplier;
             wasStateSet = false;
             Idle = false;
-            Invulnerable = false;
             delayLeft = InputDelay;
-            InvinciblityTimer = MaxInvinciblity;
-            FlashTimer = 0;
             currentHat = PlayerHats.None;
             Coins = 1000;
             fireCooldown = 0;
@@ -156,26 +146,9 @@ namespace RoomRunner
                 game.projectileList.Add(toLaunch);
                 fireCooldown = FireDelay;
             }
-
-            if (InvinciblityTimer > 0)
-            {
-                InvinciblityTimer--;
-                if (InvinciblityTimer == 0)
-                {
-                    FlashTimer = 0;
-                    Shown = true;
-                }
-                if (FlashTimer > 0)
-                    FlashTimer--; 
-            }
-            if (FlashTimer == 0 && InvinciblityTimer > 0)
-            {
-                Shown = !Shown;
-                FlashTimer = FrameBetweenFlash;
-            }
-
-
-
+            
+            
+            
             base.Update();
 
             oldkb = kb;
@@ -195,7 +168,7 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb)
         {
-            if (!Idle && Shown && IsAlive)
+          if (!Idle && Shown && IsAlive)
             {
                 sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
                 if (currentHat != PlayerHats.None)
@@ -205,14 +178,6 @@ namespace RoomRunner
 
             for (int i = 0, x = 0; i < Health; i++, x += 55)
                 sb.Draw(Heart, new Rectangle(x, 0, 50, 50), Color.White);
-        }
-        public void Damage()
-        {
-            if (InvinciblityTimer > 0 || Invulnerable) return;
-            Health--;
-            if (Health <= 0)
-                IsAlive = false;
-            InvinciblityTimer = MaxInvinciblity;
         }
 
         public static Rectangle[] LoadSheet(int width, int height, int Swidth, int Sheight, int extraWhitespace = 0)
