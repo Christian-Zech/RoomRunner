@@ -198,7 +198,8 @@ namespace RoomRunner
             if (!Idle && Shown && IsAlive)
             {
                 sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
-                sb.Draw(Hats[currentHat], HatRectangle, Color.White);
+                if (currentHat != PlayerHats.None)
+                    sb.Draw(Hats[currentHat], HatRectangle, Color.White);
             }
             if (Idle) return;
 
