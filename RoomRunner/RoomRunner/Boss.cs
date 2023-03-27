@@ -181,7 +181,7 @@ namespace RoomRunner
                 case BossPattern.BigPound_Top:
                     FlipProjX = false;
                     FlipProjY = true;
-                    ceiling = Game1.window.Height - Player.ceilingHeight + 20; //20 for inset
+                    ceiling = Game1.window.Height - Player.ceilingHeight;
                     sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
                     rects = Player.LoadSheet(3, 3, 32, 32, 1);
                     frames = (int)(12 / SpeedMultiplier);

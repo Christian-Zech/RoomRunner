@@ -604,7 +604,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
