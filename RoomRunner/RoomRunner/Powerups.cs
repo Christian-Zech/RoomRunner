@@ -11,9 +11,10 @@ using System.Linq;
 
 namespace RoomRunner
 {
-    class Powerups
+    public class Powerups
     {
         int count1, count2, count3, count4;
+
         public List<PowerupItem> items;
         public List<int> quantities;
         public double currentFrameIndex1, currentFrameIndex2, currentFrameIndex3, currentFrameIndex4;
