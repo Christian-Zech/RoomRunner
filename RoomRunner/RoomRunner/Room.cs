@@ -53,7 +53,7 @@ namespace RoomRunner
             coinsGridList = new List<Coin[,]>();
             for(int i = 0; i < rand.Next(2,6); i++)
             {
-                int amountOfCoins = rand.Next(5, 10);
+                int amountOfCoins = rand.Next(4, 6);
                 coinsGridList.Add(new Coin[amountOfCoins,amountOfCoins]);
             }
 
@@ -93,7 +93,7 @@ namespace RoomRunner
         {
             int coinGap = 50; // seperation between coins (pixels)
 
-            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 3000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - (coinsGrid.GetLength(0) * coinGap)), 50, 50);
+            Rectangle startRectangle = new Rectangle(rand.Next(window.Width, window.Width + 2000), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - (coinsGrid.GetLength(0) * coinGap)), 50, 50);
 
             // generates each coin pattern. For future reference, GetLength(0) = rows and GetLength(1) = columns
             switch (pattern)

@@ -36,7 +36,7 @@ namespace RoomRunner
 
         public void ApplyMagnetForce(GameTime gameTime)
         {
-            float magnetForce = 0.1f;
+            float magnetForce = 0.3f;
             Vector2 direction = Player.Position - Position;
             direction.Normalize();
 
@@ -48,8 +48,8 @@ namespace RoomRunner
 
         public void Destroy()
         {
-            rectangle = Rectangle.Empty;
-            Position = Vector2.Zero;
+            rectangle.X = -100000;
+            Position.X = -100000;
         }
 
     }
