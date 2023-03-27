@@ -150,13 +150,6 @@ namespace RoomRunner
                 Next = new Animation("thing")
             };
             Anims[OnetimeAnims.Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 5, rects[4], rects[5]);
-
-            sheet = game.Content.Load<Texture2D>("Projectile/Inverted Fireball");
-            Anims[OnetimeAnims.Boss_Fireball] = new OnetimeAnimation(5, game.GraphicsDevice, sheet, rects)
-            {
-                Next = new Animation("thing")
-            };
-            Anims[OnetimeAnims.Boss_Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 5, rects[4], rects[5]);
         }
         public OnetimeAnimation(int framesPerFrame, params Texture2D[] frames) : base("thing")
         {
@@ -181,7 +174,6 @@ namespace RoomRunner
     }
     public enum OnetimeAnims
     {
-        Fireball,
-        Boss_Fireball
+        Fireball
     }
 }
