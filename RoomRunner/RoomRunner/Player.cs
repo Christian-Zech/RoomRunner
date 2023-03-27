@@ -25,7 +25,7 @@ namespace RoomRunner
         public static float GravityMultiplier;
 
         public bool IsAlive;
-        public Vector2 Velocity, Position, Acceleration;
+        public static Vector2 Velocity, Position, Acceleration;
         public Rectangle PlayerRectangle, HatRectangle;
         private bool wasStateSet, onGround;
         private KeyboardState oldkb;

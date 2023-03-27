@@ -42,8 +42,8 @@ namespace RoomRunner
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        public static Powerups powerups;
-        int activePowerupIndex;
+        Powerups powerups;
+        public static int activePowerupIndex;
         int slowTimeTemp;
 
 
@@ -85,6 +85,8 @@ namespace RoomRunner
         double soundVolume;
         int songTimeElapsed;
         int fileOpenCount = 0;
+
+
 
         public enum GameState
         {
@@ -272,7 +274,6 @@ namespace RoomRunner
                 System.IO.FileStream fs = new System.IO.FileStream(name, System.IO.FileMode.Open);
                 SoundEffect temp = SoundEffect.FromStream(fs);
                 customSongList.Add(temp);
-                Console.WriteLine(name);
             }
         }
 
@@ -387,25 +388,16 @@ namespace RoomRunner
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
-                // player coin collection
-                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                
+
+
+
+
+                if (bossFight)
                 {
-                    foreach(Coin coin in coinGrid)
-                    {
-                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
-                        {
-                            coin.Destroy();
-                            jeb.Coins++;
-                        }
-                    }
-                }
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
+                        roomList[currentRoomIndex].enemyArray.Clear();
 
-
-
-
-                    if (bossFight)
-                {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
                 }
 
@@ -417,8 +409,21 @@ namespace RoomRunner
                                 gameState = GameState.GameOver;
                 }
 
+                // player coin collection
+                foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                {
+                    foreach (Coin coin in coinGrid)
+                    {
+                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        {
+                            coin.Destroy();
+                            jeb.Coins++;
+                        }
+                    }
+                }
 
-                Jeb:
+
+            Jeb:
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
@@ -473,7 +478,17 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        // no coins yet :(
+                        // pulls coins toward player
+                        foreach(Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
+                        {
+                            foreach(Coin coin in coinsGrid)
+                            {
+                                if(coin != null)
+                                {
+                                    coin.ApplyMagnetForce(gameTime);
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -515,7 +530,7 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
-            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            Player.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
             jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
