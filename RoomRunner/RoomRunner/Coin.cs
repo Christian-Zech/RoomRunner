@@ -32,6 +32,5 @@ namespace RoomRunner
         {
             rectangle = Rectangle.Empty;
         }
-        //
     }
 }
