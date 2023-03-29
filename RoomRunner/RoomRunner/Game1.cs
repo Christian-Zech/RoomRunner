@@ -381,13 +381,16 @@ namespace RoomRunner
                 if (musicScreen.customMusic)
                     LoadCustomSongs();
 
-                
+                gameSongListInstance[3].Volume = (float)musicVolume/5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
                 
             
 
             if (gameState == GameState.Play)
             {
+                gameSongListInstance[3].Stop();
                 musicVolume = musicScreen.musicVolume;
                 soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
@@ -476,7 +479,7 @@ namespace RoomRunner
                         {
                             coin.Destroy();
                             jeb.Coins++;
-                            soundEffects[0].Play(volume: (float)soundVolume/60, pitch: 0.0f, pan: 0.0f);
+                            soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
                 }
