@@ -37,7 +37,7 @@ namespace RoomRunner
         public void ApplyMagnetForce(GameTime gameTime)
         {
             float magnetForce = 0.3f;
-            Vector2 direction = Player.Position - Position;
+            Vector2 direction = new Vector2(Program.Game.jeb.Position.X + 20, Program.Game.jeb.Position.Y) - Position;
             direction.Normalize();
 
             Velocity += direction * magnetForce;

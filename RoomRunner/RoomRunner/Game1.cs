@@ -39,7 +39,7 @@ namespace RoomRunner
         Rectangle coinHitBox;
 
         public static Rectangle window;
-        private Player jeb;
+        public Player jeb;
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
@@ -90,7 +90,7 @@ namespace RoomRunner
         int songTimeElapsed;
         int fileOpenCount = 0;
 
-
+        bool debugMode = false;
 
         public enum GameState
         {
@@ -201,7 +201,7 @@ namespace RoomRunner
 
             enemyHitBox = new Rectangle(30, 10, 40, 50);
             playerHitBox = new Rectangle(25, 0, 80, 110);
-            coinHitBox = new Rectangle(0, 0, 30, 30);
+            coinHitBox = new Rectangle(-20, -15, 35, 35);
 
 
             base.Initialize();
@@ -543,7 +543,7 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
-            Player.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
             jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
@@ -684,21 +684,28 @@ namespace RoomRunner
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
 
-                foreach(Enemy enemy in roomList[currentRoomIndex].enemyArray)
-                {
-                    spriteBatch.Draw(pixel, new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height), Color.Black);
-                }
 
-                foreach(Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                // draws hitboxes to help debug them
+
+                if (debugMode)
                 {
-                    foreach(Coin coin in coinGrid)
+                    foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                     {
-                        if(coin != null)
-                            spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
+                        spriteBatch.Draw(pixel, new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height), Color.Black);
                     }
+
+                    foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                    {
+                        foreach (Coin coin in coinGrid)
+                        {
+                            if (coin != null)
+                                spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
+                        }
+                    }
+                    spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
 
-                spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
+                
 
             }
             // game over screen and meny
