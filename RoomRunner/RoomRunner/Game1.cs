@@ -151,7 +151,6 @@ namespace RoomRunner
             menuCoolDown = 0;
             bossCooldown = 0;
 
-
             gameState = GameState.Menu;
             levels = Levels.Level1;
             gameTimer = 0;
@@ -203,6 +202,7 @@ namespace RoomRunner
             List<Boss> bos = new List<Boss>();
 
             bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
+            bos.Add(new Boss(Bosses.Demon, 300, sheet, GraphicsDevice));
 
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
@@ -605,14 +605,14 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
                 {
                     transition = true;
                     levelTimer = 0;
-                    
+                    levels++;
                 }
                 
 

@@ -108,13 +108,14 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch sb, bool flipX, bool flipY)
         {
-            if (anim == default) sb.Draw(Game1.pixel, Rect, Color.Red);
-            else if (flipX)
-                sb.Draw(anim.CurrentTexture, Rect, null, Color.White, 0.0f, new Vector2(16, 16), SpriteEffects.FlipHorizontally, 0.0f);
+            if (anim == default) { sb.Draw(Game1.pixel, Rect, Color.Red); return; }
+            Texture2D txt = anim.CurrentTexture;
+            if (flipX)
+                sb.Draw(txt, Rect, null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipHorizontally, 0.0f);
             else if (flipY)
-                sb.Draw(anim.CurrentTexture, Rect, null, Color.White, 0.0f, new Vector2(16, 16), SpriteEffects.FlipVertically, 0.0f);
+                sb.Draw(txt, new Rectangle(Rect.X, Rect.Y + Rect.Height / 2, Rect.Width, Rect.Height), null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipVertically, 0.0f);
             else
-                sb.Draw(anim.CurrentTexture, Rect, Color.White);
+                sb.Draw(txt, Rect, Color.White);
         }
     }
     public class ProjectileClump

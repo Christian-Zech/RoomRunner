@@ -19,6 +19,7 @@ namespace RoomRunner
         public static Dictionary<BossPattern, int> PatternTimes;
 
         private Rectangle rect, bossBarRect;
+        private readonly Rectangle originRect;
         public Rectangle Rectangle { get { return rect; } }
         public Point Position { get { return new Point(rect.X, rect.Y); } }
         public int Health
@@ -43,6 +44,8 @@ namespace RoomRunner
         private int timer1;
         private float BossBarPercent;
         public bool IsDead, FlipProjX, FlipProjY;
+        private bool IsDown;
+        public Vector2 Velocity;
         public readonly Bosses Name;
         private GraphicsDevice graphics;
         public List<ProjectileClump> projList, projBuffer;
@@ -54,12 +57,16 @@ namespace RoomRunner
                 [BossPattern.Attack] = 90,
                 [BossPattern.Pound] = 300,
                 [BossPattern.BigPound_Bottom] = 300,
-                [BossPattern.BigPound_Top] = 300
+                [BossPattern.BigPound_Top] = 300,
+                [BossPattern.Move] = 60,
+                [BossPattern.MoveForward] = 140
             };
         }
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
         {
             Name = boss;
+            IsDown = true;
+            Velocity = Vector2.Zero;
             TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
             TimeLeftInPattern = 0;
             DoingPattern = false;
@@ -67,6 +74,7 @@ namespace RoomRunner
             projBuffer = new List<ProjectileClump>();
             graphics = gd;
             rect = new Rectangle(1500,500,200,200);
+            originRect = new Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
             MakeAnimation(boss, sheet, gd);
             maxHealth = this.health = health;
             BossBarPercent = 1.0f;
@@ -88,12 +96,15 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 4);
+                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 2)+4);
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }
             if (DoingPattern)
                 UpdatePattern();
+
+            rect.X += (int)Velocity.X;
+            rect.Y -= (int)Velocity.Y;
         }
         private void FinishPattern()
         {
@@ -105,6 +116,15 @@ namespace RoomRunner
                 case BossPattern.Pound:
                     break;
                 case BossPattern.BigPound_Bottom:
+                    break;
+                case BossPattern.BigPound_Top:
+                    break;
+                case BossPattern.Move:
+                    Velocity = Vector2.Zero;
+                    break;
+                case BossPattern.MoveForward:
+                    Velocity = Vector2.Zero;
+                    rect.X = originRect.X;
                     break;
             }
             projBuffer.Clear();
@@ -198,6 +218,13 @@ namespace RoomRunner
                         projList.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
                     }
                     break;
+                case BossPattern.Move:
+                    IsDown = !IsDown;
+                    timer1 = 0;
+                    break;
+                case BossPattern.MoveForward:
+                    timer1 = 0;
+                    break;
             }
         }
         private void UpdatePattern()
@@ -233,6 +260,29 @@ namespace RoomRunner
                     }
                     break;
                 case BossPattern.BigPound_Bottom:
+                    break;
+                case BossPattern.Move:
+                    timer1++;
+                    if (timer1 <= 30) if (IsDown)
+                            Velocity.Y -= 5.0f / timer1;
+                        else
+                            Velocity.Y += 5.0f / timer1;
+                    else if (IsDown)
+                            Velocity.Y += 10.0f / (30 - timer1);
+                        else
+                            Velocity.Y -= 10.0f / (30 - timer1);
+
+                    break;
+                case BossPattern.MoveForward:
+                    timer1++;
+                    if (timer1 <= 60)
+                        Velocity.X -= 1;
+                    else
+                    {
+                        if (timer1 == 61)
+                            rect.X = 2000;
+                        Velocity.X += 1.5f;
+                    }
                     break;
             }
         }
@@ -285,6 +335,8 @@ namespace RoomRunner
         Attack,
         Pound,
         BigPound_Bottom,
-        BigPound_Top
+        BigPound_Top,
+        Move,
+        MoveForward
     }
 }
