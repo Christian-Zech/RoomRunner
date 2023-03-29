@@ -83,11 +83,11 @@ namespace RoomRunner
         List<SoundEffect> gameSongList;
         List<SoundEffectInstance> gameSongListInstance;
         double musicVolume;
-        double soundVolume;
+        public static double soundVolume;
         int songTimeElapsed;
         int gameSongListIndex;
         int fileOpenCount = 0;
-        List<SoundEffect> soundEffects;
+        public static List<SoundEffect> soundEffects;
 
 
 
@@ -190,6 +190,7 @@ namespace RoomRunner
             files = new FileDialogue();
             musicScreen = new MusicScreen();
             musicVolume = 1;
+            soundVolume = 1;
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
             songTimeElapsed = 0;
@@ -310,11 +311,6 @@ namespace RoomRunner
         }
         public void loadSoundEffects()
         {
-            while (soundEffects.Count != 0)
-            {
-                soundEffects[0].Dispose();
-                soundEffects.RemoveAt(0);
-            }
             soundEffects.Add(Content.Load<SoundEffect>("Sounds/coinSound"));
             soundEffects.Add(Content.Load<SoundEffect>("Sounds/jump"));
             soundEffects.Add(Content.Load<SoundEffect>("Sounds/powerUp (1)"));
@@ -393,6 +389,7 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
                 musicVolume = musicScreen.musicVolume;
+                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
@@ -414,7 +411,7 @@ namespace RoomRunner
                 }
                 else //regular game music
                 {
-                    gameSongListInstance[gameSongListIndex].Volume = (float)musicVolume/4;
+                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume/15);
                     if (songTimeElapsed == 0 && gameSongListIndex == 0)
                         gameSongListInstance[gameSongListIndex].Play();
                     if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
@@ -479,6 +476,7 @@ namespace RoomRunner
                         {
                             coin.Destroy();
                             jeb.Coins++;
+                            soundEffects[0].Play(volume: (float)soundVolume/60, pitch: 0.0f, pan: 0.0f);
                         }
                     }
                 }
