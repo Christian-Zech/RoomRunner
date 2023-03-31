@@ -203,15 +203,17 @@ namespace RoomRunner
 
             foreach (Coin[,] coinGrid in coinsGridList)
             {
-                foreach(Coin coin in coinGrid)
+                foreach (Coin coin in coinGrid)
                 {
                     if (coin != null)
                     {
-                        coin.rectangle.X -= scrollSpeed;
+                        if (Program.Game.activePowerupIndex != 3) // 3rd index = magnet powerup
+                            coin.Position.X -= scrollSpeed;
                         coin.Update();
                     }
                 }
             }
+
 
             foreach (Enemy e in toRemove)
                 enemyArray.Remove(e);

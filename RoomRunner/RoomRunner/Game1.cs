@@ -47,7 +47,7 @@ namespace RoomRunner
         public List<Projectile> projectileList;
         private int amountOfRooms;
         public static Powerups powerups;
-        int activePowerupIndex;
+        public int activePowerupIndex;
         int slowTimeTemp;
 
 
@@ -558,7 +558,17 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        // no coins yet :(
+                        // pulls coins toward player
+                        foreach (Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
+                        {
+                            foreach (Coin coin in coinsGrid)
+                            {
+                                if (coin != null)
+                                {
+                                    coin.ApplyMagnetForce(gameTime);
+                                }
+                            }
+                        }
                     }
                 }
                 else

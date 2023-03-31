@@ -11,12 +11,17 @@ namespace RoomRunner
     {
         public Rectangle rectangle;
         public Texture2D texture;
+        public Vector2 Position;
+        public Vector2 Velocity;
 
 
         public Coin(Rectangle rectangle, Texture2D texture, GraphicsDevice graphics) : base(new string[] { "Coin" })
         {
             this.rectangle = rectangle;
             this.texture = texture;
+            Position = new Vector2(rectangle.X, rectangle.Y);
+            Velocity = Vector2.Zero;
+
             Rectangle[] collectablesRectangleArray = Player.LoadSheet(5, 6, 32, 32);
 
             AddAnimation("Coin", texture, graphics, 5, collectablesRectangleArray[25], collectablesRectangleArray[26], collectablesRectangleArray[27], collectablesRectangleArray[28]);
@@ -44,7 +49,8 @@ namespace RoomRunner
 
         public void Destroy()
         {
-            rectangle = Rectangle.Empty;
+            rectangle.X = -100000;
+            Position.X = -100000;
         }
     }
 }
