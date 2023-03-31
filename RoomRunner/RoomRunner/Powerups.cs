@@ -32,7 +32,7 @@ namespace RoomRunner
         }
         public void UsePowerup(int index)
         {
-            if (quantities[index] > 0 && !items[index].active)
+            if (quantities[index] > 0 && !ActivePowerups())
             {
                 quantities[index]--;
                 items[index].Activate();
@@ -44,6 +44,7 @@ namespace RoomRunner
             if (ActivePowerups())
             {
                 items[ActivePowerupsIndex()].Activate();
+                Console.WriteLine("powerup is Active");
             }
         }
 
