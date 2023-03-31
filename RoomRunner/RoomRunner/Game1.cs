@@ -92,8 +92,10 @@ namespace RoomRunner
         int gameSongListIndex;
         int fileOpenCount = 0;
         bool debugMode = false;
-        
         public static List<SoundEffect> soundEffects;
+
+        //for cutsenes
+        Cutscene cutscenes;
 
         public enum GameState
         {
@@ -101,7 +103,8 @@ namespace RoomRunner
             Shop,
             Play,
             Music,
-            GameOver
+            GameOver,
+            Cutscene
         }
         
         public enum Levels
@@ -210,6 +213,8 @@ namespace RoomRunner
             coinHitBox = new Rectangle(-20, -15, 35, 35);
 
 
+            cutscenes = new Cutscene();
+
             base.Initialize();
             
 
@@ -264,7 +269,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
-            jeb.Invulnerable = true;
+            jeb.Invulnerable = false;
             shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             loadGameSongs(0);
@@ -361,7 +366,8 @@ namespace RoomRunner
 
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
-                gameState = GameState.Play;
+                
+                gameState = GameState.Cutscene;
                 Reset();
                 menuCoolDown = 60;
             }
@@ -631,6 +637,8 @@ namespace RoomRunner
             }
         }
 
+        
+
         private void Reset()
         {
             levels = Levels.Level1;
@@ -694,6 +702,22 @@ namespace RoomRunner
                 spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
 
             }
+            if (gameState == GameState.Cutscene)
+            {
+                if (cutscenes.alpha < 0)
+                {
+                    cutscenes.phase = true;
+                    cutscenes.alpha = 0;
+                }
+                    
+                cutscenes.cutseneActive = true;
+                cutscenes.Draw(spriteBatch, pixel);
+                
+                if (cutscenes.phase == false)
+                {
+                    gameState = GameState.Play;
+                }
+            }
 
             // shop
             if (gameState == GameState.Shop)
@@ -708,7 +732,7 @@ namespace RoomRunner
             }
             if (gameState == GameState.Play)
             {
-                
+
                 
 
 
@@ -808,7 +832,12 @@ namespace RoomRunner
                     spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
 
-                
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha > 255)
+                {
+                    cutscenes.alpha = 0;
+                    cutscenes.cutseneActive = false;
+                }
 
             }
             // game over screen and meny
