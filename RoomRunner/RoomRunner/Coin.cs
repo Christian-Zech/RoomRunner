@@ -25,6 +25,20 @@ namespace RoomRunner
         public new void Update()
         {
             base.Update();
+            
+            rectangle.X = (int)Position.X;
+            rectangle.Y = (int)Position.Y;
+        }
+
+        public void ApplyMagnetForce(GameTime gameTime)
+        {
+            float magnetForce = 0.3f;
+            Vector2 direction = new Vector2(Program.Game.jeb.Position.X + 20, Program.Game.jeb.Position.Y) - Position;
+            direction.Normalize();
+
+            Velocity += direction * magnetForce;
+            Velocity *= 0.98f;
+            Position += Velocity;
         }
 
 
