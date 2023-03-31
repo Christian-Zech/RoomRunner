@@ -8,7 +8,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    class Room
+    public class Room
     {
         public const int minimumNumOfEnemies = 5;
 

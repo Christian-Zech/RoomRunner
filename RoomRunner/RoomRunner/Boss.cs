@@ -40,7 +40,8 @@ namespace RoomRunner
                 bossBarRect.Width = (int)((1900.0f - Insets * 2) * BossBarPercent);
             }
         }
-        private int health, maxHealth;
+        private int health;
+        private readonly int maxHealth;
         private int timer1;
         private float BossBarPercent;
         public bool IsDead, FlipProjX, FlipProjY;
@@ -96,7 +97,7 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 6));
+                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 2)+4);
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }

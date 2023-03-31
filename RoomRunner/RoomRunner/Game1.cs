@@ -39,7 +39,7 @@ namespace RoomRunner
         Rectangle coinHitBox;
 
         public static Rectangle window;
-        public Player jeb;
+        public List<Player> players;
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
@@ -90,7 +90,6 @@ namespace RoomRunner
         public static double soundVolume;
         int songTimeElapsed;
         int gameSongListIndex;
-        int fileOpenCount = 0;
         bool debugMode = false;
         
         public static List<SoundEffect> soundEffects;
@@ -219,10 +218,11 @@ namespace RoomRunner
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/Enemies", Content);
-            List<Boss> bos = new List<Boss>();
-
-            bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
-            bos.Add(new Boss(Bosses.Demon, 300, sheet, GraphicsDevice));
+            List<Boss> bos = new List<Boss>
+            {
+                new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
+                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice)
+            };
 
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
@@ -262,10 +262,34 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             
             backgroundImages = loadTextures("Background", Content);
+            players = new List<Player> {
+                new Player(new Vector2(900, 500))
+                {
+                    Invulnerable = false,
+                    Up = new List<Keys> { Keys.I },
+                    Down = new List<Keys> { Keys.K },
+                    Left = new List<Keys> { Keys.J },
+                    Shoot = new List<Keys> { Keys.L }
+                },
+                new Player(new Vector2(1100, 500))
+                {
+                    Invulnerable = false,
+                    Up = new List<Keys> { Keys.Up },
+                    Down = new List<Keys> { Keys.Down },
+                    Left = new List<Keys> { Keys.Left },
+                    Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                },
+                new Player(new Vector2(700, 500))
+                {
+                    Invulnerable = false,
+                    Up = new List<Keys> { Keys.W },
+                    Down = new List<Keys> { Keys.S },
+                    Left = new List<Keys> { Keys.A },
+                    Shoot = new List<Keys> { Keys.D }
+                }
+            };
 
-            jeb = new Player(new Vector2(900, 500), this);
-            jeb.Invulnerable = true;
-            shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
+            shop = new Shop(items, players[0], jebSheet, idleAnimationRectangles[0]); //Needs changing for multiplayer
 
             loadGameSongs(0);
             loadSoundEffects();
@@ -481,8 +505,9 @@ namespace RoomRunner
                 {
                     if (activePowerupIndex != 1)
                         if (enemy != null)
-                            if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
-                                jeb.Damage();
+                            foreach (Player p in players)
+                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
+                                p.Damage();
                 }
 
                 // player coin collection
@@ -490,10 +515,11 @@ namespace RoomRunner
                 {
                     foreach(Coin coin in coinGrid)
                     {
-                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
+                        foreach (Player p in players)
+                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
                         {
                             coin.Destroy();
-                            jeb.Coins++;
+                            p.Coins++;
                             soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
@@ -509,16 +535,23 @@ namespace RoomRunner
                 }
 
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
-                    if (activePowerupIndex != 1 && enemy != null && jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        jeb.Damage();
+                    foreach (Player p in players)
+                        if (activePowerupIndex != 1 && enemy != null && p.PlayerRectangle.Intersects(enemy.rectangle))
+                            p.Damage();
 
 
-                Jeb:
+                        Jeb:
 
-                jeb.Idle = gameState != GameState.Play;
-                jeb.Update();
+                bool weLiving = false;
+                foreach (Player p in players)
+                {
+                    p.Idle = gameState != GameState.Play;
+                    p.Update();
 
-                if (!jeb.IsAlive)
+                    if (p.IsAlive)
+                        weLiving = true;
+                }
+                if (!weLiving)
                     gameState = GameState.GameOver;
 
                 UpdateProjList(projectileList);
@@ -624,11 +657,12 @@ namespace RoomRunner
                 currentBoss.Damage(p.BossDamage);
                 p.DeltDamage = true;
             }
-            if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
-            {
-                jeb.Damage();
-                p.DeltDamage = true;
-            }
+            foreach (Player pp in players)
+                if (p.DamagesPlayer && p.Rect.Intersects(pp.PlayerRectangle))
+                {
+                    pp.Damage();
+                    p.DeltDamage = true;
+                }
         }
 
         private void Reset()
@@ -638,16 +672,19 @@ namespace RoomRunner
             levelTimer = 0;
             currentRoomIndex = 0;
             scrollSpeed = 0;
-            jeb.Health = Player.MaxHealth;
-            jeb.IsAlive = true;
+            foreach (Player p in players)
+            {
+                p.Health = Player.MaxHealth;
+                p.IsAlive = true;
+                p.Position.Y = Player.floorHeight + p.PlayerRectangle.Height;
+                p.delayLeft = Player.InputDelay;
+            }
 
             transition = false;
             endCurrentRoom = false;
 
             projectileList.Clear();
             currentBoss = null;
-            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
-            jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
         }
@@ -779,8 +816,8 @@ namespace RoomRunner
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
-
-                jeb.Draw(spriteBatch);
+                foreach (Player p in players)
+                    p.Draw(spriteBatch);
                 if (currentBoss != null) currentBoss.Draw(spriteBatch);
                 foreach (Projectile p in projectileList)
                     p.Draw(spriteBatch);
@@ -805,7 +842,8 @@ namespace RoomRunner
                                 spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
                         }
                     }
-                    spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
+                    foreach (Player p in players)
+                        spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
 
                 
