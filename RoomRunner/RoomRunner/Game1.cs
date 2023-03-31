@@ -81,10 +81,13 @@ namespace RoomRunner
         List<SoundEffect> customSongList;
         int customSongIndex;
         List<SoundEffect> gameSongList;
+        List<SoundEffectInstance> gameSongListInstance;
         double musicVolume;
-        double soundVolume;
+        public static double soundVolume;
         int songTimeElapsed;
+        int gameSongListIndex;
         int fileOpenCount = 0;
+        public static List<SoundEffect> soundEffects;
 
         public enum GameState
         {
@@ -184,10 +187,14 @@ namespace RoomRunner
             files = new FileDialogue();
             musicScreen = new MusicScreen();
             musicVolume = 1;
+            soundVolume = 1;
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
             songTimeElapsed = 0;
             gameSongList = new List<SoundEffect>();
+            soundEffects = new List<SoundEffect>();
+            gameSongListInstance = new List<SoundEffectInstance>();
+            gameSongListIndex = 0;
 
             oldKB = Keyboard.GetState();
             base.Initialize();
@@ -247,6 +254,9 @@ namespace RoomRunner
             jeb.Invulnerable = true;
             shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
+            loadGameSongs(0);
+            loadSoundEffects();
+
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
 
@@ -275,6 +285,36 @@ namespace RoomRunner
                 customSongList.Add(temp);
                 Console.WriteLine(name);
             }
+        }
+
+        public void loadGameSongs(int instance)
+        {
+            if (instance == 0)
+            {
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic2"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic3"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/menuMusic"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/BossMusic"));
+                for (int i = 0; i < gameSongList.Count; i++)
+                    gameSongListInstance.Add(gameSongList[i].CreateInstance());
+            }
+            else
+            {
+                for (int i = 0; i < gameSongList.Count; i++)
+                {
+                    if (gameSongListInstance[i].State == SoundState.Playing)
+                        gameSongListInstance[i].Pause();
+                }
+            }
+            
+        }
+        public void loadSoundEffects()
+        {
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/coinSound"));
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/jump"));
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/powerUp (1)"));
+
         }
 
         /// <summary>
@@ -340,18 +380,23 @@ namespace RoomRunner
             {
                 if (musicScreen.customMusic)
                     LoadCustomSongs();
-                
+
+                gameSongListInstance[3].Volume = (float)musicVolume/5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
                 
             
 
             if (gameState == GameState.Play)
             {
+                gameSongListInstance[3].Stop();
                 musicVolume = musicScreen.musicVolume;
+                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
                     if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
                     {
                         customSongIndex++;
@@ -360,7 +405,7 @@ namespace RoomRunner
                             customSongIndex = 0;
                         }
                         songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
                     }
                     else
                     {
@@ -369,7 +414,23 @@ namespace RoomRunner
                 }
                 else //regular game music
                 {
-
+                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume/15);
+                    if (songTimeElapsed == 0 && gameSongListIndex == 0)
+                        gameSongListInstance[gameSongListIndex].Play();
+                    if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
+                    {
+                        gameSongListIndex++;
+                        if (gameSongListIndex >= 3)
+                        {
+                            gameSongListIndex = 0;
+                        }
+                        songTimeElapsed = 0;
+                        gameSongListInstance[gameSongListIndex].Play();
+                    }
+                    else
+                    {
+                        songTimeElapsed++;
+                    }
                 }
 
                 if (activePowerupIndex == 0)
@@ -397,6 +458,7 @@ namespace RoomRunner
                         {
                             coin.Destroy();
                             jeb.Coins++;
+                            soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
                 }
@@ -477,10 +539,17 @@ namespace RoomRunner
                 if (musicScreen.customMusic)
                 {
                     LoadCustomSongs();
+                    loadSoundEffects();
                     customSongIndex = 0;
                     songTimeElapsed = 0;
                 }
-                //else
+                else
+                {
+                    loadGameSongs(1);
+                    loadSoundEffects();
+                    gameSongListIndex = 0;
+                    songTimeElapsed = 0;
+                }
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();

@@ -112,6 +112,7 @@ namespace RoomRunner
 
             if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
             {
+                Game1.soundEffects[1].Play(volume: (float)Game1.soundVolume/10, pitch: 0.0f, pan: 0.0f);
                 if (onGround) Velocity.Y = InitialJumpMovement * JumpMultiplier;
                 else Velocity.Y = JumpMovement * JumpMultiplier;
                 SetState("Jumping");
