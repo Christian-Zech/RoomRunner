@@ -169,6 +169,7 @@
       <Name>powerUp %281%29</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
+	</Compile>
     <Compile Include="Projectile\Inverted Fireball.png">
       <Name>Inverted Fireball</Name>
       <Importer>TextureImporter</Importer>
