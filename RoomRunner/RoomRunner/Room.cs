@@ -21,6 +21,7 @@ namespace RoomRunner
         public List<Enemy> enemyArray;
         public Random rand;
         public List<Coin[,]> coinsGridList;
+        public List<Projectile> obstacleList;
 
         public Rectangle backgroundRectangle;
 
@@ -37,6 +38,8 @@ namespace RoomRunner
             Block
         }
 
+        
+
         // intended for single images
         public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content, Rectangle window)
         {
@@ -47,6 +50,8 @@ namespace RoomRunner
             this.graphics = graphics;
             this.content = content;
             enemyArray = new List<Enemy>();
+            obstacleList = new List<Projectile>();
+
             rand = new Random(DateTime.Now.Millisecond);
 
             // determines amount of coin patches in the room
@@ -66,6 +71,9 @@ namespace RoomRunner
             }
 
             RemoveCoinOverLap();
+
+            // generates room obstacles
+            GenerateObstacles(rand.Next(2, 5));
 
         }
 
@@ -120,6 +128,19 @@ namespace RoomRunner
                     }
                     break;
             }
+        }
+
+        // generates obstacles for the room. Call once and forget.
+        private void GenerateObstacles(int amountOfObstacles)
+        {
+            Rectangle[] frameRectangles = Player.LoadSheet(32, 32, 3, 3);
+            for(int i = 0; i < amountOfObstacles; i++)
+            {
+                Program.Game.projectileList.Add(new Projectile(new Rectangle(50 + rand.Next(0, 100), 10, 100, 100), 1, 100, new OnetimeAnimation(1, graphics, Game1.loadImage("Enemies/Obstacles",  content), frameRectangles[5], frameRectangles[6])));
+                
+            }
+
+
         }
 
         public void InheritEnemies(List<Enemy> toInherit)
@@ -214,6 +235,15 @@ namespace RoomRunner
                 }
             }
 
+            //foreach(Projectile obstacle in obstacleList)
+            //{
+            //    obstacle.Rect.X -= scrollSpeed;
+            //    obstacle.Update();
+            //    Console.WriteLine(obstacle.Rect);
+            //}
+
+            
+
 
             foreach (Enemy e in toRemove)
                 enemyArray.Remove(e);
@@ -237,6 +267,10 @@ namespace RoomRunner
                         spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
                 }
             }
+            //foreach(Projectile obstacle in obstacleList)
+            //{
+            //    obstacle.Draw(spriteBatch);
+            //}
         }
 
 
