@@ -482,7 +482,7 @@ namespace RoomRunner
                     if (activePowerupIndex != 1)
                         if (enemy != null)
                             if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
-                                gameState = GameState.GameOver;
+                                jeb.Damage();
                 }
 
                 // player coin collection
