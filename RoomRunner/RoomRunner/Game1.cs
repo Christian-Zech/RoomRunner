@@ -34,6 +34,10 @@ namespace RoomRunner
         Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
 
+        Rectangle enemyHitBox;
+        Rectangle playerHitBox;
+        Rectangle coinHitBox;
+
         public static Rectangle window;
         public Player jeb;
         public static Boss currentBoss;
@@ -43,7 +47,7 @@ namespace RoomRunner
         public List<Projectile> projectileList;
         private int amountOfRooms;
         public static Powerups powerups;
-        int activePowerupIndex;
+        public int activePowerupIndex;
         int slowTimeTemp;
 
 
@@ -81,10 +85,15 @@ namespace RoomRunner
         List<SoundEffect> customSongList;
         int customSongIndex;
         List<SoundEffect> gameSongList;
+        List<SoundEffectInstance> gameSongListInstance;
         double musicVolume;
-        double soundVolume;
+        public static double soundVolume;
         int songTimeElapsed;
+        int gameSongListIndex;
         int fileOpenCount = 0;
+        bool debugMode = false;
+        
+        public static List<SoundEffect> soundEffects;
 
         public enum GameState
         {
@@ -184,12 +193,23 @@ namespace RoomRunner
             files = new FileDialogue();
             musicScreen = new MusicScreen();
             musicVolume = 1;
+            soundVolume = 1;
             customSongList = new List<SoundEffect>();
             customSongIndex = 0;
             songTimeElapsed = 0;
             gameSongList = new List<SoundEffect>();
+            soundEffects = new List<SoundEffect>();
+            gameSongListInstance = new List<SoundEffectInstance>();
+            gameSongListIndex = 0;
 
             oldKB = Keyboard.GetState();
+
+
+            enemyHitBox = new Rectangle(30, 10, 40, 50);
+            playerHitBox = new Rectangle(25, 0, 80, 110);
+            coinHitBox = new Rectangle(-20, -15, 35, 35);
+
+
             base.Initialize();
             
 
@@ -247,6 +267,9 @@ namespace RoomRunner
             jeb.Invulnerable = true;
             shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
+            loadGameSongs(0);
+            loadSoundEffects();
+
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
 
@@ -275,6 +298,36 @@ namespace RoomRunner
                 customSongList.Add(temp);
                 Console.WriteLine(name);
             }
+        }
+
+        public void loadGameSongs(int instance)
+        {
+            if (instance == 0)
+            {
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic2"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/8bitMusic3"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/menuMusic"));
+                gameSongList.Add(Content.Load<SoundEffect>("Sounds/BossMusic"));
+                for (int i = 0; i < gameSongList.Count; i++)
+                    gameSongListInstance.Add(gameSongList[i].CreateInstance());
+            }
+            else
+            {
+                for (int i = 0; i < gameSongList.Count; i++)
+                {
+                    if (gameSongListInstance[i].State == SoundState.Playing)
+                        gameSongListInstance[i].Pause();
+                }
+            }
+            
+        }
+        public void loadSoundEffects()
+        {
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/coinSound"));
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/jump"));
+            soundEffects.Add(Content.Load<SoundEffect>("Sounds/powerUp (1)"));
+
         }
 
         /// <summary>
@@ -340,18 +393,23 @@ namespace RoomRunner
             {
                 if (musicScreen.customMusic)
                     LoadCustomSongs();
-                
+
+                gameSongListInstance[3].Volume = (float)musicVolume/5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
                 
             
 
             if (gameState == GameState.Play)
             {
+                gameSongListInstance[3].Stop();
                 musicVolume = musicScreen.musicVolume;
+                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
                     if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
                     {
                         customSongIndex++;
@@ -360,7 +418,7 @@ namespace RoomRunner
                             customSongIndex = 0;
                         }
                         songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
                     }
                     else
                     {
@@ -369,7 +427,23 @@ namespace RoomRunner
                 }
                 else //regular game music
                 {
-
+                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume/15);
+                    if (songTimeElapsed == 0 && gameSongListIndex == 0)
+                        gameSongListInstance[gameSongListIndex].Play();
+                    if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
+                    {
+                        gameSongListIndex++;
+                        if (gameSongListIndex >= 3)
+                        {
+                            gameSongListIndex = 0;
+                        }
+                        songTimeElapsed = 0;
+                        gameSongListInstance[gameSongListIndex].Play();
+                    }
+                    else
+                    {
+                        songTimeElapsed++;
+                    }
                 }
 
                 if (activePowerupIndex == 0)
@@ -388,15 +462,39 @@ namespace RoomRunner
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
+                
+
+
+
+
+                if (bossFight)
+                {
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
+                        roomList[currentRoomIndex].enemyArray.Clear();
+
+                    goto Jeb;
+                }
+
+
+                // kills player if enemy intercepts them
+                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
+                {
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
+                                jeb.Damage();
+                }
+
                 // player coin collection
                 foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
                 {
                     foreach(Coin coin in coinGrid)
                     {
-                        if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
+                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
                         {
                             coin.Destroy();
                             jeb.Coins++;
+                            soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
                 }
@@ -460,7 +558,17 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        // no coins yet :(
+                        // pulls coins toward player
+                        foreach (Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
+                        {
+                            foreach (Coin coin in coinsGrid)
+                            {
+                                if (coin != null)
+                                {
+                                    coin.ApplyMagnetForce(gameTime);
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -477,10 +585,17 @@ namespace RoomRunner
                 if (musicScreen.customMusic)
                 {
                     LoadCustomSongs();
+                    loadSoundEffects();
                     customSongIndex = 0;
                     songTimeElapsed = 0;
                 }
-                //else
+                else
+                {
+                    loadGameSongs(1);
+                    loadSoundEffects();
+                    gameSongListIndex = 0;
+                    songTimeElapsed = 0;
+                }
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
@@ -605,7 +720,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -671,6 +786,30 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
+
+
+                // draws hitboxes to help debug them
+
+                if (debugMode)
+                {
+                    foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
+                    {
+                        spriteBatch.Draw(pixel, new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height), Color.Black);
+                    }
+
+                    foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
+                    {
+                        foreach (Coin coin in coinGrid)
+                        {
+                            if (coin != null)
+                                spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
+                        }
+                    }
+                    spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
+                }
+
+                
+
             }
             // game over screen and meny
             if(gameState == GameState.GameOver)

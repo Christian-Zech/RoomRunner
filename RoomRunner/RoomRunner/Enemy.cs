@@ -16,6 +16,7 @@ namespace RoomRunner
 
         public Texture2D texture;
         public Rectangle rectangle;
+        public Rectangle hitBox;
         public static int totalEnemyCount;
 
         static Enemy()
@@ -26,6 +27,8 @@ namespace RoomRunner
         {
             this.texture = texture;
             this.rectangle = rectangle;
+
+
             AddAnimation("Idle", texture, graphics, 5, Player.LoadSheet(2, 2, 32, 32));
             totalEnemyCount++;
 

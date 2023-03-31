@@ -96,7 +96,7 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 2)+4);
+                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 6));
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }

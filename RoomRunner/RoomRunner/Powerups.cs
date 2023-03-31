@@ -22,7 +22,7 @@ namespace RoomRunner
         public Powerups()
         {
             items = new List<PowerupItem> { new PowerupItem("Time Control", 400, false), new PowerupItem("Can't Die", 600, false), new PowerupItem("Instakill", 10, false), new PowerupItem("Magnet", 600, false) };
-            quantities = new List<int> { 1, 1, 1, 1 };
+            quantities = new List<int> { 2, 1, 1, 1 };
             currentFrameIndex1 = currentFrameIndex2 = currentFrameIndex3 = currentFrameIndex4 = 0;
             count = count1 = count2 = count3 = count4 = 0;
         }
@@ -36,7 +36,7 @@ namespace RoomRunner
             {
                 quantities[index]--;
                 items[index].Activate();
-                
+                Game1.soundEffects[2].Play(volume: (float)Game1.soundVolume/10, pitch: 0.0f, pan: 0.0f);
             }
         }
         public void Update()
