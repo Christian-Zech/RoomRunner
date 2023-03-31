@@ -37,7 +37,7 @@ namespace RoomRunner
             Block
         }
 
-        // intended for single images
+        // Each room operates as its own entity where it will have its own background, enemies, and coins. Game1 has a roomList variable that stores all of the rooms.
         public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content, Rectangle window)
         {
             background1 = background;
@@ -69,6 +69,7 @@ namespace RoomRunner
 
         }
 
+        // generates enemies. Call this once and the room will have enemies.
         private void generateEnemies(int amount)
         {
             Enemy.totalEnemyCount += amount;
@@ -77,7 +78,7 @@ namespace RoomRunner
             RemoveOverlap();
         }
 
-
+        // generates 1 coin patch. Call this multiple times to get lots of coins
         private void generateCoins(Coin[,] coinsGrid, CoinPattern pattern, Rectangle window)
         {
             int coinGap = 50; // seperation between coins (pixels)
@@ -122,10 +123,13 @@ namespace RoomRunner
             }
         }
 
+        // fixes an issue where enemies can "despawn" if the room count progresses.
         public void InheritEnemies(List<Enemy> toInherit)
         {
             enemyArray.AddRange(toInherit);
         }
+
+        // fixes an issue where enemies can be spawned right on top of each other. Fixes the issue by making a list of problematic enemies and then deleting them from the main enemy list.
         private void RemoveOverlap()
         {
             List<Enemy> hasOverlap = new List<Enemy>();
@@ -141,21 +145,8 @@ namespace RoomRunner
                 enemyArray.Remove(e);
             generateEnemies(hasOverlap.Count);
         }
-        public void RemoveOverlap(List<Rectangle> list)
-        {
-            List<Rectangle> hasOverlap = new List<Rectangle>();
-            for (int i1 = 0; i1 < list.Count; i1++)
-                for (int i2 = i1 + 1; i2 < list.Count; i2++)
-                    if (list[i1].Intersects(list[i2]))
-                    {
-                        hasOverlap.Add(list[i1]);
-                        hasOverlap.Add(list[i2]);
-                    }
-            if (hasOverlap.Count == 0) return;
-            foreach (Rectangle e in hasOverlap)
-                list.Remove(e);
-        }
 
+        // fixes an issue where coincs can spawn on top of each other
         public void RemoveCoinOverLap()
         {
             for(int i = 0; i < coinsGridList.Count; i++)
@@ -179,7 +170,7 @@ namespace RoomRunner
             }
         }
 
-        // makes the game scroll by moving the background to the left. Also controls enemies.
+        // makes the game scroll by moving the background to the left. Also controls enemies and coins.
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
