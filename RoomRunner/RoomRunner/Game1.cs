@@ -35,15 +35,15 @@ namespace RoomRunner
         Rectangle menuButtonRectangle;
 
         public static Rectangle window;
-        private Player jeb;
+        public Player jeb;
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
         List<Room> roomList;
         public List<Projectile> projectileList;
         private int amountOfRooms;
-        Powerups powerups;
-        public static int activePowerupIndex;
+        public static Powerups powerups;
+        int activePowerupIndex;
         int slowTimeTemp;
 
 
@@ -85,8 +85,6 @@ namespace RoomRunner
         double soundVolume;
         int songTimeElapsed;
         int fileOpenCount = 0;
-
-
 
         public enum GameState
         {
@@ -153,7 +151,6 @@ namespace RoomRunner
             menuCoolDown = 0;
             bossCooldown = 0;
 
-
             gameState = GameState.Menu;
             levels = Levels.Level1;
             gameTimer = 0;
@@ -205,6 +202,7 @@ namespace RoomRunner
             List<Boss> bos = new List<Boss>();
 
             bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
+            bos.Add(new Boss(Bosses.Demon, 300, sheet, GraphicsDevice));
 
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
@@ -246,6 +244,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
+            jeb.Invulnerable = true;
             shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
@@ -274,6 +273,7 @@ namespace RoomRunner
                 System.IO.FileStream fs = new System.IO.FileStream(name, System.IO.FileMode.Open);
                 SoundEffect temp = SoundEffect.FromStream(fs);
                 customSongList.Add(temp);
+                Console.WriteLine(name);
             }
         }
 
@@ -388,31 +388,10 @@ namespace RoomRunner
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
 
-                
-
-
-
-
-                if (bossFight)
-                {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
-                        roomList[currentRoomIndex].enemyArray.Clear();
-
-                    goto Jeb;
-                }
-
-                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
-                {
-                    if (activePowerupIndex != 1)
-                        if (enemy != null)
-                            if (jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                                gameState = GameState.GameOver;
-                }
-
                 // player coin collection
                 foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
                 {
-                    foreach (Coin coin in coinGrid)
+                    foreach(Coin coin in coinGrid)
                     {
                         if (coin != null && coin.rectangle.Intersects(jeb.PlayerRectangle))
                         {
@@ -423,26 +402,29 @@ namespace RoomRunner
                 }
 
 
-            Jeb:
+
+
+                    if (bossFight)
+                {
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
+                    goto Jeb;
+                }
+
+                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
+                    if (activePowerupIndex != 1 && enemy != null && jeb.PlayerRectangle.Intersects(enemy.rectangle))
+                        jeb.Damage();
+
+
+                Jeb:
 
                 jeb.Idle = gameState != GameState.Play;
                 jeb.Update();
 
-                List<Projectile> toRemove = new List<Projectile>();
-                foreach (Projectile p in projectileList)
-                {
-                    p.Update();
+                if (!jeb.IsAlive)
+                    gameState = GameState.GameOver;
 
-                    if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
-                    {
-                        currentBoss.Damage(p.BossDamage);
-                        p.DeltDamage = true;
-                    }
+                UpdateProjList(projectileList);
 
-                    if (p.ToRemove) toRemove.Add(p);
-                }
-                foreach (Projectile p in toRemove)
-                    projectileList.Remove(p);
 
                 
                 
@@ -478,17 +460,7 @@ namespace RoomRunner
                     }
                     if (activePowerupIndex == 3)
                     {
-                        // pulls coins toward player
-                        foreach(Coin[,] coinsGrid in roomList[currentRoomIndex].coinsGridList)
-                        {
-                            foreach(Coin coin in coinsGrid)
-                            {
-                                if(coin != null)
-                                {
-                                    coin.ApplyMagnetForce(gameTime);
-                                }
-                            }
-                        }
+                        // no coins yet :(
                     }
                 }
                 else
@@ -516,6 +488,33 @@ namespace RoomRunner
 
             base.Update(gameTime);
         }
+        public void UpdateProjList(List<Projectile> list)
+        {
+            List<Projectile> toRemove = new List<Projectile>();
+            foreach (Projectile p in list)
+            {
+                UpdateProjectile(p);
+
+                if (p.ToRemove) toRemove.Add(p);
+            }
+            foreach (Projectile p in toRemove)
+                list.Remove(p);
+        }
+        public void UpdateProjectile(Projectile p)
+        {
+            p.Update();
+
+            if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+            {
+                currentBoss.Damage(p.BossDamage);
+                p.DeltDamage = true;
+            }
+            if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
+            {
+                jeb.Damage();
+                p.DeltDamage = true;
+            }
+        }
 
         private void Reset()
         {
@@ -524,13 +523,15 @@ namespace RoomRunner
             levelTimer = 0;
             currentRoomIndex = 0;
             scrollSpeed = 0;
+            jeb.Health = Player.MaxHealth;
+            jeb.IsAlive = true;
 
             transition = false;
             endCurrentRoom = false;
 
             projectileList.Clear();
             currentBoss = null;
-            Player.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
+            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
             jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
@@ -604,14 +605,14 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
                 {
                     transition = true;
                     levelTimer = 0;
-                    
+                    levels++;
                 }
                 
 
