@@ -86,7 +86,7 @@ namespace RoomRunner
         int customSongIndex;
         List<SoundEffect> gameSongList;
         List<SoundEffectInstance> gameSongListInstance;
-        double musicVolume;
+        public static double musicVolume;
         public static double soundVolume;
         int songTimeElapsed;
         int gameSongListIndex;
@@ -415,7 +415,7 @@ namespace RoomRunner
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/3, pitch: 0.0f, pan: 0.0f);
                     if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
                     {
                         customSongIndex++;
@@ -424,7 +424,7 @@ namespace RoomRunner
                             customSongIndex = 0;
                         }
                         songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume/3, pitch: 0.0f, pan: 0.0f);
                     }
                     else
                     {
@@ -729,6 +729,8 @@ namespace RoomRunner
             if (gameState == GameState.Music)
             {
                 musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                musicVolume = musicScreen.musicVolume;
+                gameSongListInstance[3].Volume = (float)musicVolume / 5;
             }
             if (gameState == GameState.Play)
             {
