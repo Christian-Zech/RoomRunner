@@ -414,22 +414,27 @@ namespace RoomRunner
                 soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
-                    if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/3, pitch: 0.0f, pan: 0.0f);
-                    if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
+                    if (customSongList.Count != 0)
                     {
-                        customSongIndex++;
-                        if (customSongIndex >= customSongList.Count)
+                        if (songTimeElapsed == 0 && customSongIndex == 0)
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
+                        if (songTimeElapsed / 60 > customSongList[customSongIndex].Duration.TotalSeconds)
                         {
-                            customSongIndex = 0;
+                            customSongIndex++;
+                            if (customSongIndex >= customSongList.Count)
+                            {
+                                customSongIndex = 0;
+                            }
+                            songTimeElapsed = 0;
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
                         }
-                        songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/3, pitch: 0.0f, pan: 0.0f);
+                        else
+                        {
+                            songTimeElapsed++;
+                        }
+
                     }
-                    else
-                    {
-                        songTimeElapsed++;
-                    }
+                    
                 }
                 else //regular game music
                 {
