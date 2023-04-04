@@ -263,7 +263,7 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-                new Player(new Vector2(900, 500))
+                /*new Player(new Vector2(900, 500))
                 {
                     Invulnerable = false,
                     Up = new List<Keys> { Keys.I },
@@ -278,7 +278,7 @@ namespace RoomRunner
                     Down = new List<Keys> { Keys.Down },
                     Left = new List<Keys> { Keys.Left },
                     Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                },
+                },//*/
                 new Player(new Vector2(700, 500))
                 {
                     Invulnerable = false,
@@ -652,13 +652,13 @@ namespace RoomRunner
         {
             p.Update();
 
-            if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+            if (p.DamagesBoss && bossFight && p.Rectangle.Intersects(currentBoss.Rectangle))
             {
                 currentBoss.Damage(p.BossDamage);
                 p.DeltDamage = true;
             }
             foreach (Player pp in players)
-                if (p.DamagesPlayer && p.Rect.Intersects(pp.PlayerRectangle))
+                if (p.DamagesPlayer && p.Rectangle.Intersects(pp.PlayerRectangle))
                 {
                     pp.Damage();
                     p.DeltDamage = true;
