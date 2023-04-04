@@ -209,8 +209,8 @@ namespace RoomRunner
 
 
             enemyHitBox = new Rectangle(30, 10, 40, 50);
-            playerHitBox = new Rectangle(25, 0, 80, 110);
-            coinHitBox = new Rectangle(-20, -15, 35, 35);
+            playerHitBox = new Rectangle(35, 5, 60, 90);
+            coinHitBox = new Rectangle(5, 5, 40, 40);
 
 
             cutscenes = new Cutscene();
