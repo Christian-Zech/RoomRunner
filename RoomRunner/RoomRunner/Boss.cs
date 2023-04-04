@@ -10,7 +10,8 @@ namespace RoomRunner
     public class Boss : Animation
     {
         private const int Insets = 20; //in px
-        public const int TimeBetweenPatterns = 50; //in frames
+        public const int WarningTime = 120; //in frames
+        public const int TimeBetweenPatterns = WarningTime + 50; //in frames
         public const double SpeedMultiplier = 2;
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;
@@ -97,7 +98,7 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
+                CurrentPattern = (BossPattern)3;//Program.Game.rand.Next(0, 6);
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }
@@ -304,7 +305,7 @@ namespace RoomRunner
         }
         public new Boss Clone() { return new Boss(Name, health, LastUsedSheet, graphics); }
 
-        public void Damage(int amount) => Health -= amount;
+        public void Damage(int amount) { Health -= amount; }
         private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
         {
             Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
