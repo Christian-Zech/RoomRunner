@@ -723,14 +723,17 @@ namespace RoomRunner
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                
-                    
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
+
             }
             if (gameState == GameState.Music)
             {
                 musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
                 musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
             if (gameState == GameState.Play)
             {
