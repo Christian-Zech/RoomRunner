@@ -55,7 +55,7 @@ namespace RoomRunner
         {
             PatternTimes = new Dictionary<BossPattern, int>
             {
-                [BossPattern.Attack] = 90,
+                [BossPattern.Attack] = 180,
                 [BossPattern.Pound] = 300,
                 [BossPattern.BigPound_Bottom] = 300,
                 [BossPattern.BigPound_Top] = 300,
@@ -154,7 +154,7 @@ namespace RoomRunner
                         int rdmNum = availablePoints.ElementAt(Program.Game.rand.Next(0, availablePoints.Count));
                         for (int ii = rdmNum - 100; ii <= rdmNum + 100; ii++)
                             availablePoints.Remove(ii);
-                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point((int)(-24 * SpeedMultiplier), 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
+                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point((int)(-12 * SpeedMultiplier), 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
                     }
                     break;
