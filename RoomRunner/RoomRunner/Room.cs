@@ -21,7 +21,6 @@ namespace RoomRunner
         public List<Enemy> enemyArray;
         public Random rand;
         public List<Coin[,]> coinsGridList;
-        public List<Projectile> obstacleList;
 
         public Rectangle backgroundRectangle;
 
@@ -50,7 +49,6 @@ namespace RoomRunner
             this.graphics = graphics;
             this.content = content;
             enemyArray = new List<Enemy>();
-            obstacleList = new List<Projectile>();
 
             rand = new Random(DateTime.Now.Millisecond);
 
@@ -133,12 +131,19 @@ namespace RoomRunner
         // generates obstacles for the room. Call once and forget.
         private void GenerateObstacles(int amountOfObstacles)
         {
-            Rectangle[] frameRectangles = Player.LoadSheet(32, 32, 3, 3);
-            for(int i = 0; i < amountOfObstacles; i++)
+            Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
+            for (int i = 0; i < amountOfObstacles; i++)
             {
-                Program.Game.projectileList.Add(new Projectile(new Rectangle(50 + rand.Next(0, 100), 10, 100, 100), 1, 100, new OnetimeAnimation(1, graphics, Game1.loadImage("Enemies/Obstacles",  content), frameRectangles[5], frameRectangles[6])));
-                
+
+                Program.Game.projectileList.Add(new Projectile(new Rectangle(1000 + rand.Next(0, 5000), 0, 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
+                    new OnetimeAnimation(25, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
+                    {
+                        Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
+                    }));
+
+
             }
+            
 
 
         }
@@ -267,10 +272,9 @@ namespace RoomRunner
                         spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
                 }
             }
-            //foreach(Projectile obstacle in obstacleList)
-            //{
-            //    obstacle.Draw(spriteBatch);
-            //}
+            
+            
+
         }
 
 

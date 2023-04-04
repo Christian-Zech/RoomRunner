@@ -56,7 +56,7 @@ namespace RoomRunner
         private int levelTimer;
         private int bossCooldown;
         public int currentRoomIndex;
-        public int scrollSpeed;
+        public static int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
         public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
@@ -156,7 +156,7 @@ namespace RoomRunner
 
 
             amountOfRooms = 5;
-            scrollSpeed = 0;
+            scrollSpeed = 10;
             menuCoolDown = 0;
             bossCooldown = 0;
 
@@ -164,7 +164,7 @@ namespace RoomRunner
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
-            currentRoomIndex = 0;
+            currentRoomIndex = 10;
 
             transition = false;
             endCurrentRoom = false;
@@ -637,7 +637,7 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoomIndex = 0;
-            scrollSpeed = 0;
+            scrollSpeed = 10;
             jeb.Health = Player.MaxHealth;
             jeb.IsAlive = true;
 
