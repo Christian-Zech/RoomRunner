@@ -225,6 +225,9 @@ namespace RoomRunner
                     break;
                 case BossPattern.MoveForward:
                     timer1 = 0;
+                    FlipProjX = false;
+                    FlipProjY = false;
+                    projList.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(rect, 0, 140, default, false, true)));
                     break;
             }
         }

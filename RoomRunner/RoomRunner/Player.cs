@@ -110,6 +110,7 @@ namespace RoomRunner
         }
         public new void Update()
         {
+            if (!IsAlive) return;
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
             bool stateSet = false;
