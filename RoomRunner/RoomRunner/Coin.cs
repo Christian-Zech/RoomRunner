@@ -7,7 +7,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    class Coin : Animation
+    public class Coin : Animation
     {
         public Rectangle rectangle;
         public Texture2D texture;
@@ -38,12 +38,15 @@ namespace RoomRunner
         public void ApplyMagnetForce(GameTime gameTime)
         {
             float magnetForce = 0.3f;
-            Vector2 direction = new Vector2(Program.Game.jeb.Position.X + 20, Program.Game.jeb.Position.Y) - Position;
-            direction.Normalize();
 
-            Velocity += direction * magnetForce;
-            Velocity *= 0.98f;
-            Position += Velocity;
+            foreach (Player p in Program.Game.players) {
+                Vector2 direction = new Vector2(p.Position.X + 20, p.Position.Y) - Position;
+                direction.Normalize();
+
+                Velocity += direction * magnetForce;
+                Velocity *= 0.98f;
+                Position += Velocity; 
+            }
         }
 
 

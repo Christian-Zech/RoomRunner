@@ -40,7 +40,8 @@ namespace RoomRunner
                 bossBarRect.Width = (int)((1900.0f - Insets * 2) * BossBarPercent);
             }
         }
-        private int health, maxHealth;
+        private int health;
+        private readonly int maxHealth;
         private int timer1;
         private float BossBarPercent;
         public bool IsDead, FlipProjX, FlipProjY;
@@ -54,7 +55,7 @@ namespace RoomRunner
         {
             PatternTimes = new Dictionary<BossPattern, int>
             {
-                [BossPattern.Attack] = 90,
+                [BossPattern.Attack] = 180,
                 [BossPattern.Pound] = 300,
                 [BossPattern.BigPound_Bottom] = 300,
                 [BossPattern.BigPound_Top] = 300,
@@ -96,7 +97,7 @@ namespace RoomRunner
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)(Program.Game.rand.Next(0, 6));
+                CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }
@@ -153,7 +154,7 @@ namespace RoomRunner
                         int rdmNum = availablePoints.ElementAt(Program.Game.rand.Next(0, availablePoints.Count));
                         for (int ii = rdmNum - 100; ii <= rdmNum + 100; ii++)
                             availablePoints.Remove(ii);
-                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point((int)(-24 * SpeedMultiplier), 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
+                        projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(new Rectangle(1500, rdmNum, 100, 100), 0, new Point((int)(-12 * SpeedMultiplier), 0), OnetimeAnimation.Anims[OnetimeAnims.Boss_Fireball].Clone(), false, true)));
                         Program.Game.rand.Next(DateTime.UtcNow.Millisecond);
                     }
                     break;
@@ -169,11 +170,11 @@ namespace RoomRunner
                     {
                         List<Projectile> toClump = new List<Projectile>
                         {
-                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 90, 100, 90), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                            new Projectile(true, new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 90, 100, 90), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 30, 100, 30), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
                         };
                         projBuffer.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
                     }
@@ -189,11 +190,11 @@ namespace RoomRunner
                     {
                         List<Projectile> toClump = new List<Projectile>
                         {
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 180, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                            new Projectile(true, new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 180, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 120, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, floor - 60, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
                         };
                         projList.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
                     }
@@ -209,11 +210,11 @@ namespace RoomRunner
                     {
                         List<Projectile> toClump = new List<Projectile>
                         {
-                            new Projectile(new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, ceiling, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
-                            new Projectile(new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
+                            new Projectile(true, new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, ceiling, 100, 180), 0, frames * 10, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, ceiling, 100, 120), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true),
+                            new Projectile(true, new Rectangle(x, ceiling, 100, 60), 0, frames, new OnetimeAnimation(10, Program.Game.GraphicsDevice, sheet, rects[5]), false, true)
                         };
                         projList.Add(new ProjectileClump(FlipProjX, FlipProjY, toClump.ToArray()));
                     }
@@ -224,6 +225,9 @@ namespace RoomRunner
                     break;
                 case BossPattern.MoveForward:
                     timer1 = 0;
+                    FlipProjX = false;
+                    FlipProjY = false;
+                    projList.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(true, () => rect, 0, 140, default, false, true)));
                     break;
             }
         }
