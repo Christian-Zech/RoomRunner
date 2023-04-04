@@ -82,17 +82,17 @@ namespace RoomRunner
             currentFrameIndex3 = items[2].AnimateLinear(nuke, currentFrameIndex3);
             currentFrameIndex4 = items[3].AnimateLinear(magnet, currentFrameIndex4);
 
-            spriteBatch.Draw(pixel, new Rectangle(40, 20, 390, 130), Color.Black*.3f);
-            spriteBatch.DrawString(font, "" + quantities[0], new Vector2(75, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[1], new Vector2(175, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[2], new Vector2(275, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[3], new Vector2(375, 120), Color.White);
+            spriteBatch.Draw(pixel, new Rectangle(0, 70, 390, 130), Color.Black*.3f);
+            spriteBatch.DrawString(font, "" + quantities[0], new Vector2(35, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[1], new Vector2(135, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[2], new Vector2(235, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[3], new Vector2(335, 170), Color.White);
             
             
-            spriteBatch.Draw(textures, new Rectangle(50, 40, 70, 70), clock[(int)(currentFrameIndex1)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(150, 40, 70, 70), skull[(int)(currentFrameIndex2)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(250, 40, 70, 70), nuke[(int)(currentFrameIndex3)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(350, 40, 70, 70), magnet[(int)(currentFrameIndex4)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(10, 90, 70, 70), clock[(int)(currentFrameIndex1)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(110, 90, 70, 70), skull[(int)(currentFrameIndex2)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(210, 90, 70, 70), nuke[(int)(currentFrameIndex3)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(310, 90, 70, 70), magnet[(int)(currentFrameIndex4)], Color.White);
         }
     }
 }

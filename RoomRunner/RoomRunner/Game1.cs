@@ -86,13 +86,15 @@ namespace RoomRunner
         int customSongIndex;
         List<SoundEffect> gameSongList;
         List<SoundEffectInstance> gameSongListInstance;
-        double musicVolume;
+        public static double musicVolume;
         public static double soundVolume;
         int songTimeElapsed;
         int gameSongListIndex;
         bool debugMode = false;
-        
         public static List<SoundEffect> soundEffects;
+
+        //for cutsenes
+        Cutscene cutscenes;
 
         public enum GameState
         {
@@ -100,7 +102,8 @@ namespace RoomRunner
             Shop,
             Play,
             Music,
-            GameOver
+            GameOver,
+            Cutscene
         }
         
         public enum Levels
@@ -205,9 +208,11 @@ namespace RoomRunner
 
 
             enemyHitBox = new Rectangle(30, 10, 40, 50);
-            playerHitBox = new Rectangle(25, 0, 80, 110);
-            coinHitBox = new Rectangle(-20, -15, 35, 35);
+            playerHitBox = new Rectangle(35, 5, 60, 90);
+            coinHitBox = new Rectangle(5, 5, 40, 40);
 
+
+            cutscenes = new Cutscene();
 
             base.Initialize();
             
@@ -385,7 +390,8 @@ namespace RoomRunner
 
             if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
             {
-                gameState = GameState.Play;
+                
+                gameState = GameState.Cutscene;
                 Reset();
                 menuCoolDown = 60;
             }
@@ -432,22 +438,27 @@ namespace RoomRunner
                 soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
-                    if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
-                    if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
+                    if (customSongList.Count != 0)
                     {
-                        customSongIndex++;
-                        if (customSongIndex >= customSongList.Count)
+                        if (songTimeElapsed == 0 && customSongIndex == 0)
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
+                        if (songTimeElapsed / 60 > customSongList[customSongIndex].Duration.TotalSeconds)
                         {
-                            customSongIndex = 0;
+                            customSongIndex++;
+                            if (customSongIndex >= customSongList.Count)
+                            {
+                                customSongIndex = 0;
+                            }
+                            songTimeElapsed = 0;
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
                         }
-                        songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
+                        else
+                        {
+                            songTimeElapsed++;
+                        }
+
                     }
-                    else
-                    {
-                        songTimeElapsed++;
-                    }
+                    
                 }
                 else //regular game music
                 {
@@ -665,6 +676,8 @@ namespace RoomRunner
                 }
         }
 
+        
+
         private void Reset()
         {
             levels = Levels.Level1;
@@ -731,21 +744,42 @@ namespace RoomRunner
                 spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
 
             }
+            if (gameState == GameState.Cutscene)
+            {
+                if (cutscenes.alpha < 0)
+                {
+                    cutscenes.phase = true;
+                    cutscenes.alpha = 0;
+                }
+                    
+                cutscenes.cutseneActive = true;
+                cutscenes.Draw(spriteBatch, pixel);
+                
+                if (cutscenes.phase == false)
+                {
+                    gameState = GameState.Play;
+                }
+            }
 
             // shop
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                
-                    
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
+
             }
             if (gameState == GameState.Music)
             {
                 musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                musicVolume = musicScreen.musicVolume;
+                gameSongListInstance[3].Volume = (float)musicVolume / 5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
             if (gameState == GameState.Play)
             {
-                
+
                 
 
 
@@ -846,7 +880,12 @@ namespace RoomRunner
                         spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
 
-                
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha > 255)
+                {
+                    cutscenes.alpha = 0;
+                    cutscenes.cutseneActive = false;
+                }
 
             }
             // game over screen and meny

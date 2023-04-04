@@ -153,6 +153,7 @@ namespace RoomRunner
             //for exiting
             if (mouseRect.Intersects(exitRect) && mouse.LeftButton == ButtonState.Pressed)
             {
+                //Game1.musicVolume = this.musicVolume;
                 Game1.gameState = Game1.GameState.Menu;
             }
         }
