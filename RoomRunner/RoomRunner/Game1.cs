@@ -264,7 +264,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
 
             jeb = new Player(new Vector2(900, 500), this);
-            jeb.Invulnerable = true;
+            jeb.Invulnerable = false;
             shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
 
             loadGameSongs(0);
@@ -720,7 +720,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 999 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)

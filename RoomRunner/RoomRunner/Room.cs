@@ -50,7 +50,7 @@ namespace RoomRunner
             this.content = content;
             enemyArray = new List<Enemy>();
 
-            rand = new Random(DateTime.Now.Millisecond);
+            rand = new Random();
 
             // determines amount of coin patches in the room
             coinsGridList = new List<Coin[,]>();
@@ -135,7 +135,7 @@ namespace RoomRunner
             for (int i = 0; i < amountOfObstacles; i++)
             {
 
-                Program.Game.projectileList.Add(new Projectile(new Rectangle(1000 + rand.Next(0, 5000), 0, 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
+                Program.Game.projectileList.Add(new Projectile(new Rectangle(rand.Next(1000, 5000), rand.Next(0, floorHeight), 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
                     new OnetimeAnimation(25, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
                     {
                         Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
