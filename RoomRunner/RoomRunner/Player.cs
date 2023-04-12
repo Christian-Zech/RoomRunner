@@ -34,7 +34,7 @@ namespace RoomRunner
         private KeyboardState oldkb;
         public List<Keys> Up, Down, Left, Shoot;
         private MouseState oldms;
-        public int Coins, Health;
+        public int Coins, Health, distanceTraveled;
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
@@ -81,6 +81,7 @@ namespace RoomRunner
             FlashTimer = 0;
             currentHat = PlayerHats.None;
             Coins = 1000;
+            distanceTraveled = 0;
             fireCooldown = 0;
             MakePlayerAnimations();
             MakePlayerHats();
