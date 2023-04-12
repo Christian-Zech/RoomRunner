@@ -150,7 +150,6 @@ namespace RoomRunner
             FlipY = flipY;
             Delete = false;
         }
-
         public void DrawAndUpdate(SpriteBatch sb)
         {
             if (Delete) return;

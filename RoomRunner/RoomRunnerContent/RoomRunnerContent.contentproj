@@ -109,9 +109,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-	  <Compile Include="Level1\Enemies\Obstacles.png">
-		  <Name>Obstacles</Name>
-	  </Compile>
+    <Compile Include="Level1\Enemies\Obstacles.png">
+      <Name>Obstacles</Name>
+    </Compile>
     <Compile Include="Heart.png">
       <Name>Heart</Name>
       <Importer>TextureImporter</Importer>
@@ -169,9 +169,30 @@
       <Name>powerUp %281%29</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-	</Compile>
+    </Compile>
     <Compile Include="Projectile\Inverted Fireball.png">
       <Name>Inverted Fireball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Level1\Enemies\BetterBat.png">
+      <Name>BetterBat</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="warning.png">
+      <Name>warning</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Level1\Enemies\EnemiesButBetter.png">
+      <Name>EnemiesButBetter</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

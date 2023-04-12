@@ -43,7 +43,10 @@ namespace RoomRunner
         }
         private int health;
         private readonly int maxHealth;
-        private int timer1;
+        private int timer1, warningTime;
+        private Rectangle warningRect;
+        private bool showWarning;
+        private static Texture2D warning;
         private float BossBarPercent;
         public bool IsDead, FlipProjX, FlipProjY;
         private bool IsDown;
@@ -63,6 +66,7 @@ namespace RoomRunner
                 [BossPattern.Move] = 60,
                 [BossPattern.MoveForward] = 140
             };
+            warning = Program.Game.Content.Load<Texture2D>("warning");
         }
         public Boss(Bosses boss, int health, Texture2D sheet, GraphicsDevice gd) : base(new string[] { "Idle" })
         {
@@ -81,6 +85,8 @@ namespace RoomRunner
             maxHealth = this.health = health;
             BossBarPercent = 1.0f;
             IsDead = false;
+            showWarning = false;
+            warningTime = 0;
             FlipProjX = FlipProjY = false;
             bossBarRect = new Rectangle(Insets, 900, 1900 - Insets * 2, 50);
         }
@@ -92,21 +98,59 @@ namespace RoomRunner
             {
                 TimeLeftInPattern--;
                 if (TimeLeftInPattern == 0)
+                {
                     FinishPattern();
+                    CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
+                    InitWarning();
+                }
             }
             else if (TimeBeforeNextPattern-- <= 0)
             {
                 TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
                 DoingPattern = true;
-                CurrentPattern = (BossPattern)3;//Program.Game.rand.Next(0, 6);
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
             }
             if (DoingPattern)
                 UpdatePattern();
+            if (warningTime > 0)
+                UpdateWarning();
 
             rect.X += (int)Velocity.X;
             rect.Y -= (int)Velocity.Y;
+        }
+        private void InitWarning()
+        {
+            warningTime = (int)(WarningTime / SpeedMultiplier);
+            showWarning = true;
+            switch (CurrentPattern)
+            {
+                case BossPattern.Attack:
+                    warningRect = new Rectangle(Game1.window.Width * 3 / 4, 0, 150, Game1.window.Height);
+                    break;
+                case BossPattern.BigPound_Bottom:
+                    warningRect = new Rectangle(0, Game1.window.Height - 150 - Player.floorHeight, Game1.window.Width, 150);
+                    break;
+                case BossPattern.BigPound_Top:
+                    warningRect = new Rectangle(0, 0, Game1.window.Width, 150);
+                    break;
+                case BossPattern.Move:
+                    warningRect = new Rectangle(0,0,0,0);
+                    break;
+                case BossPattern.MoveForward:
+                    warningRect = new Rectangle(0, 0, Game1.window.Width * 3 / 4, Game1.window.Height);
+                    break;
+                case BossPattern.Pound:
+                    warningRect = new Rectangle(0, Game1.window.Height - 50 - Player.floorHeight, Game1.window.Width, 50);
+                    break;
+            }
+
+        }
+        private void UpdateWarning()
+        {
+            --warningTime;
+            if (warningTime % 20 == 0) 
+                showWarning = !showWarning;
         }
         private void FinishPattern()
         {
@@ -131,6 +175,7 @@ namespace RoomRunner
             }
             projBuffer.Clear();
             projList.Clear();
+            SetState("Idle");
             CurrentPattern = default;
         }
         private void InitPattern()
@@ -145,6 +190,7 @@ namespace RoomRunner
                     timer1 = 0;
                     FlipProjX = true;
                     FlipProjY = false;
+                    SetState("Attack");
                     numOfProjs = 3;
                     availablePoints = new List<int>();
                     for (int i = 10; i < Player.frameHeight - Player.floorHeight - 10; i++)
@@ -163,6 +209,7 @@ namespace RoomRunner
                     timer1 = 0;
                     FlipProjX = false;
                     FlipProjY = false;
+                    SetState("Pound");
                     floor = Game1.window.Height - Player.floorHeight;
                     sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
                     rects = Player.LoadSheet(3, 3, 32, 32, 1);
@@ -183,6 +230,7 @@ namespace RoomRunner
                 case BossPattern.BigPound_Bottom:
                     FlipProjX = false;
                     FlipProjY = false;
+                    SetState("Pound");
                     floor = Game1.window.Height - Player.floorHeight;
                     sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
                     rects = Player.LoadSheet(3, 3, 32, 32, 1);
@@ -203,6 +251,7 @@ namespace RoomRunner
                 case BossPattern.BigPound_Top:
                     FlipProjX = false;
                     FlipProjY = true;
+                    SetState("PoundUp");
                     ceiling = Game1.window.Height - Player.ceilingHeight;
                     sheet = Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles");
                     rects = Player.LoadSheet(3, 3, 32, 32, 1);
@@ -226,6 +275,7 @@ namespace RoomRunner
                     break;
                 case BossPattern.MoveForward:
                     timer1 = 0;
+                    SetState("MoveForward");
                     FlipProjX = false;
                     FlipProjY = false;
                     projList.Add(new ProjectileClump(FlipProjX, FlipProjY, new Projectile(true, () => rect, 0, 140, default, false, true)));
@@ -302,23 +352,32 @@ namespace RoomRunner
             {
                 p.DrawAndUpdate(sb);
             }
+            if (showWarning) 
+                sb.Draw(warning, warningRect, new Color(255, 0, 0, 20));
         }
         public new Boss Clone() { return new Boss(Name, health, LastUsedSheet, graphics); }
 
         public void Damage(int amount) { Health -= amount; }
         private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
         {
-            Rectangle[] rects = Player.LoadSheet(4, 5, 32, 32);
+            Rectangle[] rects = Player.LoadSheet(9, 9, 52, 52);
             switch (boss)
             {
                 case Bosses.Demon:
-                    AddAnimation("Idle", sheet, gd, 25, rects[0], rects[1]);
+                    AddAnimation("Attack", sheet, gd, 10, rects[18], rects[11], rects[20], rects[19]);
+                    //AddAnimation("MoveForward", sheet, gd, 5, rects)
+                    AddAnimation("Idle", sheet, gd, 25, rects[10], rects[2]);
+                    
                     break;
                 case Bosses.Yeti:
                     AddAnimation("Idle", sheet, gd, 5, rects[2], rects[3], rects[4], rects[5], rects[6]);
                     break;
                 case Bosses.Bat:
-                    AddAnimation("Idle", sheet, gd, 15, rects[7], rects[8], rects[9], rects[10]);
+                    AddAnimation("Attack", sheet, gd, 5, rects.Skip(73).Take(8).ToArray());
+                    AddAnimation("MoveForward", sheet, gd, 5, rects.Skip(64).Take(4).ToArray());
+                    AddAnimation("Idle", sheet, gd, 15, rects[8], rects[68], rects[69], rects[70]);
+                    AddAnimation("Pound", sheet, gd, 10, rects[17], rects[26], rects[35], rects[44]);
+                    AddAnimation("PoundUp", sheet, gd, 10, rects[53], rects[62], rects[71], rects[72]);
                     break;
                 case Bosses.Shark:
                     AddAnimation("Idle", sheet, gd, 7, rects[14], rects[15], rects[16], rects[17], rects[18], rects[19]);

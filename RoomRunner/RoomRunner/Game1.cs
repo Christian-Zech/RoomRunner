@@ -222,7 +222,7 @@ namespace RoomRunner
 
         private void CreateBosses()
         {
-            Texture2D sheet = loadImage("Enemies/Enemies", Content);
+            Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
             List<Boss> bos = new List<Boss>
             {
                 new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
@@ -286,7 +286,7 @@ namespace RoomRunner
                 },//*/
                 new Player(new Vector2(700, 500))
                 {
-                    Invulnerable = false,
+                    Invulnerable = true,
                     Up = new List<Keys> { Keys.W },
                     Down = new List<Keys> { Keys.S },
                     Left = new List<Keys> { Keys.A },
@@ -791,7 +791,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
