@@ -21,6 +21,7 @@ namespace RoomRunner
         public List<Enemy> enemyArray;
         public Random rand;
         public List<Coin[,]> coinsGridList;
+        public List<ProjectileClump> obstacleList;
 
         public Rectangle backgroundRectangle;
 
@@ -49,6 +50,7 @@ namespace RoomRunner
             this.graphics = graphics;
             this.content = content;
             enemyArray = new List<Enemy>();
+            obstacleList = new List<ProjectileClump>();
 
             rand = new Random();
 
@@ -71,7 +73,7 @@ namespace RoomRunner
             RemoveCoinOverLap();
 
             // generates room obstacles
-            GenerateObstacles(rand.Next(2, 5));
+            GenerateObstacles(2);
 
         }
 
@@ -131,22 +133,23 @@ namespace RoomRunner
         // generates obstacles for the room. Call once and forget.
         private void GenerateObstacles(int amountOfObstacles)
         {
-            Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
-            for (int i = 0; i < amountOfObstacles; i++)
-            {
-
-                Program.Game.projectileList.Add(new Projectile(new Rectangle(rand.Next(1000, 5000), rand.Next(0, floorHeight), 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
-                    new OnetimeAnimation(25, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
-                    {
-                        Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
-                    }));
-
-
-            }
             
 
 
+            Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
+            for (int i = 0; i < amountOfObstacles; i++)
+            {
+                obstacleList.Add(new ProjectileClump(false, false, new Projectile(true, new Rectangle(rand.Next(Game1.window.Width, Game1.window.Width * 2), rand.Next(100, floorHeight), 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
+                    new OnetimeAnimation(25, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
+                    {
+                        Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
+                    })));
+
+
+            }
         }
+
+
 
         public void InheritEnemies(List<Enemy> toInherit)
         {
@@ -240,14 +243,13 @@ namespace RoomRunner
                 }
             }
 
-            //foreach(Projectile obstacle in obstacleList)
-            //{
-            //    obstacle.Rect.X -= scrollSpeed;
-            //    obstacle.Update();
-            //    Console.WriteLine(obstacle.Rect);
-            //}
 
+            foreach(ProjectileClump obstacle in obstacleList)
+            {
+                obstacle.Current.Velocity.X = scrollSpeed;
+            }
             
+
 
 
             foreach (Enemy e in toRemove)
@@ -272,8 +274,13 @@ namespace RoomRunner
                         spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
                 }
             }
-            
-            
+
+            foreach (ProjectileClump obstacle in obstacleList)
+            {
+                obstacle.DrawAndUpdate(spriteBatch);
+            }
+
+
 
         }
 

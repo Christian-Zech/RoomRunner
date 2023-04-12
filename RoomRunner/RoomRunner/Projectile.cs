@@ -91,6 +91,9 @@ namespace RoomRunner
             Rect.X += Velocity.X;
             Rect.Y += Velocity.Y;
         }
+
+        
+
         private void IsInFrame()
         {
             if (!InFrame || Persists) return;
@@ -137,6 +140,19 @@ namespace RoomRunner
             if (Delete) return;
             Program.Game.UpdateProjectile(Current);
             if (!Current.InFrame || Current.DeltDamage) projs.Dequeue();
+            if (projs.Count == 0)
+            {
+                Delete = true;
+                return;
+            }
+            Current.Draw(sb, FlipX, FlipY);
+        }
+
+        public void DrawAndUpdate(SpriteBatch sb, bool deleteIfOutOfFrame)
+        {
+            if (Delete) return;
+            Program.Game.UpdateProjectile(Current);
+            //if ((!Current.InFrame && deleteIfOutOfFrame) || Current.DeltDamage) projs.Dequeue();
             if (projs.Count == 0)
             {
                 Delete = true;

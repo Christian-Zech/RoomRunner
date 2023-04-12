@@ -765,6 +765,9 @@ namespace RoomRunner
                     roomList[currentRoomIndex].backgroundRectangle.X = 0;
                 }
 
+                //Console.WriteLine("LoopImage: " + loopImage + "\ntransition: " + transition + "\nendCurrentRoom: " + endCurrentRoom);
+
+                
 
                 // draws the room
 
@@ -772,6 +775,16 @@ namespace RoomRunner
 
                 spriteBatch.Draw(roomList[currentRoomIndex].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+
+
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
@@ -788,7 +801,7 @@ namespace RoomRunner
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
 
 
-                // draws hitboxes to help debug them
+                // draws hitboxes to help debug them if debugMode is active
 
                 if (debugMode)
                 {
