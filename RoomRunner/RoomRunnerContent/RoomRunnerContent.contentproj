@@ -109,9 +109,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-	  <Compile Include="Level1\Enemies\Obstacles.png">
-		  <Name>Obstacles</Name>
-	  </Compile>
+    <Compile Include="Level1\Enemies\Obstacles.png">
+      <Name>Obstacles</Name>
+    </Compile>
     <Compile Include="Heart.png">
       <Name>Heart</Name>
       <Importer>TextureImporter</Importer>
@@ -169,9 +169,21 @@
       <Name>powerUp %281%29</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-	</Compile>
+    </Compile>
     <Compile Include="Projectile\Inverted Fireball.png">
       <Name>Inverted Fireball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Icons\personIcon.png">
+      <Name>personIcon</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Icons\personIconSelected-removebg-preview.png">
+      <Name>personIconSelected-removebg-preview</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
