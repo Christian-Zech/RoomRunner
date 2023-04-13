@@ -138,7 +138,7 @@ namespace RoomRunner
                     warningRect = new Rectangle(0,0,0,0);
                     break;
                 case BossPattern.MoveForward:
-                    warningRect = new Rectangle(0, 0, Game1.window.Width * 3 / 4, Game1.window.Height);
+                    warningRect = new Rectangle(0, rect.Y - 50, Game1.window.Width, rect.Height + 100);
                     break;
                 case BossPattern.Pound:
                     warningRect = new Rectangle(0, Game1.window.Height - 50 - Player.floorHeight, Game1.window.Width, 50);
@@ -149,7 +149,7 @@ namespace RoomRunner
         private void UpdateWarning()
         {
             --warningTime;
-            if (warningTime % 20 == 0) 
+            if (warningTime % (int)(40 / SpeedMultiplier) == 0) 
                 showWarning = !showWarning;
         }
         private void FinishPattern()
@@ -344,6 +344,7 @@ namespace RoomRunner
         public void Draw(SpriteBatch sb)
         {
             if (IsDead) return;
+            sb.Draw(Game1.pixel, Clone(rect), Color.Yellow);
             sb.Draw(CurrentTexture, rect, Color.White);
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
@@ -357,6 +358,8 @@ namespace RoomRunner
         }
         public new Boss Clone() { return new Boss(Name, health, LastUsedSheet, graphics); }
 
+        public static Rectangle Clone(Rectangle r) { return new Rectangle(r.X, r.Y, r.Width, r.Height); }
+
         public void Damage(int amount) { Health -= amount; }
         private void MakeAnimation(Bosses boss, Texture2D sheet, GraphicsDevice gd)
         {
@@ -364,13 +367,18 @@ namespace RoomRunner
             switch (boss)
             {
                 case Bosses.Demon:
-                    AddAnimation("Attack", sheet, gd, 10, rects[18], rects[11], rects[20], rects[19]);
-                    //AddAnimation("MoveForward", sheet, gd, 5, rects)
+                    AddAnimation("Attack", sheet, gd, 5, rects[18], rects[11], rects[20], rects[19]);
+                    AddAnimation("MoveForward", sheet, gd, 10, rects[21], rects[27]);
                     AddAnimation("Idle", sheet, gd, 25, rects[10], rects[2]);
-                    
+                    AddAnimation("Pound", sheet, gd, 10, rects[29], rects[28]);
+                    AddAnimation("PoundUp", sheet, gd, 10, rects[12], rects[3]);
                     break;
                 case Bosses.Yeti:
-                    AddAnimation("Idle", sheet, gd, 5, rects[2], rects[3], rects[4], rects[5], rects[6]);
+                    AddAnimation("Attack", sheet, gd, 5, rects[61], rects[52]);
+                    AddAnimation("MoveForward", sheet, gd, 10, rects.Skip(57).Take(4).ToArray());
+                    AddAnimation("Idle", sheet, gd, 15, rects.Skip(57).Take(4).ToArray());
+                    AddAnimation("Pound", sheet, gd, 5, rects[7], rects[63], rects[7], rects[16], rects[25], rects[34]);
+                    AddAnimation("PoundUp", sheet, gd, 10, rects[7], rects[63], rects[7], rects[16]);
                     break;
                 case Bosses.Bat:
                     AddAnimation("Attack", sheet, gd, 5, rects.Skip(73).Take(8).ToArray());
@@ -380,7 +388,11 @@ namespace RoomRunner
                     AddAnimation("PoundUp", sheet, gd, 10, rects[53], rects[62], rects[71], rects[72]);
                     break;
                 case Bosses.Shark:
-                    AddAnimation("Idle", sheet, gd, 7, rects[14], rects[15], rects[16], rects[17], rects[18], rects[19]);
+                    AddAnimation("Attack", sheet, gd, 5, rects[33], rects[42], rects[51], rects[54], rects[55], rects[56], rects[6], rects[15], rects[24], rects[48], rects[49], rects[50]);
+                    AddAnimation("MoveForward", sheet, gd, 14, rects[30], rects[31], rects[36]);
+                    AddAnimation("Idle", sheet, gd, 7, rects[4], rects[13], rects[22], rects[30], rects[31], rects[36]);
+                    AddAnimation("Pound", sheet, gd, 10, rects[23], rects[32], rects[41], rects[45], rects[46], rects[47]);
+                    AddAnimation("PoundUp", sheet, gd, 10, rects[37], rects[38], rects[39], rects[40], rects[5], rects[14]);
                     break;
             }
         }

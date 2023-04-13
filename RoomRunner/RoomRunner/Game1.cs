@@ -226,7 +226,9 @@ namespace RoomRunner
             List<Boss> bos = new List<Boss>
             {
                 new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
-                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice)
+                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
+                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
+                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
             };
 
             for (int i = 0; i < bos.Count; i++)

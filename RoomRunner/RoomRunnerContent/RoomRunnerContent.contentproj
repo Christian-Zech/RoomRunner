@@ -177,13 +177,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Level1\Enemies\BetterBat.png">
-      <Name>BetterBat</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="warning.png">
       <Name>warning</Name>
       <Importer>TextureImporter</Importer>
