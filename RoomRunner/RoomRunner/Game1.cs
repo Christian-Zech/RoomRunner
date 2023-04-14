@@ -128,6 +128,8 @@ namespace RoomRunner
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 1900;
             graphics.PreferredBackBufferHeight = 1000;
+
+            graphics.ApplyChanges();
         }
 
         /// <summary>
@@ -139,6 +141,8 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            var form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(this.Window.Handle);
+            form.Location = new System.Drawing.Point(0, 0);
 
             //for shop
             clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
@@ -147,7 +151,6 @@ namespace RoomRunner
             magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
             
 
-            //I'm fixing you're stupid hard-coded mess, Owen - Samuel
             items = new List<ShopItem>();
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
@@ -234,16 +237,58 @@ namespace RoomRunner
 
         private void GenMens()
         {
-            List<Button> butts = new List<Button>();
-            butts.Add(new Button(startButtonRectangle, Color.Green, menuFont, "Start")
+            List<Button> butts = new List<Button>
             {
-                BorderWidth = 6,
-                TextColor = Color.White
-            });
-
+                new Button(startButtonRectangle, new Color(0,255,0,255), menuFont, "Start")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                },
+                new Button(shopButtonRectangle, Color.Green, menuFont, "Enter Shop")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                },
+                new Button(MusicButtonRectangle, new Color(0,64,0,255), menuFont, "Settings")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                }
+            };
+            foreach (Rectangle r in multiplayerButtons)
+                butts.Add(new Button(r, iconTextures[0])
+                {
+                    BorderWidth = -1
+                });
+            butts[3].Texture = iconTextures[1];
 
 
             menus[GameState.Menu] = new Menu(butts.ToArray());
+            butts.Clear();
+
+            Animation[] anims = GenShopButts();
+            butts.AddRange(new Button[]
+            {
+                new Button(new Rectangle(window.Width/4,window.Height/8,150,150),anims[0])
+                {
+                    BorderWidth = -1
+                }
+            });
+
+            menus[GameState.Shop] = new Menu(butts.ToArray());
+            butts.Clear();
+        }
+        private Animation[] GenShopButts()
+        {
+            List<Animation> outp = new List<Animation>();
+            //Clock
+            Texture2D sheet = collectableSheet;
+            Rectangle[] rects = Player.LoadSheet(5, 6, 32, 32, 1);
+            Animation hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 5, rects.Take(8).ToArray());
+            outp.Add(hold);
+
+            return outp.ToArray();
         }
 
         private void CreateBosses()
@@ -289,7 +334,7 @@ namespace RoomRunner
                 }
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
-            items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
+            items.Add(new ShopItem(50, "Coin", new List<Rectangle>(collectableRect.Skip(25).Take(4)), collectableSheet));
 
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
@@ -377,6 +422,27 @@ namespace RoomRunner
             soundEffects.Add(Content.Load<SoundEffect>("Sounds/powerUp (1)"));
 
         }
+        private void GeneratePlayers(int amount)
+        {
+            if (amount <= 1) return;
+            players.Add(new Player(new Vector2(900, 500))
+            {
+                Invulnerable = false,
+                Up = new List<Keys> { Keys.Up },
+                Down = new List<Keys> { Keys.Down },
+                Left = new List<Keys> { Keys.Left },
+                Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+            });
+            if (amount == 2) return;
+            players.Add(new Player(new Vector2(500, 500))
+            {
+                Invulnerable = false,
+                Up = new List<Keys> { Keys.I },
+                Down = new List<Keys> { Keys.K },
+                Left = new List<Keys> { Keys.J },
+                Shoot = new List<Keys> { Keys.L}
+            });
+        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -398,6 +464,7 @@ namespace RoomRunner
             
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
+            Menu currentMenu = getCurrentMenu();
 
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboard.IsKeyDown(Keys.Escape))
@@ -407,28 +474,29 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[0].MouseClickedOnce)
             {
                 
                 gameState = GameState.Cutscene;
                 Reset();
                 menuCoolDown = 60;
+                GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count);
             }
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[2].MouseClickedOnce)
             {
                 gameState = GameState.Music;
             }
 
 
-            if (gameState == GameState.GameOver && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, menuButtonRectangle) && menuCoolDown == 0)
+            if (gameState == GameState.GameOver && currentMenu != null && currentMenu.thingies[0].MouseClickedOnce && menuCoolDown == 0)
             {
                 gameState = GameState.Menu;
                 menuCoolDown = 60;
             }
                 
 
-            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0)
+            if (gameState == GameState.Menu && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[1].MouseClickedOnce)
             {
                 gameState = GameState.Shop;
                 menuCoolDown = 60;
@@ -443,87 +511,30 @@ namespace RoomRunner
                 if (musicScreen.customMusic)
                     LoadCustomSongs();
 
-                gameSongListInstance[3].Volume = (float)musicVolume/5;
+                gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
-                Rectangle mouseRect = new Rectangle(mouse.X, mouse.Y, 1, 1);
-                for (int i = 0; i < multiplayerButtons.Count; i++)
-                {
-                    if (mouseRect.Intersects(multiplayerButtons[i]) && mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                bool change = false;
+                for (int i = 3; i < 6 && currentMenu != null; i++) 
+                    if (currentMenu.thingies[i].MouseClickedOnce)
                     {
-                        if (i == 2)
-                        {
-                            if (!multiplayerButtonStates[i])
-                            {
-                                for (int j = 1; j < 3; j++)
-                                {
-                                    if (!multiplayerButtonStates[j])
-                                    {
-                                        multiplayerButtonStates[j] = true;
-                                        players.Add(
-                                        new Player(new Vector2(700 + j * 200, 500))
-                                        {
-                                            Invulnerable = false,
-                                            Up = new List<Keys> { Keys.Up },
-                                            Down = new List<Keys> { Keys.Down },
-                                            Left = new List<Keys> { Keys.Left },
-                                            Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                                        });
-                                    }
-                                    
-                                }
-                            }
-                            
-                            
-                        }
-                        else if (i == 1)
-                        {
-                            if (!multiplayerButtonStates[i])
-                            {
-                                multiplayerButtonStates[i] = true;
-                                players.Add(
-                                    new Player(new Vector2(700 + i * 200, 500))
-                                    {
-                                        Invulnerable = false,
-                                        Up = new List<Keys> { Keys.Up },
-                                        Down = new List<Keys> { Keys.Down },
-                                        Left = new List<Keys> { Keys.Left },
-                                        Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                                    });
-                            }
-                            
-                            if (multiplayerButtonStates[i + 1])
-                            {
-                                multiplayerButtonStates[i+1] = false;
-                                players.RemoveAt(i + 1);
-                                Player.players--;
-                            }
-                            
-                            
-                            
-                        }
+                        bool toSet = !multiplayerButtonStates[i - 3];
+                        if (toSet)
+                            for (int j = i - 3; j >= 0; j--)
+                                multiplayerButtonStates[j] = true;
                         else
-                        {
-                            if (multiplayerButtonStates[i + 2])
-                            {
-                                multiplayerButtonStates[i + 2] = false;
-                                players.RemoveAt(i + 2);
-                                Player.players--;
-                            }
-                            if (multiplayerButtonStates[i + 1])
-                            {
-                                multiplayerButtonStates[i + 1] = false;
-                                players.RemoveAt(i + 1);
-                                Player.players--;
-                            }
-                        }
-                        
-                        
-
+                            for (int j = 2; j >= i - 3; j--)
+                                multiplayerButtonStates[j] = false;
+                        change = true;
                     }
-                        
-                }
+                if (change)
+                    for (int i = 0; i < 3; i++)
+                        if (multiplayerButtonStates[i])
+                            currentMenu.thingies[i + 3].Texture = iconTextures[1];
+                        else
+                            currentMenu.thingies[i + 3].Texture = iconTextures[0];
+
             }
                 
             
@@ -839,27 +850,6 @@ namespace RoomRunner
                 spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
 
-                // menu buttons
-                
-               /* spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
-
-
-                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
-
-                spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);//*/
-
-                for (int i = 0; i < multiplayerButtons.Count; i++)
-                {
-                    if (multiplayerButtonStates[i])
-                        spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
-                    else
-                        spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
-                }
-
-
             }
             if (gameState == GameState.Cutscene)
             {
@@ -881,7 +871,7 @@ namespace RoomRunner
             // shop
             if (gameState == GameState.Shop)
             {
-                shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
