@@ -17,7 +17,7 @@ namespace RoomRunner
         FileDialogue fileExplorer;
 
         MouseState mouse;
-        Rectangle sliderHandleMusic;
+        public Rectangle sliderHandleMusic;
         Rectangle sliderLineMusic;
         Rectangle sliderHandleSound;
         Rectangle sliderLineSound;
@@ -30,7 +30,7 @@ namespace RoomRunner
         public double soundVolume;
 
         Rectangle gameMusicButton;
-        Rectangle customMusicButton;
+        public Rectangle customMusicButton;
         Rectangle selectedButtonBorder;
 
         public bool customMusic;

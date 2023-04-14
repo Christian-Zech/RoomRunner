@@ -99,7 +99,10 @@ namespace RoomRunner
         //for cutsenes
         Cutscene cutscenes;
 
-        
+        public bool tutorialActive;
+        public int textboxesLeft;
+        public List<Textbox> textboxes;
+        public Textbox textbox;
 
         public enum GameState
         {
@@ -224,6 +227,16 @@ namespace RoomRunner
             cutscenes = new Cutscene();
             oldMouse = Mouse.GetState();
 
+            tutorialActive = false;
+            textboxesLeft = 6;
+            textbox = new Textbox("Here you can press these buttons\nto select how many players \nyou'd like", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2));
+            textboxes = new List<Textbox>
+            {
+                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
+                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
+                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(musicScreen.sliderHandleMusic.X, musicScreen.sliderHandleMusic.Y)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X, musicScreen.customMusicButton.Y))
+            };
             base.Initialize();
             
 
@@ -387,7 +400,7 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
                 
                 gameState = GameState.Cutscene;
@@ -395,7 +408,7 @@ namespace RoomRunner
                 menuCoolDown = 60;
             }
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
                 gameState = GameState.Music;
             }
@@ -408,7 +421,7 @@ namespace RoomRunner
             }
                 
 
-            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0)
+            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
                 gameState = GameState.Shop;
                 menuCoolDown = 60;
@@ -804,39 +817,59 @@ namespace RoomRunner
             // menu
             if(gameState == GameState.Menu)
             {
-                int halfSeconds = gameTimer / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
-                
-                Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
-
-
-                // Title screen animation
-                if (halfSeconds % 2 == 0)
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
-                else
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
-                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
-
-
-                // menu buttons
-                
-                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
-
-
-                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
-
-                spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
-
-                for (int i = 0; i < multiplayerButtons.Count; i++)
+                if (!tutorialActive)
                 {
-                    if (multiplayerButtonStates[i])
-                        spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
+                    int halfSeconds = gameTimer / 30;
+                    Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
+
+                    Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
+
+
+                    // Title screen animation
+                    if (halfSeconds % 2 == 0)
+                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
                     else
-                        spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
+                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+
+                    spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
+
+
+                    // menu buttons
+
+                    spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
+
+
+                    spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
+
+                    spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X + 20, MusicButtonRectangle.Y + 20), Color.White);
+
+                    for (int i = 0; i < multiplayerButtons.Count; i++)
+                    {
+                        if (multiplayerButtonStates[i])
+                            spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
+                        else
+                            spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
+                    }
+                }
+                else
+                {
+                    if (textboxesLeft == 6)
+                    {
+                        for (int i = 0; i < multiplayerButtons.Count; i++)
+                        {
+                            if (multiplayerButtonStates[i])
+                                spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
+                            else
+                                spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
+                        }
+                        textbox.Draw(spriteBatch, pixel, fonts[3]);
+                        textbox.Update();
+                        if (textbox.exited)
+                            textboxesLeft--;
+                    }
                 }
 
 
