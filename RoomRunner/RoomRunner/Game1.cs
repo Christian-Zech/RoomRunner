@@ -445,25 +445,74 @@ namespace RoomRunner
                 {
                     if (mouseRect.Intersects(multiplayerButtons[i]) && mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
                     {
-                        if (multiplayerButtonStates[i] && players.Count != 1)
+                        if (i == 2)
                         {
-                            multiplayerButtonStates[i] = false;
-                            players.RemoveAt(0);
-                            Player.players--;
+                            if (!multiplayerButtonStates[i])
+                            {
+                                for (int j = 1; j < 3; j++)
+                                {
+                                    if (!multiplayerButtonStates[j])
+                                    {
+                                        multiplayerButtonStates[j] = true;
+                                        players.Add(
+                                        new Player(new Vector2(700 + j * 200, 500))
+                                        {
+                                            Invulnerable = false,
+                                            Up = new List<Keys> { Keys.Up },
+                                            Down = new List<Keys> { Keys.Down },
+                                            Left = new List<Keys> { Keys.Left },
+                                            Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                        });
+                                    }
+                                    
+                                }
+                            }
+                            
+                            
+                        }
+                        else if (i == 1)
+                        {
+                            if (!multiplayerButtonStates[i])
+                            {
+                                multiplayerButtonStates[i] = true;
+                                players.Add(
+                                    new Player(new Vector2(700 + i * 200, 500))
+                                    {
+                                        Invulnerable = false,
+                                        Up = new List<Keys> { Keys.Up },
+                                        Down = new List<Keys> { Keys.Down },
+                                        Left = new List<Keys> { Keys.Left },
+                                        Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                    });
+                            }
+                            
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i+1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
+                            
+                            
+                            
                         }
                         else
                         {
-                            multiplayerButtonStates[i] = true;
-                            players.Add(
-                                new Player(new Vector2(700 + i*200, 500))
-                                {
-                                    Invulnerable = false,
-                                    Up = new List<Keys> { Keys.Up },
-                                    Down = new List<Keys> { Keys.Down },
-                                    Left = new List<Keys> { Keys.Left },
-                                    Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                                });
+                            if (multiplayerButtonStates[i + 2])
+                            {
+                                multiplayerButtonStates[i + 2] = false;
+                                players.RemoveAt(i + 2);
+                                Player.players--;
+                            }
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i + 1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
                         }
+                        
+                        
 
                     }
                         

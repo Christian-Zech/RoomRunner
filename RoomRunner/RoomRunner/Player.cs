@@ -40,7 +40,7 @@ namespace RoomRunner
         public PlayerHats currentHat;
         public List<int> ownedHats;
         public static Texture2D Heart;
-        private static int players;
+        public static int players;
         private readonly int id;
         
         static Player()
