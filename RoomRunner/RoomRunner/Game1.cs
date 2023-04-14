@@ -51,7 +51,6 @@ namespace RoomRunner
         int slowTimeTemp;
 
 
-
         private int gameTimer;
         private int levelTimer;
         private int bossCooldown;
@@ -95,6 +94,8 @@ namespace RoomRunner
 
         //for cutsenes
         Cutscene cutscenes;
+
+        
 
         public enum GameState
         {
@@ -270,7 +271,7 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-                /*new Player(new Vector2(900, 500))
+                new Player(new Vector2(900, 500))
                 {
                     Invulnerable = false,
                     Up = new List<Keys> { Keys.I },
@@ -285,7 +286,7 @@ namespace RoomRunner
                     Down = new List<Keys> { Keys.Down },
                     Left = new List<Keys> { Keys.Left },
                     Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                },//*/
+                },
                 new Player(new Vector2(700, 500))
                 {
                     Invulnerable = true,
@@ -490,6 +491,12 @@ namespace RoomRunner
                         return;
 
                 }
+                for (int i = 0; i < players.Count; i++)
+                {
+                    if (players[i].IsAlive)
+                        players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
+                }
+                    
 
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
@@ -628,6 +635,11 @@ namespace RoomRunner
             gameTimer++;
             if (gameState == GameState.GameOver)
             {
+                for (int i = 0; i < players.Count; i++)
+                {
+                    players[i].distanceTraveled = 0;
+                }
+
                 if (musicScreen.customMusic)
                 {
                     LoadCustomSongs();
@@ -881,6 +893,18 @@ namespace RoomRunner
                     foreach (Player p in players)
                         spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
+
+                //score and coins
+                int y = 70;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
+                    spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y+15, 40, 40), collectableRect[25], Color.White);
+                    spriteBatch.DrawString(fonts[3], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y+20), Color.White);
+                    //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
+                    y += 140;
+                }
+                
 
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha > 255)
