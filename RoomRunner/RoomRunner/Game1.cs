@@ -63,6 +63,7 @@ namespace RoomRunner
         public bool endCurrentRoom;
         public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
         public Dictionary<Levels, Boss> bosses;
+        public Dictionary<GameState, Menu> menus;
 
         public Random rand;
 
@@ -154,6 +155,7 @@ namespace RoomRunner
             bosses = new Dictionary<Levels, Boss>();
             CreateBosses();
 
+            
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
@@ -230,6 +232,20 @@ namespace RoomRunner
 
         }
 
+        private void GenMens()
+        {
+            List<Button> butts = new List<Button>();
+            butts.Add(new Button(startButtonRectangle, Color.Green, menuFont, "Start")
+            {
+                BorderWidth = 6,
+                TextColor = Color.White
+            });
+
+
+
+            menus[GameState.Menu] = new Menu(butts.ToArray());
+        }
+
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
@@ -281,6 +297,10 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             
             backgroundImages = loadTextures("Background", Content);
+
+            menus = new Dictionary<GameState, Menu>();
+            GenMens();
+
             players = new List<Player> {
 
                 new Player(new Vector2(700, 500))
@@ -796,8 +816,8 @@ namespace RoomRunner
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-            
 
+            
 
             
 
@@ -821,7 +841,7 @@ namespace RoomRunner
 
                 // menu buttons
                 
-                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+               /* spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
 
 
@@ -829,7 +849,7 @@ namespace RoomRunner
                 spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
 
                 spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
+                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);//*/
 
                 for (int i = 0; i < multiplayerButtons.Count; i++)
                 {
@@ -1009,17 +1029,20 @@ namespace RoomRunner
                 spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
 
             }
-            
 
-
-
-            
+            Menu val = getCurrentMenu();
+            if (val != null)
+                val.DrawAndUpdate(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        
+        private Menu getCurrentMenu()
+        {
+            menus.TryGetValue(gameState, out Menu val);
+            return val;
+        }
 
         private void SummonBoss()
         {

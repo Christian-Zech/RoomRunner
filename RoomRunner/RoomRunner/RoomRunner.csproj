@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Boss.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="FileDialogue.cs" />
     <Compile Include="MusicScreen.cs" />
     <Compile Include="Coin.cs" />
