@@ -271,7 +271,7 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-                new Player(new Vector2(900, 500))
+                /*new Player(new Vector2(900, 500))
                 {
                     Invulnerable = false,
                     Up = new List<Keys> { Keys.I },
@@ -286,7 +286,7 @@ namespace RoomRunner
                     Down = new List<Keys> { Keys.Down },
                     Left = new List<Keys> { Keys.Left },
                     Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                },
+                },//*/
                 new Player(new Vector2(700, 500))
                 {
                     Invulnerable = true,

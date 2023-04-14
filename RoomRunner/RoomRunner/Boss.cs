@@ -19,7 +19,7 @@ namespace RoomRunner
         public BossPattern CurrentPattern;
         public static Dictionary<BossPattern, int> PatternTimes;
 
-        private Rectangle rect, bossBarRect;
+        private Rectangle rect, bossBarRect, drawRect;
         private readonly Rectangle originRect;
         public Rectangle Rectangle { get { return rect; } }
         public Point Position { get { return new Point(rect.X, rect.Y); } }
@@ -43,7 +43,7 @@ namespace RoomRunner
         }
         private int health;
         private readonly int maxHealth;
-        private int timer1, warningTime;
+        private int timer1, warningTime, whiteSpace;
         private Rectangle warningRect;
         private bool showWarning;
         private static Texture2D warning;
@@ -80,6 +80,8 @@ namespace RoomRunner
             projBuffer = new List<ProjectileClump>();
             graphics = gd;
             rect = new Rectangle(1500,500,200,200);
+            whiteSpace = (int)Math.Round(rect.Width % 52 * rect.Width / 52.0);
+            drawRect = new Rectangle(rect.X - whiteSpace / 2, rect.Y - whiteSpace / 2, rect.Width + whiteSpace, rect.Height + whiteSpace);
             originRect = new Rectangle(rect.X, rect.Y, rect.Width, rect.Height);
             MakeAnimation(boss, sheet, gd);
             maxHealth = this.health = health;
@@ -118,6 +120,8 @@ namespace RoomRunner
 
             rect.X += (int)Velocity.X;
             rect.Y -= (int)Velocity.Y;
+            drawRect.X = rect.X - whiteSpace / 2;
+            drawRect.Y = rect.Y - whiteSpace / 2;
         }
         private void InitWarning()
         {
@@ -344,8 +348,7 @@ namespace RoomRunner
         public void Draw(SpriteBatch sb)
         {
             if (IsDead) return;
-            sb.Draw(Game1.pixel, Clone(rect), Color.Yellow);
-            sb.Draw(CurrentTexture, rect, Color.White);
+            sb.Draw(CurrentTexture, drawRect, Color.White);
 
             sb.Draw(Game1.pixel, bossBarRect, Color.Red);
 
