@@ -73,7 +73,7 @@ namespace RoomRunner
             RemoveCoinOverLap();
 
             // generates room obstacles
-            GenerateObstacles(2);
+            GenerateObstacles(rand.Next(4, 8));
 
         }
 
@@ -133,19 +133,21 @@ namespace RoomRunner
         // generates obstacles for the room. Call once and forget.
         private void GenerateObstacles(int amountOfObstacles)
         {
-            
 
 
             Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
             for (int i = 0; i < amountOfObstacles; i++)
             {
-                obstacleList.Add(new ProjectileClump(false, false, new Projectile(true, new Rectangle(rand.Next(Game1.window.Width, Game1.window.Width * 2), rand.Next(100, floorHeight), 100, 100), 1, new Point(-Game1.scrollSpeed, 0),
-                    new OnetimeAnimation(25, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
+                int height = rand.Next(200, 400);
+                int width = height / 2;
+                obstacleList.Add(new ProjectileClump(false, false, new Projectile(true, new Rectangle(rand.Next(Game1.window.Width, Game1.window.Width * 4), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - height), width, height), 1, new Point(0, 0),
+                    new OnetimeAnimation(15, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
                     {
                         Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
                     })));
+                   
 
-
+                obstacleList[i].Current.anim.Idle = true;
             }
         }
 
@@ -208,6 +210,19 @@ namespace RoomRunner
             }
         }
 
+        public void RemoveObstacleOverLap()
+        {
+            for(int i = 0; i < obstacleList.Count; i++)
+            {
+                for(int j = i+1; j < obstacleList.Count; j++)
+                {
+                    if (obstacleList[i].Current.Rect.Intersects(obstacleList[j].Current.Rect))
+                        obstacleList.RemoveAt(i);
+                }
+            }
+        }
+
+
         // makes the game scroll by moving the background to the left. Also controls enemies.
         public void Update(int scrollSpeed)
         {
@@ -246,9 +261,10 @@ namespace RoomRunner
 
             foreach(ProjectileClump obstacle in obstacleList)
             {
-                obstacle.Current.Velocity.X = scrollSpeed;
+                obstacle.Current.Velocity.X = -scrollSpeed;
+                if (obstacle.Current.Rect.Intersects(Game1.window))
+                    obstacle.Current.anim.Idle = false;
             }
-            
 
 
 

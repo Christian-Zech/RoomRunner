@@ -19,20 +19,12 @@ namespace RoomRunner
         public bool DeltDamage;
         public bool Persists;
         public int Lifespan;
-        private OnetimeAnimation anim;
+        public OnetimeAnimation anim;
         public bool ToRemove { get { return !InFrame || DeltDamage; } }
 
         private readonly static int FrameWidth, FrameHeight;
 
         public bool DamagesPlayer, DamagesBoss;
-        public Point Position
-        {
-            set
-            {
-                Rect.X = value.X;
-                Rect.Y = value.Y;
-            }
-        }
 
         static Projectile()
         {
@@ -140,19 +132,6 @@ namespace RoomRunner
             if (Delete) return;
             Program.Game.UpdateProjectile(Current);
             if (!Current.InFrame || Current.DeltDamage) projs.Dequeue();
-            if (projs.Count == 0)
-            {
-                Delete = true;
-                return;
-            }
-            Current.Draw(sb, FlipX, FlipY);
-        }
-
-        public void DrawAndUpdate(SpriteBatch sb, bool deleteIfOutOfFrame)
-        {
-            if (Delete) return;
-            Program.Game.UpdateProjectile(Current);
-            //if ((!Current.InFrame && deleteIfOutOfFrame) || Current.DeltDamage) projs.Dequeue();
             if (projs.Count == 0)
             {
                 Delete = true;

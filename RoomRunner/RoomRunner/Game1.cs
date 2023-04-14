@@ -37,6 +37,7 @@ namespace RoomRunner
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
         Rectangle coinHitBox;
+        Rectangle obstacleHitBox;
 
         public static Rectangle window;
         public Player jeb;
@@ -208,7 +209,7 @@ namespace RoomRunner
             enemyHitBox = new Rectangle(30, 10, 40, 50);
             playerHitBox = new Rectangle(25, 0, 80, 110);
             coinHitBox = new Rectangle(-20, -15, 35, 35);
-
+            obstacleHitBox = new Rectangle(0, 0, 0, 0);
 
             base.Initialize();
             
@@ -476,13 +477,13 @@ namespace RoomRunner
                 }
 
 
-                // kills player if enemy intercepts them
+                // damages player if enemy intercepts them
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
-                    if (activePowerupIndex != 1)
-                        if (enemy != null)
-                            if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
-                                jeb.Damage();
+                    if (activePowerupIndex != 1 && enemy != null && 
+                        new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
+                        .Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
+                            jeb.Damage();
                 }
 
                 // player coin collection
@@ -500,7 +501,14 @@ namespace RoomRunner
                 }
 
 
-
+               // damages player if obstacle intercepts them
+               foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                {
+                    if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
+                        .Intersects(new Rectangle(obstacle.Current.Rect.X + obstacleHitBox.X, obstacle.Current.Rect.Y + obstacleHitBox.Y, 
+                        obstacle.Current.Rect.Width + obstacleHitBox.Width, obstacle.Current.Rect.Height + obstacleHitBox.Height)))
+                            jeb.Damage();
+                }
 
                     if (bossFight)
                 {
@@ -782,6 +790,9 @@ namespace RoomRunner
                     //draws the obstacles in the next room
                     foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
                     {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rect.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
                         obstacle.DrawAndUpdate(spriteBatch);
                     }
                 }
