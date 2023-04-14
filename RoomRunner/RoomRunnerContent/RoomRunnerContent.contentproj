@@ -177,6 +177,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Icons\personIcon.png">
+      <Name>personIcon</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Icons\personIconSelected-removebg-preview.png">
+      <Name>personIconSelected-removebg-preview</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="warning.png">
       <Name>warning</Name>
       <Importer>TextureImporter</Importer>
@@ -186,6 +196,7 @@
   <ItemGroup>
     <Compile Include="Level1\Enemies\EnemiesButBetter.png">
       <Name>EnemiesButBetter</Name>
+
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

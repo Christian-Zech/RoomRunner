@@ -33,6 +33,9 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
+        List<Rectangle> multiplayerButtons;
+        List<bool> multiplayerButtonStates;
+        Texture2D[] iconTextures;
 
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
@@ -77,6 +80,7 @@ namespace RoomRunner
         public int menuCoolDown;
 
         KeyboardState oldKB;
+        MouseState oldMouse;
 
         //for music and sounds
         FileDialogue files;
@@ -169,6 +173,10 @@ namespace RoomRunner
             levelTimer = 0;
             currentRoomIndex = 0;
 
+            multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
+            multiplayerButtonStates = new List<bool> { true, false, false };
+            iconTextures = new Texture2D[2];
+
             transition = false;
             endCurrentRoom = false;
 
@@ -214,6 +222,7 @@ namespace RoomRunner
 
 
             cutscenes = new Cutscene();
+            oldMouse = Mouse.GetState();
 
             base.Initialize();
             
@@ -265,28 +274,15 @@ namespace RoomRunner
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
             items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-            
+
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
+            iconTextures[0] = Content.Load<Texture2D>("Icons/personIcon");
+            iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-                /*new Player(new Vector2(900, 500))
-                {
-                    Invulnerable = false,
-                    Up = new List<Keys> { Keys.I },
-                    Down = new List<Keys> { Keys.K },
-                    Left = new List<Keys> { Keys.J },
-                    Shoot = new List<Keys> { Keys.L }
-                },
-                new Player(new Vector2(1100, 500))
-                {
-                    Invulnerable = false,
-                    Up = new List<Keys> { Keys.Up },
-                    Down = new List<Keys> { Keys.Down },
-                    Left = new List<Keys> { Keys.Left },
-                    Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                },//*/
+
                 new Player(new Vector2(700, 500))
                 {
                     Invulnerable = true,
@@ -430,6 +426,84 @@ namespace RoomRunner
                 gameSongListInstance[3].Volume = (float)musicVolume/5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
+
+                Rectangle mouseRect = new Rectangle(mouse.X, mouse.Y, 1, 1);
+                for (int i = 0; i < multiplayerButtons.Count; i++)
+                {
+                    if (mouseRect.Intersects(multiplayerButtons[i]) && mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                    {
+                        if (i == 2)
+                        {
+                            if (!multiplayerButtonStates[i])
+                            {
+                                for (int j = 1; j < 3; j++)
+                                {
+                                    if (!multiplayerButtonStates[j])
+                                    {
+                                        multiplayerButtonStates[j] = true;
+                                        players.Add(
+                                        new Player(new Vector2(700 + j * 200, 500))
+                                        {
+                                            Invulnerable = false,
+                                            Up = new List<Keys> { Keys.Up },
+                                            Down = new List<Keys> { Keys.Down },
+                                            Left = new List<Keys> { Keys.Left },
+                                            Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                        });
+                                    }
+                                    
+                                }
+                            }
+                            
+                            
+                        }
+                        else if (i == 1)
+                        {
+                            if (!multiplayerButtonStates[i])
+                            {
+                                multiplayerButtonStates[i] = true;
+                                players.Add(
+                                    new Player(new Vector2(700 + i * 200, 500))
+                                    {
+                                        Invulnerable = false,
+                                        Up = new List<Keys> { Keys.Up },
+                                        Down = new List<Keys> { Keys.Down },
+                                        Left = new List<Keys> { Keys.Left },
+                                        Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                    });
+                            }
+                            
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i+1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
+                            
+                            
+                            
+                        }
+                        else
+                        {
+                            if (multiplayerButtonStates[i + 2])
+                            {
+                                multiplayerButtonStates[i + 2] = false;
+                                players.RemoveAt(i + 2);
+                                Player.players--;
+                            }
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i + 1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
+                        }
+                        
+                        
+
+                    }
+                        
+                }
             }
                 
             
@@ -658,7 +732,7 @@ namespace RoomRunner
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
             }
-
+            oldMouse = mouse;
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -756,6 +830,15 @@ namespace RoomRunner
 
                 spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
                 spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
+
+                for (int i = 0; i < multiplayerButtons.Count; i++)
+                {
+                    if (multiplayerButtonStates[i])
+                        spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
+                    else
+                        spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
+                }
+
 
             }
             if (gameState == GameState.Cutscene)
