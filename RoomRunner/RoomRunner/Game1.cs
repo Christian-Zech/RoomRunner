@@ -223,11 +223,13 @@ namespace RoomRunner
 
         private void CreateBosses()
         {
-            Texture2D sheet = loadImage("Enemies/Enemies", Content);
+            Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
             List<Boss> bos = new List<Boss>
             {
                 new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
-                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice)
+                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
+                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
+                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
             };
 
             for (int i = 0; i < bos.Count; i++)
@@ -269,7 +271,7 @@ namespace RoomRunner
             
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-                new Player(new Vector2(900, 500))
+                /*new Player(new Vector2(900, 500))
                 {
                     Invulnerable = false,
                     Up = new List<Keys> { Keys.I },
@@ -284,10 +286,10 @@ namespace RoomRunner
                     Down = new List<Keys> { Keys.Down },
                     Left = new List<Keys> { Keys.Left },
                     Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                },
+                },//*/
                 new Player(new Vector2(700, 500))
                 {
-                    Invulnerable = false,
+                    Invulnerable = true,
                     Up = new List<Keys> { Keys.W },
                     Down = new List<Keys> { Keys.S },
                     Left = new List<Keys> { Keys.A },
@@ -803,7 +805,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
