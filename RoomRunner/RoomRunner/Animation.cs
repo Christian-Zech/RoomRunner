@@ -157,6 +157,8 @@ namespace RoomRunner
                 Next = new Animation("thing")
             };
             Anims[OnetimeAnims.Boss_Fireball].Next.AddAnimation("thing", sheet, game.GraphicsDevice, 5, rects[4], rects[5]);
+
+
         }
         public OnetimeAnimation(int framesPerFrame, params Texture2D[] frames) : base("thing")
         {
