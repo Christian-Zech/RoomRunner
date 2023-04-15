@@ -25,6 +25,12 @@ namespace RoomRunner
         {
             arrowEndPoint = relevantPoint;
             message = text;
+            if (relevantPoint.X > Game1.window.Width - 310)
+                relevantPoint.X = Game1.window.Width/ 2 + 200;
+            if (relevantPoint.X < 400)
+                relevantPoint.X = Game1.window.Width / 2 ;
+            if (relevantPoint.Y < 205)
+                relevantPoint.Y = Game1.window.Height/2 +150;
             rect = new Rectangle(Game1.window.Width - (int)relevantPoint.X, Game1.window.Height - (int)relevantPoint.Y, 400, 300);
             exitButton = new Rectangle(rect.X + rect.Width - 60, rect.Y + rect.Height - 40, 60, 40);
             exited = false;
@@ -34,8 +40,8 @@ namespace RoomRunner
         public Textbox(string text)
         {
             message = text;
-            rect = new Rectangle(Game1.window.Width / 2 - 200, Game1.window.Height / 2 - 150, 400, 300);
-            exitButton = new Rectangle(rect.X + rect.Width - 60, rect.Y + rect.Height - 40, 60, 40);
+            rect = new Rectangle(Game1.window.Width / 2 - 250, Game1.window.Height / 2 - 200, 400, 300);
+            exitButton = new Rectangle(rect.X + rect.Width - 110, rect.Y + rect.Height - 90, 60, 40);
             exited = false;
         }
         public void Update()
