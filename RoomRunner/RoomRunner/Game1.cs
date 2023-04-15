@@ -100,7 +100,7 @@ namespace RoomRunner
         Cutscene cutscenes;
 
         public bool tutorialActive;
-        public int textboxesLeft;
+        public int textboxesIndex;
         public List<Textbox> textboxes;
         public Textbox textbox;
 
@@ -228,7 +228,7 @@ namespace RoomRunner
             oldMouse = Mouse.GetState();
 
             tutorialActive = false;
-            textboxesLeft = 6;
+            
             textbox = new Textbox("Here you can press these buttons\nto select how many players \nyou'd like", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2));
             textboxes = new List<Textbox>
             {
@@ -237,6 +237,7 @@ namespace RoomRunner
                 new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(musicScreen.sliderHandleMusic.X, musicScreen.sliderHandleMusic.Y)),
                 new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X, musicScreen.customMusicButton.Y))
             };
+            textboxesIndex = 0 ;
             base.Initialize();
             
 
@@ -518,7 +519,10 @@ namespace RoomRunner
                         
                 }
             }
-                
+            if (gameState == GameState.Shop)
+            {
+                shop.Update();
+            }
             
 
             if (gameState == GameState.Play)
@@ -856,20 +860,21 @@ namespace RoomRunner
                 }
                 else
                 {
-                    if (textboxesLeft == 6)
+                    switch (textboxesIndex)
                     {
-                        for (int i = 0; i < multiplayerButtons.Count; i++)
-                        {
-                            if (multiplayerButtonStates[i])
-                                spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
-                            else
-                                spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
-                        }
-                        textbox.Draw(spriteBatch, pixel, fonts[3]);
-                        textbox.Update();
-                        if (textbox.exited)
-                            textboxesLeft--;
+                        case 0:
+                            //menu.draw once samuel does it
+                            break;
+                        case 1:
+                            shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            break;
                     }
+
+                    textboxes[textboxesIndex].Draw(spriteBatch, pixel, fonts[3]);
+                    textboxes[textboxesIndex].Update();
+                    if (textboxes[textboxesIndex].exited)
+                        textboxesIndex++;
+                    
                 }
 
 

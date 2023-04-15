@@ -28,8 +28,8 @@ namespace RoomRunner
             rect = new Rectangle(Game1.window.Width - (int)relevantPoint.X, Game1.window.Height - (int)relevantPoint.Y, 400, 300);
             exitButton = new Rectangle(rect.X + rect.Width - 60, rect.Y + rect.Height - 40, 60, 40);
             exited = false;
-            distance = (int)Math.Sqrt(Math.Pow(rect.X - arrowEndPoint.X, 2) + Math.Pow(rect.Y - arrowEndPoint.Y, 2));
-            angle = (float)Math.Atan2(rect.Y - arrowEndPoint.Y, rect.X - arrowEndPoint.X);
+            distance = (int)Math.Sqrt(Math.Pow(rect.X+rect.Width/2 - arrowEndPoint.X, 2) + Math.Pow(rect.Y + rect.Height / 2 - arrowEndPoint.Y, 2));
+            angle = (float)Math.Atan2(rect.Y + rect.Height / 2 - arrowEndPoint.Y, rect.X + rect.Width / 2 - arrowEndPoint.X);
         }
         public Textbox(string text)
         {
@@ -49,12 +49,13 @@ namespace RoomRunner
         }
         public void Draw(SpriteBatch spriteBatch, Texture2D pixel, SpriteFont font)
         {
+            if (arrowEndPoint != null)
+                spriteBatch.Draw(pixel, new Rectangle((int)arrowEndPoint.X, (int)arrowEndPoint.Y, distance, 3), null, Color.White, angle, new Vector2(0, 0), SpriteEffects.None, 0);
             spriteBatch.Draw(pixel, Game1.window, Color.Black * .3f);
             spriteBatch.Draw(pixel, rect, Color.White);
             spriteBatch.DrawString(font, message, new Vector2(rect.X + 5, rect.Y + 5), Color.Black);
             spriteBatch.DrawString(font, "Okay", new Vector2(exitButton.X, exitButton.Y), Color.Green);
-            if (arrowEndPoint != null)
-                spriteBatch.Draw(pixel, new Rectangle((int)arrowEndPoint.X, (int)arrowEndPoint.Y, distance, 3), null, Color.White, angle, new Vector2(0, 0), SpriteEffects.None, 0);
+            
         }
     }
 }
