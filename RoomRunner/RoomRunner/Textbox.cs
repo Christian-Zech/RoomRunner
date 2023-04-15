@@ -41,7 +41,7 @@ namespace RoomRunner
         {
             message = text;
             rect = new Rectangle(Game1.window.Width / 2 - 250, Game1.window.Height / 2 - 200, 400, 300);
-            exitButton = new Rectangle(rect.X + rect.Width - 110, rect.Y + rect.Height - 90, 60, 40);
+            exitButton = new Rectangle(rect.X + rect.Width - 60, rect.Y + rect.Height - 40, 60, 40);
             exited = false;
         }
         public void Update()

@@ -100,6 +100,9 @@ namespace RoomRunner
         Cutscene cutscenes;
         GameState cutsceneDestination;
 
+        //tutorial stuff
+        Texture2D questionMark;
+        Rectangle tutorialRect;
         public bool tutorialActive;
         public int textboxesIndex;
         public List<Textbox> textboxes;
@@ -230,8 +233,7 @@ namespace RoomRunner
             oldMouse = Mouse.GetState();
 
             tutorialActive = false;
-            
-            textbox = new Textbox("Here you can press these buttons\nto select how many players \nyou'd like", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2));
+            tutorialRect = new Rectangle(window.Width/2, 280, 60, 60);
             textboxes = new List<Textbox>
             {
                 new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
@@ -298,7 +300,7 @@ namespace RoomRunner
             jebSheet = this.Content.Load<Texture2D>("jeb");
             iconTextures[0] = Content.Load<Texture2D>("Icons/personIcon");
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
-            
+            questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
 
@@ -432,6 +434,10 @@ namespace RoomRunner
             {
                 gameState = GameState.Shop;
                 menuCoolDown = 60;
+            }
+            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
+            {
+                tutorialActive = true;
             }
             if (gameState == GameState.Cutscene)
             {
@@ -863,6 +869,8 @@ namespace RoomRunner
                     spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
                     spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X + 20, MusicButtonRectangle.Y + 20), Color.White);
 
+                    spriteBatch.Draw(questionMark, tutorialRect, Color.White);
+
                     for (int i = 0; i < multiplayerButtons.Count; i++)
                     {
                         if (multiplayerButtonStates[i])
@@ -927,6 +935,10 @@ namespace RoomRunner
                             tutorialActive = false;
                             cutsceneDestination = GameState.Menu;
                             gameState = GameState.Cutscene;
+                            for (int i = 0; i < textboxes.Count; i++)
+                            {
+                                textboxes[i].exited = false;
+                            }
                         }
 
                         else
