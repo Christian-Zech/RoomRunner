@@ -36,6 +36,7 @@ namespace RoomRunner
         List<Rectangle> multiplayerButtons;
         List<bool> multiplayerButtonStates;
         Texture2D[] iconTextures;
+        private int CurrentPlayerInShop;
 
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
@@ -71,12 +72,10 @@ namespace RoomRunner
 
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
-        private List<ShopItem> items;
         public Rectangle[] collectableRect, cosmeticRect;
         public SpriteFont shopFont { get { return fonts[2]; } }
         public SpriteFont shopFontBold { get { return fonts[3]; } }
         public SpriteFont shopTitleFont { get { return fonts[4]; } }
-        private Shop shop;
 
         public int menuCoolDown;
 
@@ -151,7 +150,6 @@ namespace RoomRunner
             magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
             
 
-            items = new List<ShopItem>();
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
@@ -181,6 +179,7 @@ namespace RoomRunner
             multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
             multiplayerButtonStates = new List<bool> { true, false, false };
             iconTextures = new Texture2D[2];
+            CurrentPlayerInShop = 0;
 
             transition = false;
             endCurrentRoom = false;
@@ -237,7 +236,8 @@ namespace RoomRunner
 
         private void GenMens()
         {
-            List<Button> butts = new List<Button>
+            
+            List<MenuThingie> butts = new List<MenuThingie>
             {
                 new Button(startButtonRectangle, new Color(0,255,0,255), menuFont, "Start")
                 {
@@ -260,19 +260,48 @@ namespace RoomRunner
                 {
                     BorderWidth = -1
                 });
-            butts[3].Texture = iconTextures[1];
-
+            (butts[3] as Button).Texture = iconTextures[1];
 
             menus[GameState.Menu] = new Menu(butts.ToArray());
             butts.Clear();
 
             Animation[] anims = GenShopButts();
-            butts.AddRange(new Button[]
+            const int size = 75;
+            string[] names = new string[] { "Time Control", "Can't Die", "Instakill", "Magnet", "Ski Mask", "Construction", "Hair", "Headphones", "Santa Hat", "Headband", "Fire", "Army Hat", "Red Headband", "Blue Headband" };
+            for (int i = 0, j = 0, c = 0; c < 12; c++, i++)
             {
-                new Button(new Rectangle(window.Width/4,window.Height/8,150,150),anims[0])
+                if (i >= 4) { i = 0; j++; }
+                butts.Add(new Button(new Rectangle(window.Width * (i + 5) / 16 + size * i, window.Height * (j * 3 + 5) / 18, size, size), anims[c], shopFont, names[c]));
+            }
+            butts.Add(new Button(new Rectangle(window.Width * 6 / 16 + size, window.Height * 14 / 18, size, size), anims[12], shopFont, names[12]));
+            butts.Add(new Button(new Rectangle(window.Width * 7 / 16 + size * 2, window.Height * 14 / 18, size, size), anims[13], shopFont, names[13]));
+            butts.Add(new Box(new Rectangle(window.Width * 13 / 16, window.Height * 2 / 18, size, size), anims[14], shopFont, () => "Coins: " + players[CurrentPlayerInShop].Coins));
+            butts.Add(new Box(new Rectangle(window.Width * 3 / 16, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
+            butts.Add(new MenuText(shopTitleFont, "SHOP", new Vector2(window.Width / 2.43f, window.Height / 25)));
+            
+            foreach (MenuThingie a in butts)
+            {
+                if (a is Button)
                 {
-                    BorderWidth = -1
+                    Button b = a as Button;
+                    b.TextPosition = new Vector2(b.TextPosition.X, b.TextPosition.Y + b.Rectangle.Height);
+                    continue;
                 }
+                if (a is Box)
+                {
+                    Box b = a as Box;
+                    b.TextPosition = new Vector2(b.TextPosition.X, b.TextPosition.Y + b.Rectangle.Height);
+                    continue;
+                }
+            }
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, size * 2), Color.Green, shopFont, "Go Back")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+            butts.Add(new Box(new Rectangle(0, 0, 50, 50), SelectionGrid.Pointer)
+            {
+                Shown = false
             });
 
             menus[GameState.Shop] = new Menu(butts.ToArray());
@@ -281,14 +310,114 @@ namespace RoomRunner
         private Animation[] GenShopButts()
         {
             List<Animation> outp = new List<Animation>();
-            //Clock
             Texture2D sheet = collectableSheet;
             Rectangle[] rects = Player.LoadSheet(5, 6, 32, 32, 1);
             Animation hold = new Animation("idle");
-            hold.AddAnimation("idle", sheet, GraphicsDevice, 5, rects.Take(8).ToArray());
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Take(8).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(8).Take(5).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(13).Take(8).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(21).Take(4).ToArray());
             outp.Add(hold);
 
+            sheet = cosmeticSheet;
+            rects = Player.LoadSheet(5, 5, 32, 32, 1);
+            for (int i = 0; i < 24; i+=2)
+            {
+                hold = new Animation("idle");
+                if (i == 12) { hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects[12], rects[14], rects[16]); i += 4; }
+                else hold.AddAnimation("idle", sheet, GraphicsDevice, 60, rects[i]);
+                outp.Add(hold);
+            }
+            hold = new Animation("idle");
+            rects = Player.LoadSheet(5, 6, 32, 32, 1);
+            hold.AddAnimation("idle", collectableSheet, GraphicsDevice, 10, rects[25], rects[26], rects[27], rects[28], rects[27], rects[26]);
+            outp.Add(hold);
+            hold = new Animation("idle");
+            rects = Player.LoadSheet(4, 3, 32, 32);
+            hold.AddAnimation("idle", jebSheet, GraphicsDevice, 60, rects[10]);
+            outp.Add(hold);
+            
+
             return outp.ToArray();
+        }
+        private void UpdateShop()
+        {
+            //shopMenu length = 19
+            if (menuCoolDown > 0) return;
+            const int Price = 50;
+            MenuThingie[] shopMenu = menus[GameState.Shop].thingies.ToArray();
+            Player current = players[CurrentPlayerInShop];
+            int c = 0;
+            KeyboardState kb = Keyboard.GetState();
+            int index = -1;
+            for (;c<14;c++)
+            {
+                if (shopMenu[c].Equals(menus[GameState.Shop].LastTouched)) index = c;
+                Button b = shopMenu[c] as Button;
+                
+                if (b.BorderColor.Equals(Color.Green))
+                {
+                    if (b.MouseClickedOnce || (kb.IsKeyDown(Keys.Space) && !oldKB.IsKeyDown(Keys.Space)) || (kb.IsKeyDown(Keys.Enter) && !oldKB.IsKeyDown(Keys.Enter)))
+                        current.currentHat = (PlayerHats)c - 3;
+                    continue;
+                }
+                if (b.MouseHovering) b.Font = shopFontBold;
+                else
+                {
+                    b.Font = shopFont;
+                    if (b.BorderWidth == -1) continue;
+                    b.BorderWidth = -1;
+                    b.BorderColor = Color.Black;
+                    continue;
+                }
+                if ((b.MouseClickedOnce || (kb.IsKeyDown(Keys.Space) && !oldKB.IsKeyDown(Keys.Space)) || (kb.IsKeyDown(Keys.Enter) && !oldKB.IsKeyDown(Keys.Enter))) && current.Coins >= Price)
+                {
+                    current.Coins -= Price;
+                    if (c - 4 < 0)
+                    {
+                        continue;
+                    }
+                    b.BorderColor = Color.Green;
+                    (shopMenu[15] as Box).Animation = b.Animation;
+                    current.currentHat = (PlayerHats)c-3;
+                    current.ownedHats.Add(c-3);
+                    continue;
+                }
+                if (b.BorderWidth == -1)
+                {
+                    b.BorderWidth = 1;
+                    b.BorderColor = new Color(255, 255, 255, 64);
+                    b.Font = shopFontBold;
+                }
+            }
+            if ((shopMenu[17] as Button).MouseClickedOnce) gameState = GameState.Menu;
+            if (index > -1)
+            {
+                int start = index;
+                if (kb.IsKeyDown(Keys.Up) && !oldKB.IsKeyDown(Keys.Up) && index - 4 >= 0) index -= 4;
+                if (kb.IsKeyDown(Keys.Right) && !oldKB.IsKeyDown(Keys.Right) && index + 1 < 15) index++;
+                if (kb.IsKeyDown(Keys.Down) && !oldKB.IsKeyDown(Keys.Down) && index + 4 < 15) index += 4;
+                if (kb.IsKeyDown(Keys.Left) && !oldKB.IsKeyDown(Keys.Left) && index - 1 >= 0) index--;
+                if (start != index && (start <= 11 ^ index <= 11) && Math.Abs(start-index)>1)
+                {
+                    if (start < 11) index--;
+                    else index++;
+                }
+                menus[GameState.Shop].LastTouched = shopMenu[index];
+            }
+            MenuThingie thingie = menus[GameState.Shop].LastTouched;
+            if (thingie != default && thingie is Button)
+            {
+                shopMenu[18].Shown = true;
+                shopMenu[18].Rectangle.X = thingie.Rectangle.X + thingie.Rectangle.Width;
+                shopMenu[18].Rectangle.Y = thingie.Rectangle.Y + thingie.Rectangle.Height;
+            }
         }
 
         private void CreateBosses()
@@ -320,31 +449,12 @@ namespace RoomRunner
             collectableSheet = this.Content.Load<Texture2D>("Shop/collectables");
             cosmeticSheet = this.Content.Load<Texture2D>("Shop/cosmetics");
 
-            //for shop, textures have to be loaded first before they can be sent as parameters
-            int[] collectNums = new int[] { 8, 5, 8, 4 };
-            string[] itemNames = new string[] { "Time Control", "Can't Die", "Instakill", "Magnet", "Ski Mask", "Construction", "Hair", "Headphones", "Santa Hat", "Headband", "Army Hat", "Red Headband", "Blue Headband" };
-            for (int i = 0, c = 0; i < collectNums.Length; c += collectNums[i], i++)
-                items.Add(new ShopItem(50, itemNames[i], collectableRect.Skip(c).Take(collectNums[i]).ToList(), collectableSheet));
-            for (int i = collectNums.Length, c = 0; i < itemNames.Length; i++, c += 2)
-            {
-                if (c == 12) //fire has multiple frames, so had to add a specific case for it
-                {
-                    items.Add(new ShopItem(50, "Fire", new List<Rectangle> { cosmeticRect[12], cosmeticRect[14], cosmeticRect[16] }, cosmeticSheet));
-                    c += 6;
-                }
-                items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
-            }
-            items.Add(new ShopItem(50, "Coin", new List<Rectangle>(collectableRect.Skip(25).Take(4)), collectableSheet));
-
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             iconTextures[0] = Content.Load<Texture2D>("Icons/personIcon");
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             
             backgroundImages = loadTextures("Background", Content);
-
-            menus = new Dictionary<GameState, Menu>();
-            GenMens();
 
             players = new List<Player> {
 
@@ -358,7 +468,8 @@ namespace RoomRunner
                 }
             };
 
-            shop = new Shop(items, players[0], jebSheet, idleAnimationRectangles[0]); //Needs changing for multiplayer
+            menus = new Dictionary<GameState, Menu>();
+            GenMens();
 
             loadGameSongs(0);
             loadSoundEffects();
@@ -440,7 +551,7 @@ namespace RoomRunner
                 Up = new List<Keys> { Keys.I },
                 Down = new List<Keys> { Keys.K },
                 Left = new List<Keys> { Keys.J },
-                Shoot = new List<Keys> { Keys.L}
+                Shoot = new List<Keys> { Keys.L }
             });
         }
 
@@ -474,7 +585,7 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[0].MouseClickedOnce)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && ((Button)currentMenu.thingies[0]).MouseClickedOnce)
             {
                 
                 gameState = GameState.Cutscene;
@@ -483,22 +594,24 @@ namespace RoomRunner
                 GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count);
             }
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[2].MouseClickedOnce)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && menuCoolDown == 0 && currentMenu != null && ((Button)currentMenu.thingies[2]).MouseClickedOnce)
             {
                 gameState = GameState.Music;
             }
 
 
-            if (gameState == GameState.GameOver && currentMenu != null && currentMenu.thingies[0].MouseClickedOnce && menuCoolDown == 0)
+            if (gameState == GameState.GameOver && currentMenu != null && ((Button)currentMenu.thingies[0]).MouseClickedOnce && menuCoolDown == 0)
             {
                 gameState = GameState.Menu;
                 menuCoolDown = 60;
             }
                 
 
-            if (gameState == GameState.Menu && menuCoolDown == 0 && currentMenu != null && currentMenu.thingies[1].MouseClickedOnce)
+            if (gameState == GameState.Menu && menuCoolDown == 0 && currentMenu != null && ((Button)currentMenu.thingies[1]).MouseClickedOnce)
             {
                 gameState = GameState.Shop;
+                menus[gameState].thingies[18].Shown = false;
+                menus[gameState].LastTouched = default;
                 menuCoolDown = 60;
             }
 
@@ -517,7 +630,7 @@ namespace RoomRunner
 
                 bool change = false;
                 for (int i = 3; i < 6 && currentMenu != null; i++) 
-                    if (currentMenu.thingies[i].MouseClickedOnce)
+                    if (((Button)currentMenu.thingies[i]).MouseClickedOnce)
                     {
                         bool toSet = !multiplayerButtonStates[i - 3];
                         if (toSet)
@@ -531,9 +644,9 @@ namespace RoomRunner
                 if (change)
                     for (int i = 0; i < 3; i++)
                         if (multiplayerButtonStates[i])
-                            currentMenu.thingies[i + 3].Texture = iconTextures[1];
+                            ((Button)currentMenu.thingies[i + 3]).Texture = iconTextures[1];
                         else
-                            currentMenu.thingies[i + 3].Texture = iconTextures[0];
+                            ((Button)currentMenu.thingies[i + 3]).Texture = iconTextures[0];
 
             }
                 
@@ -763,7 +876,10 @@ namespace RoomRunner
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
             }
+            if (gameState == GameState.Shop)
+                UpdateShop();
             oldMouse = mouse;
+            oldKB = Keyboard.GetState();
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -1115,7 +1231,7 @@ namespace RoomRunner
             }
             return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
         }
-
+        public static bool KeyPressed(Keys k, KeyboardState kb) { return kb.IsKeyDown(k) && !Program.Game.oldKB.IsKeyDown(k); }
 
 
     }
