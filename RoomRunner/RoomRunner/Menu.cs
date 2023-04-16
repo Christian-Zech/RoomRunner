@@ -33,15 +33,16 @@ namespace RoomRunner
 
         public Rectangle Rectangle;
         public Vector2 Position;
-        public int BorderWidth;
+        public int BorderWidth, Insets;
         public bool Shown, MouseHovering;
         public Color BorderColor, BGColor;
         public virtual void DrawAndUpdate(SpriteBatch sb)
         {
             MouseHovering = MouseInBounds(Mouse.GetState());
-            sb.Draw(Game1.pixel, Rectangle, BGColor);
+            Rectangle DrawRect = new Rectangle(Rectangle.X - Insets, Rectangle.Y - Insets, Rectangle.Width + Insets * 2, Rectangle.Height + Insets * 2);
             if (BorderWidth > 0)
-                sb.Draw(Game1.pixel, new Rectangle(Rectangle.X - BorderWidth, Rectangle.Y - BorderWidth, Rectangle.Width + BorderWidth * 2, Rectangle.Height + BorderWidth * 2), BorderColor);
+                sb.Draw(Game1.pixel, new Rectangle(DrawRect.X - BorderWidth, DrawRect.Y - BorderWidth, DrawRect.Width + BorderWidth * 2, DrawRect.Height + BorderWidth * 2), BorderColor);
+            sb.Draw(Game1.pixel, DrawRect, BGColor);
         }
 
         protected MenuThingie(Rectangle r)
@@ -52,6 +53,7 @@ namespace RoomRunner
             BorderColor = Color.Black;
             BGColor = Invisible;
             Shown = true;
+            Insets = 0;
         }
         protected MenuThingie(Vector2 p)
         {
@@ -61,6 +63,17 @@ namespace RoomRunner
             BorderColor = Color.Black;
             BGColor = Invisible;
             Shown = true;
+            Insets = 0;
+        }
+        protected MenuThingie()
+        {
+            Position = Vector2.Zero;
+            Rectangle = new Rectangle();
+            BorderWidth = 0;
+            BorderColor = Color.Black;
+            BGColor = Invisible;
+            Shown = true;
+            Insets = 0;
         }
 
         public bool MouseInBounds(MouseState ms)
@@ -154,13 +167,6 @@ namespace RoomRunner
             }
             if (Font != default && text != "")
                 sb.DrawString(Font, text, txtPos, TextColor); 
-        }
-        private bool MouseInBounds(MouseState ms)
-        {
-            bool a, b;
-            a = ms.X >= Rectangle.X && ms.Y >= Rectangle.Y;
-            b = ms.X <= Rectangle.X + Rectangle.Width && ms.Y <= Rectangle.Y + Rectangle.Height;
-            return a && b;
         }
         private Vector2 calcTxt()
         {
@@ -317,9 +323,20 @@ namespace RoomRunner
             Rectangle.Height = (int)size.Y;
         }
     }
-    public class SelectionGrid
+    public class SelectionGrid : MenuThingie
     {
         public readonly static Animation Pointer;
+
+        public Button[][] Grid;
+        public Button Current { get { return GetSelected(Selected); } }
+        public Point Selected;
+        public Button[] Butts;
+
+        private Point[] RowSizes;
+        private readonly Animation InstancePointer;
+        private Rectangle PointerRect;
+        private KeyboardState OldKb;
+        
 
         static SelectionGrid()
         {
@@ -333,6 +350,109 @@ namespace RoomRunner
             Animation hold = new Animation("idle");
             hold.AddAnimation("idle", arrow, Program.Game.GraphicsDevice, 5, Player.LoadSheet(4, 3, 39, 30, 1));
             Pointer = hold;
+        }
+        public SelectionGrid(Button[][] g)
+        {
+            Grid = g;
+            Selected = Point.Zero;
+            InstancePointer = Pointer.Clone();
+            PointerRect = new Rectangle(0, 0, 50, 50);
+            OldKb = Keyboard.GetState();
+            List<Button> hold = new List<Button>();
+            foreach (Button[] a in g)
+                hold.AddRange(a);
+            Butts = hold.ToArray();
+            GenBounds();
+        }
+
+        private void GenBounds()
+        {
+            RowSizes = new Point[Grid.Length];
+            int x, y, MaxWidth, MaxHeight;
+            x = y = -1;
+            MaxWidth = MaxHeight = 0;
+            for (int r = 0, h = 0; r < Grid.Length; r++)
+            {
+                int ww = 0, hh = 0, i = -1;
+                for (int c = 0; c < Grid[r].Length; c++)
+                {
+                    if (Grid[r][c] == default) continue;
+                    i = c;
+                    Rectangle hold = Grid[r][c].Rectangle;
+                    if (x == -1) x = hold.X;
+                    if (y == -1) y = hold.Y;
+                    if (hh < hold.Height) hh = hold.Height;
+                    if (h < hold.Y) h = hold.Y;
+                }
+                ww = Grid[r][i].Rectangle.X + Grid[r][i].Rectangle.Width - x;
+                RowSizes[r] = new Point(ww, hh);
+                if (ww > MaxWidth) MaxWidth = ww;
+                if (r == Grid.Length - 1)
+                    MaxHeight = h + hh - y;
+            }
+
+            Rectangle = new Rectangle(x, y, MaxWidth, MaxHeight);
+            Position = new Vector2(Rectangle.X, Rectangle.Y);
+        }
+        public override void DrawAndUpdate(SpriteBatch sb)
+        {
+            if (!Shown) return;
+            base.DrawAndUpdate(sb);
+
+            Button lastTouched = default;
+            foreach (Button b in Butts) if (b != null && b.MouseHovering) lastTouched = b;
+            KeyboardState kb = Keyboard.GetState();
+            Point change = Point.Zero, newP;
+            if (KeyPressed(Keys.Up, kb)) change.X -= 1;
+            if (KeyPressed(Keys.Right, kb)) change.Y += 1;
+            if (KeyPressed(Keys.Left, kb)) change.Y -= 1;
+            if (KeyPressed(Keys.Down, kb)) change.X += 1;
+            if (change != Point.Zero)
+            {
+                newP = new Point(Selected.X + change.X, Selected.Y + change.Y);
+                if (!OutOfBounds(newP))
+                    while (GetSelected(newP) == null)
+                    {
+                        newP.X += change.X;
+                        newP.Y += change.Y;
+                        if (OutOfBounds(newP)) break;
+                    }
+                if (!OutOfBounds(newP))
+                    Selected = newP;
+            }
+            else if (lastTouched != default) Selected = FindSelected(lastTouched);
+
+            foreach (MenuThingie[] a in Grid)
+                foreach (MenuThingie b in a)
+                    if (b != default) 
+                        b.DrawAndUpdate(sb);
+            Rectangle SelRect = Grid[Selected.X][Selected.Y].Rectangle;
+            PointerRect.X = SelRect.X + SelRect.Width;
+            PointerRect.Y = SelRect.Y + SelRect.Height;
+            sb.Draw(InstancePointer.CurrentTexture, PointerRect, Color.White);
+            InstancePointer.Update();
+
+            OldKb = kb;
+        }
+        private bool KeyPressed(Keys k, KeyboardState kb) { return kb.IsKeyDown(k) && !OldKb.IsKeyDown(k); }
+        private Button GetSelected(Point p) { return Grid[p.X][p.Y]; }
+        private Point FindSelected(Button b)
+        {
+            for (int r = 0; r < Grid.Length; r++)
+                for (int c = 0; c < Grid[r].Length; c++)
+                    if (b.Equals(Grid[r][c]))
+                        return new Point(r, c);
+            throw new Exception("No Point Found For given Button");
+        }
+        private bool OutOfBounds(Point p)
+        {
+            bool a, b, c, d;
+            a = p.X < 0;
+            b = p.Y < 0;
+            c = p.X >= Grid.Length;
+            if (c || a) return true;
+            d = p.Y >= Grid[p.X].Length;
+            return b || d;
         }
     }
 }
