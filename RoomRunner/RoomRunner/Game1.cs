@@ -65,6 +65,8 @@ namespace RoomRunner
         public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
         public Dictionary<Levels, Boss> bosses;
         public Dictionary<GameState, Menu> menus;
+        private PlayerHats Pondering;
+        private List<MenuThingie> Storage;
 
         public Random rand;
 
@@ -180,6 +182,7 @@ namespace RoomRunner
             multiplayerButtonStates = new List<bool> { true, false, false };
             iconTextures = new Texture2D[2];
             CurrentPlayerInShop = 0;
+            Storage = new List<MenuThingie>();
 
             transition = false;
             endCurrentRoom = false;
@@ -271,10 +274,19 @@ namespace RoomRunner
             for (int i = 0, j = 0, c = 0; c < 12; c++, i++)
             {
                 if (i >= 4) { i = 0; j++; }
-                butts.Add(new Button(new Rectangle(window.Width * (i + 5) / 16 + size * i, window.Height * (j * 3 + 5) / 18, size, size), anims[c], shopFont, names[c]));
+                butts.Add(new Button(new Rectangle(window.Width * (i + 5) / 16 + size * i, window.Height * (j * 3 + 5) / 18, size, size), anims[c], shopFont, names[c])
+                {
+                    HitboxInset = 20
+                });
             }
-            butts.Add(new Button(new Rectangle(window.Width * 6 / 16 + size, window.Height * 14 / 18, size, size), anims[12], shopFont, names[12]));
-            butts.Add(new Button(new Rectangle(window.Width * 7 / 16 + size * 2, window.Height * 14 / 18, size, size), anims[13], shopFont, names[13]));
+            butts.Add(new Button(new Rectangle(window.Width * 6 / 16 + size, window.Height * 14 / 18, size, size), anims[12], shopFont, names[12])
+            {
+                HitboxInset = 20
+            });
+            butts.Add(new Button(new Rectangle(window.Width * 7 / 16 + size * 2, window.Height * 14 / 18, size, size), anims[13], shopFont, names[13])
+            {
+                HitboxInset = 20
+            });
             foreach (MenuThingie a in butts)
             {
                 Button b = a as Button;
@@ -290,12 +302,12 @@ namespace RoomRunner
             {
                 BGColor = new Color(192, 192, 192, 255),
                 BorderWidth = 6,
-                Insets = 75
+                HitboxInset = 75
             };
             butts.Clear();
             butts.Add(hold);
             butts.Add(new Box(new Rectangle(window.Width * 13 / 16, window.Height * 2 / 18, size, size), anims[14], shopFont, () => "Coins: " + players[CurrentPlayerInShop].Coins));
-            butts.Add(new Box(new Rectangle(window.Width * 3 / 16, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
+            butts.Add(new Box(new Rectangle(window.Width * 5 / 32, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
             butts.Add(new MenuText(shopTitleFont, "SHOP", new Vector2(window.Width / 2.43f, window.Height / 25)));
             
             foreach (MenuThingie a in butts)
@@ -363,56 +375,107 @@ namespace RoomRunner
         }
         private void UpdateShop()
         {
-            //shopMenu length = 19
+            //shopMenu length = 5
             if (menuCoolDown > 0) return;
             const int Price = 50;
+            if (menus[GameState.Shop].LinkedMenu != default)
+            {
+                UpdatePopup(Price);
+                return;
+            }
+            
             MenuThingie[] shopMenu = menus[GameState.Shop].thingies.ToArray();
             Player current = players[CurrentPlayerInShop];
             KeyboardState kb = Keyboard.GetState();
             Button b = (shopMenu[0] as SelectionGrid).Current;
             Point p = (shopMenu[0] as SelectionGrid).Selected;
-            int c = p.X * 4 + p.Y;
+            int c = p.X * 4 + p.Y - 4;
 
             if (b.BGColor.Equals(Color.Green))
             {
-                if (b.MouseClickedOnce || (kb.IsKeyDown(Keys.Space) && !oldKB.IsKeyDown(Keys.Space)) || (kb.IsKeyDown(Keys.Enter) && !oldKB.IsKeyDown(Keys.Enter)))
+                if (b.MouseClickedOnce || KeyPressed(kb, Keys.Space, Keys.Enter))
                 {
-                    if (c <= 10)
-                        current.currentHat = (PlayerHats)c - 3;
-                    else if (c == 10)
-                        current.currentHat = (PlayerHats)c - 1;
+                    if (c <= 6)
+                        current.currentHat = (PlayerHats)c + 1;
+                    else if (c == 7)
+                        current.currentHat = (PlayerHats)c + 3;
                     else
-                        current.currentHat = (PlayerHats)c - 2;
+                        current.currentHat = (PlayerHats)c + 2;
                     (shopMenu[2] as Box).Animation = b.Animation;
                 }
-                goto skip;
             }
-            if ((b.MouseClickedOnce || (kb.IsKeyDown(Keys.Space) && !oldKB.IsKeyDown(Keys.Space)) || (kb.IsKeyDown(Keys.Enter) && !oldKB.IsKeyDown(Keys.Enter))) && current.Coins >= Price)
+            else if ((b.MouseClickedOnce || KeyPressed(kb, Keys.Space, Keys.Enter)) && current.Coins >= Price)
             {
-                current.Coins -= Price;
-                if (c - 4 < 0)
+                if (c >= 0)
                 {
-                    goto skip;
-                }
-                b.BGColor = Color.Green;
-                (shopMenu[2] as Box).Animation = b.Animation;
-                if (c <= 10)
-                    current.currentHat = (PlayerHats)c - 3;
-                else if (c == 10)
-                    current.currentHat = (PlayerHats)c - 1;
-                else
-                    current.currentHat = (PlayerHats)c - 2;
-                current.ownedHats.Add((int)current.currentHat);
-                goto skip;
+                    PlayerHats buying;
+                    if (c <= 6)
+                        buying = (PlayerHats)c + 1;
+                    else if (c == 7)
+                        buying = (PlayerHats)c + 3;
+                    else
+                        buying = (PlayerHats)c + 2;
+                    Storage.AddRange(new MenuThingie[] { b, shopMenu[2] });
+                    AddShopPopup(buying, menus[gameState], Price);
+                } 
+                else 
+                    current.Coins -= Price;
             }
-            if (b.BorderWidth == -1)
-            {
-                b.BorderWidth = 1;
-                b.BorderColor = new Color(255, 255, 255, 64);
-                b.Font = shopFontBold;
-            }
-        skip:
             if ((shopMenu[4] as Button).MouseClickedOnce) gameState = GameState.Menu;
+        }
+        private void AddShopPopup(PlayerHats buying, Menu current, int Price)
+        {
+            menuCoolDown = 2;
+            Pondering = buying;
+            List<MenuThingie> elements = new List<MenuThingie>
+            {
+                new Box(new Rectangle(window.Width / 2 - window.Width * 7 / 38, window.Height / 2 - window.Height * 2 / 19, window.Width / 3, window.Height / 3))
+                {
+                    BGColor = new Color(255,253,219,255),
+                    BorderWidth = 6
+                },
+                new MenuText(shopFont, "Buy "+buying+"?", new Vector2(window.Width / 2 - window.Width * 15 / 38 + window.Width / 3, window.Height / 2 - window.Height * 3 / 38)),
+                new MenuText(shopFont, "Price: "+Price+" Coins", new Vector2(window.Width / 2 - window.Width * 15 / 38 + window.Width / 3, window.Height / 2 - window.Height / 38)),
+                new SelectionGrid(
+                    new Button[][] {
+                        new Button[] {
+                            new Button(new Rectangle(window.Width / 2 - window.Width * 6 / 38, window.Height / 2 + window.Height / 19, (int)Math.Round(window.Width / 9.5), window.Height / 9), Color.Red, shopFontBold, "No")
+                            {
+                                BorderWidth = 6
+                            },
+                            new Button(new Rectangle(window.Width / 2 - window.Width * 12 / 38 + window.Width / 3, window.Height / 2 + window.Height / 19, (int)Math.Round(window.Width / 9.5), window.Height / 9), Color.Green, shopFontBold, "Yes")
+                            {
+                                BorderWidth = 6
+                            }
+                            
+                        }
+                    }
+                )
+            };
+            Menu popup = new Menu(elements.ToArray());
+
+            current.LinkedMenu = popup;
+        }
+        private void UpdatePopup(int Price)
+        {
+            if (menuCoolDown > 0) return;
+            Button b = (menus[gameState].LinkedMenu.thingies[3] as SelectionGrid).Current;
+            KeyboardState kb = Keyboard.GetState();
+            if (b.MouseClickedOnce || KeyPressed(kb, Keys.Enter, Keys.Space))
+            {
+                if (b.DrawColor.Equals(Color.Green))
+                {
+                    players[CurrentPlayerInShop].ownedHats.Add((int)Pondering);
+                    players[CurrentPlayerInShop].currentHat = Pondering;
+                    players[CurrentPlayerInShop].Coins -= Price;
+                    Storage[0].BGColor = Color.Green;
+                    (Storage[1] as Box).Animation = (Storage[0] as Button).Animation;
+                }
+                menus[gameState].LinkedMenu = default;
+                Pondering = default;
+                menuCoolDown = 2;
+                Storage.Clear();
+            }
         }
 
 
@@ -1226,6 +1289,11 @@ namespace RoomRunner
             return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
         }
         public static bool KeyPressed(Keys k, KeyboardState kb) { return kb.IsKeyDown(k) && !Program.Game.oldKB.IsKeyDown(k); }
+        public static bool KeyPressed(KeyboardState kb, params Keys[] k)
+        {
+            foreach (Keys kk in k) if (KeyPressed(kk, kb)) return true;
+            return false;
+        }
 
 
     }

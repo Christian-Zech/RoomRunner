@@ -12,7 +12,7 @@ namespace RoomRunner
     {
         public List<MenuThingie> thingies;
         public MenuThingie LastTouched;
-        
+        public Menu LinkedMenu;
         public Menu(params MenuThingie[] butts)
         {
             thingies = new List<MenuThingie>(butts);
@@ -20,11 +20,14 @@ namespace RoomRunner
 
         public void DrawAndUpdate(SpriteBatch sb)
         {
+            bool hasLink = LinkedMenu != default;
             foreach (MenuThingie b in thingies)
             {
+                b.Disabled = hasLink;
                 b.DrawAndUpdate(sb);
                 if (b.MouseHovering) LastTouched = b;
             }
+            if (hasLink) LinkedMenu.DrawAndUpdate(sb);
         }
     }
     public abstract class MenuThingie
@@ -32,17 +35,31 @@ namespace RoomRunner
         public readonly static Color Invisible = new Color(0, 0, 0, 0);
 
         public Rectangle Rectangle;
+        public Rectangle DrawRectangle;
         public Vector2 Position;
-        public int BorderWidth, Insets;
-        public bool Shown, MouseHovering;
+        public int BorderWidth;
+        public bool Shown, MouseHovering, Disabled;
         public Color BorderColor, BGColor;
+        public int HitboxInset
+        {
+            set
+            {
+                DrawRectangle = new Rectangle(DrawRectangle.X - value, DrawRectangle.Y - value, DrawRectangle.Width + value * 2, DrawRectangle.Height + value * 2);
+            }
+        }
+        public int Inset
+        {
+            set
+            {
+                Rectangle = new Rectangle(Rectangle.X - value, Rectangle.Y - value, Rectangle.Width + value * 2, Rectangle.Height + value * 2);
+            }
+        }
         public virtual void DrawAndUpdate(SpriteBatch sb)
         {
             MouseHovering = MouseInBounds(Mouse.GetState());
-            Rectangle DrawRect = new Rectangle(Rectangle.X - Insets, Rectangle.Y - Insets, Rectangle.Width + Insets * 2, Rectangle.Height + Insets * 2);
             if (BorderWidth > 0)
-                sb.Draw(Game1.pixel, new Rectangle(DrawRect.X - BorderWidth, DrawRect.Y - BorderWidth, DrawRect.Width + BorderWidth * 2, DrawRect.Height + BorderWidth * 2), BorderColor);
-            sb.Draw(Game1.pixel, DrawRect, BGColor);
+                sb.Draw(Game1.pixel, new Rectangle(DrawRectangle.X - BorderWidth, DrawRectangle.Y - BorderWidth, DrawRectangle.Width + BorderWidth * 2, DrawRectangle.Height + BorderWidth * 2), BorderColor);
+            sb.Draw(Game1.pixel, DrawRectangle, BGColor);
         }
 
         protected MenuThingie(Rectangle r)
@@ -53,7 +70,7 @@ namespace RoomRunner
             BorderColor = Color.Black;
             BGColor = Invisible;
             Shown = true;
-            Insets = 0;
+            DrawRectangle = Rectangle;
         }
         protected MenuThingie(Vector2 p)
         {
@@ -63,7 +80,7 @@ namespace RoomRunner
             BorderColor = Color.Black;
             BGColor = Invisible;
             Shown = true;
-            Insets = 0;
+            DrawRectangle = Rectangle;
         }
         protected MenuThingie()
         {
@@ -73,7 +90,7 @@ namespace RoomRunner
             BorderColor = Color.Black;
             BGColor = Invisible;
             Shown = true;
-            Insets = 0;
+            DrawRectangle = Rectangle;
         }
 
         public bool MouseInBounds(MouseState ms)
@@ -159,10 +176,10 @@ namespace RoomRunner
             oldms = ms;
 
             if (Animation == default)
-                sb.Draw(txt, Rectangle, col);
+                sb.Draw(txt, DrawRectangle, col);
             else
             {
-                sb.Draw(Animation.CurrentTexture, Rectangle, col);
+                sb.Draw(Animation.CurrentTexture, DrawRectangle, col);
                 Animation.Update();
             }
             if (Font != default && text != "")
@@ -170,7 +187,7 @@ namespace RoomRunner
         }
         private Vector2 calcTxt()
         {
-            return new Vector2(Rectangle.Center.X, Rectangle.Center.Y) - Font.MeasureString(text) / 2;
+            return new Vector2(DrawRectangle.Center.X, DrawRectangle.Center.Y) - Font.MeasureString(text) / 2;
         }
         public static Vector2 CalcTxt(SpriteFont font, Rectangle rect, string text)
         {
@@ -210,6 +227,12 @@ namespace RoomRunner
         public Box(Rectangle r, Animation a) : base(r)
         {
             Animation = a;
+            DrawColor = Color.White;
+            TextColor = Color.Black;
+            Offset = Vector2.Zero;
+        }
+        public Box(Rectangle r) : base(r)
+        {
             DrawColor = Color.White;
             TextColor = Color.Black;
             Offset = Vector2.Zero;
@@ -260,7 +283,7 @@ namespace RoomRunner
             UpdateText();
             if (Animation != null)
             {
-                sb.Draw(Animation.CurrentTexture, Rectangle, DrawColor);
+                sb.Draw(Animation.CurrentTexture, DrawRectangle, DrawColor);
                 Animation.Update();
             }
             if (Font != default)
@@ -271,7 +294,7 @@ namespace RoomRunner
             if (TextGetter == default) return;
             string val = Text;
             if (val.Equals(text)) return;
-            TextPos = Button.CalcTxt(Font, Rectangle, val) + Offset;
+            TextPos = Button.CalcTxt(Font, DrawRectangle, val) + Offset;
             text = val;
         }
     }
@@ -297,6 +320,7 @@ namespace RoomRunner
             Vector2 size = font.MeasureString(text);
             Rectangle.Width = (int)size.X;
             Rectangle.Height = (int)size.Y;
+            DrawRectangle = Rectangle;
         }
         public MenuText(SpriteFont font, Func<string> text, Vector2 TextPos) : base(TextPos)
         {
@@ -321,6 +345,7 @@ namespace RoomRunner
             Vector2 size = Font.MeasureString(text);
             Rectangle.Width = (int)size.X;
             Rectangle.Height = (int)size.Y;
+            DrawRectangle = Rectangle;
         }
     }
     public class SelectionGrid : MenuThingie
@@ -336,6 +361,8 @@ namespace RoomRunner
         private readonly Animation InstancePointer;
         private Rectangle PointerRect;
         private KeyboardState OldKb;
+        private Point OldMousePos;
+        private sbyte lastUsed; //0 == Mouse, 1 == Keyboard
         
 
         static SelectionGrid()
@@ -345,7 +372,7 @@ namespace RoomRunner
             arrow.GetData(cols);
             Color badCol = new Color(0, 255, 0, 255);
             for (int i = 0; i < cols.Length; i++)
-                if (cols[i].Equals(badCol)) cols[i] = MenuThingie.Invisible;
+                if (cols[i].Equals(badCol)) cols[i] = Invisible;
             arrow.SetData(cols);
             Animation hold = new Animation("idle");
             hold.AddAnimation("idle", arrow, Program.Game.GraphicsDevice, 5, Player.LoadSheet(4, 3, 39, 30, 1));
@@ -362,6 +389,8 @@ namespace RoomRunner
             foreach (Button[] a in g)
                 hold.AddRange(a);
             Butts = hold.ToArray();
+            lastUsed = -1;
+            OldMousePos = new Point(-1, -1);
             GenBounds();
         }
 
@@ -373,18 +402,20 @@ namespace RoomRunner
             MaxWidth = MaxHeight = 0;
             for (int r = 0, h = 0; r < Grid.Length; r++)
             {
-                int ww = 0, hh = 0, i = -1;
+                int hh = 0, i = -1;
                 for (int c = 0; c < Grid[r].Length; c++)
                 {
                     if (Grid[r][c] == default) continue;
                     i = c;
-                    Rectangle hold = Grid[r][c].Rectangle;
+                    Rectangle hold = Grid[r][c].DrawRectangle;
                     if (x == -1) x = hold.X;
                     if (y == -1) y = hold.Y;
                     if (hh < hold.Height) hh = hold.Height;
                     if (h < hold.Y) h = hold.Y;
                 }
-                ww = Grid[r][i].Rectangle.X + Grid[r][i].Rectangle.Width - x;
+                int ww = 0;
+                if (i != -1)
+                    ww = Grid[r][i].DrawRectangle.X + Grid[r][i].DrawRectangle.Width - x;
                 RowSizes[r] = new Point(ww, hh);
                 if (ww > MaxWidth) MaxWidth = ww;
                 if (r == Grid.Length - 1)
@@ -392,6 +423,7 @@ namespace RoomRunner
             }
 
             Rectangle = new Rectangle(x, y, MaxWidth, MaxHeight);
+            DrawRectangle = Rectangle;
             Position = new Vector2(Rectangle.X, Rectangle.Y);
         }
         public override void DrawAndUpdate(SpriteBatch sb)
@@ -399,16 +431,32 @@ namespace RoomRunner
             if (!Shown) return;
             base.DrawAndUpdate(sb);
 
+            if (Disabled)
+            {
+                foreach (MenuThingie[] a in Grid)
+                    foreach (MenuThingie b in a)
+                        if (b != default)
+                            b.DrawAndUpdate(sb);
+                return;
+            }
+
             Button lastTouched = default;
             foreach (Button b in Butts) if (b != null && b.MouseHovering) lastTouched = b;
             KeyboardState kb = Keyboard.GetState();
             Point change = Point.Zero, newP;
+            //ignore this part, just hijacking variables to save a bit of memory :)
+            newP = new Point(Mouse.GetState().X, Mouse.GetState().Y);
+            if (!newP.Equals(OldMousePos)) lastUsed = 0;
+            OldMousePos = newP;
+            bool ignoreMouse = lastUsed != 0;
+            //---------------------------------------------------------------------
             if (KeyPressed(Keys.Up, kb)) change.X -= 1;
             if (KeyPressed(Keys.Right, kb)) change.Y += 1;
             if (KeyPressed(Keys.Left, kb)) change.Y -= 1;
             if (KeyPressed(Keys.Down, kb)) change.X += 1;
             if (change != Point.Zero)
             {
+                lastUsed = 1;
                 newP = new Point(Selected.X + change.X, Selected.Y + change.Y);
                 if (!OutOfBounds(newP))
                     while (GetSelected(newP) == null)
@@ -420,16 +468,19 @@ namespace RoomRunner
                 if (!OutOfBounds(newP))
                     Selected = newP;
             }
-            else if (lastTouched != default) Selected = FindSelected(lastTouched);
+            else if (lastTouched != default && !ignoreMouse) Selected = FindSelected(lastTouched);
 
             foreach (MenuThingie[] a in Grid)
                 foreach (MenuThingie b in a)
                     if (b != default) 
                         b.DrawAndUpdate(sb);
-            Rectangle SelRect = Grid[Selected.X][Selected.Y].Rectangle;
-            PointerRect.X = SelRect.X + SelRect.Width;
-            PointerRect.Y = SelRect.Y + SelRect.Height;
-            sb.Draw(InstancePointer.CurrentTexture, PointerRect, Color.White);
+            if (Grid[Selected.X].Length > Selected.Y && Grid[Selected.X][Selected.Y] != null)
+            {
+                Rectangle SelRect = Grid[Selected.X][Selected.Y].DrawRectangle;
+                PointerRect.X = SelRect.X + SelRect.Width;
+                PointerRect.Y = SelRect.Y + SelRect.Height;
+                sb.Draw(InstancePointer.CurrentTexture, PointerRect, Color.White);
+            }
             InstancePointer.Update();
 
             OldKb = kb;
