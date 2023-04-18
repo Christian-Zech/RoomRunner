@@ -103,7 +103,8 @@ namespace RoomRunner
     }
     public class Button : MenuThingie
     {
-        private string text;
+        private readonly string text;
+        public string Text { get { return text; } }
         public SpriteFont Font;
         private Color col;
         public Color TextColor;
