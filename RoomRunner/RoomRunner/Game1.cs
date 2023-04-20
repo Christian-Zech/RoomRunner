@@ -718,6 +718,7 @@ namespace RoomRunner
                     if ((gameState == GameState.Menu && b.Text.Equals("Start")) || (gameState == GameState.GameOver && b.Text.Equals("Play Again")))
                     {
 
+                        cutsceneDestination = GameState.Play;
                         gameState = GameState.Cutscene;
                         Reset();
                         menuCoolDown = 2;
@@ -795,10 +796,6 @@ namespace RoomRunner
                         }
                     }
                 }
-            }
-            if (gameState == GameState.Shop)
-            {
-                shop.Update();
             }
             
 
@@ -1165,7 +1162,7 @@ namespace RoomRunner
                             //menu.draw once samuel does it
                             break;
                         case 1:
-                            shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                             break;
                         case 2:
                             musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
