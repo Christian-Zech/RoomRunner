@@ -241,6 +241,14 @@ namespace RoomRunner
                 }
             return outp;
         }
+        public void Save()
+        {
+            SaveAndLoad.Save<Player>(this, "PlayerData.txt");
+        }
+        public void Load()
+        {
+            SaveAndLoad.Load<Player>("PlayerData.txt");
+        }
     }
     public enum PlayerHats
     {

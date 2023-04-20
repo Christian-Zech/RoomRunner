@@ -138,6 +138,10 @@ namespace RoomRunner
             else
                 sb.Draw(txt, rect, Color.White);
         }
+        public void Save()
+        {
+            SaveAndLoad temp = new SaveAndLoad();
+        }
     }
     public class ProjectileClump
     {
