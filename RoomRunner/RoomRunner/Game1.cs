@@ -438,6 +438,8 @@ namespace RoomRunner
             if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
             {
                 tutorialActive = true;
+                cutsceneDestination = GameState.Menu;
+                gameState = GameState.Cutscene;
             }
             if (gameState == GameState.Cutscene)
             {
@@ -943,7 +945,11 @@ namespace RoomRunner
 
                         else
                             textboxesIndex++;
-                    
+                    cutscenes.Draw(spriteBatch, pixel);
+                    if (cutscenes.alpha < 1 && !cutscenes.phase)
+                    {
+                        cutscenes = new Cutscene();
+                    }
                 }
 
 
