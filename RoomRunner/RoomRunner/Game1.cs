@@ -40,6 +40,7 @@ namespace RoomRunner
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
         Rectangle coinHitBox;
+        Rectangle obstacleHitBox;
 
         public static Rectangle window;
         public List<Player> players;
@@ -58,7 +59,7 @@ namespace RoomRunner
         private int levelTimer;
         private int bossCooldown;
         public int currentRoomIndex;
-        public int scrollSpeed;
+        public static int scrollSpeed;
         public bool transition;
         public bool endCurrentRoom;
         public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
@@ -170,7 +171,7 @@ namespace RoomRunner
 
 
             amountOfRooms = 5;
-            scrollSpeed = 0;
+            scrollSpeed = 10;
             menuCoolDown = 0;
             bossCooldown = 0;
 
@@ -178,7 +179,7 @@ namespace RoomRunner
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
-            currentRoomIndex = 0;
+            currentRoomIndex = 10;
 
             multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
             multiplayerButtonStates = new List<bool> { true, false, false };
@@ -224,9 +225,9 @@ namespace RoomRunner
 
 
             enemyHitBox = new Rectangle(30, 10, 40, 50);
+            obstacleHitBox = new Rectangle(0, 0, 0, 0);
             playerHitBox = new Rectangle(35, 5, 60, 90);
             coinHitBox = new Rectangle(5, 5, 40, 40);
-
 
             cutscenes = new Cutscene();
             cutsceneDestination = GameState.Menu;
@@ -303,7 +304,6 @@ namespace RoomRunner
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
             players = new List<Player> {
-
                 new Player(new Vector2(700, 500))
                 {
                     Invulnerable = true,
@@ -632,7 +632,7 @@ namespace RoomRunner
                 }
 
 
-                // kills player if enemy intercepts them
+                // damages player if enemy intercepts them
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
                     if (activePowerupIndex != 1)
@@ -658,7 +658,14 @@ namespace RoomRunner
                 }
 
 
-
+               // damages player if obstacle intercepts them
+               foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                {
+                    if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
+                        .Intersects(new Rectangle(obstacle.Current.Rect.X + obstacleHitBox.X, obstacle.Current.Rect.Y + obstacleHitBox.Y, 
+                        obstacle.Current.Rect.Width + obstacleHitBox.Width, obstacle.Current.Rect.Height + obstacleHitBox.Height)))
+                            jeb.Damage();
+                }
 
                     if (bossFight)
                 {
@@ -997,7 +1004,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 999 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -1042,6 +1049,9 @@ namespace RoomRunner
                     roomList[currentRoomIndex].backgroundRectangle.X = 0;
                 }
 
+                //Console.WriteLine("LoopImage: " + loopImage + "\ntransition: " + transition + "\nendCurrentRoom: " + endCurrentRoom);
+
+                
 
                 // draws the room
 
@@ -1049,6 +1059,19 @@ namespace RoomRunner
 
                 spriteBatch.Draw(roomList[currentRoomIndex].background1, roomRectangle, Color.White);
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
+
+
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rect.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
@@ -1075,7 +1098,7 @@ namespace RoomRunner
                     y += 140;
                 }
 
-                // draws hitboxes to help debug them
+                // draws hitboxes to help debug them if debugMode is active
 
                 if (debugMode)
                 {

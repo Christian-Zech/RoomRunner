@@ -21,8 +21,8 @@ namespace RoomRunner
         public bool DeltDamage;
         public bool Persists;
         public int Lifespan;
-        private OnetimeAnimation anim;
-        public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } }
+        public OnetimeAnimation anim;
+        public bool ToRemove { get { return !InFrame || DeltDamage; } } // placeholder: public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } }
 
         private readonly static int FrameWidth, FrameHeight;
 
@@ -110,6 +110,9 @@ namespace RoomRunner
             rect.X += Velocity.X;
             rect.Y += Velocity.Y;
         }
+
+        
+
         private void IsInFrame()
         {
             if (!InFrame) return;
