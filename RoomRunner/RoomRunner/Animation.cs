@@ -131,7 +131,7 @@ namespace RoomRunner
                 if (Delete && Next != default) 
                     return Next.CurrentTexture;
                 Update();
-                if(!Idle)
+                if (!Idle)
                     FramesLeft--;
                 return base.CurrentTexture;
             }

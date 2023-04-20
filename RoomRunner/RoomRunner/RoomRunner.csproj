@@ -50,6 +50,7 @@
     <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -59,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Animation.cs" />
     <Compile Include="Boss.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="FileDialogue.cs" />
     <Compile Include="MusicScreen.cs" />
     <Compile Include="Coin.cs" />

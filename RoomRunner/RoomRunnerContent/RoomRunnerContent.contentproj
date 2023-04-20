@@ -201,6 +201,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="arrow.png">
+      <Name>arrow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="Icons\questionMark.png">
       <Name>questionMark</Name>
       <Importer>TextureImporter</Importer>

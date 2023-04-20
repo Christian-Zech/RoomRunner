@@ -36,6 +36,7 @@ namespace RoomRunner
         List<Rectangle> multiplayerButtons;
         List<bool> multiplayerButtonStates;
         Texture2D[] iconTextures;
+        private int CurrentPlayerInShop;
 
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
@@ -64,6 +65,9 @@ namespace RoomRunner
         public bool endCurrentRoom;
         public static bool bossFight { get { return currentBoss != null && !currentBoss.IsDead; } }
         public Dictionary<Levels, Boss> bosses;
+        public Dictionary<GameState, Menu> menus;
+        private PlayerHats Pondering;
+        private List<MenuThingie> Storage;
 
         public Random rand;
 
@@ -71,12 +75,10 @@ namespace RoomRunner
 
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
-        private List<ShopItem> items;
         public Rectangle[] collectableRect, cosmeticRect;
         public SpriteFont shopFont { get { return fonts[2]; } }
         public SpriteFont shopFontBold { get { return fonts[3]; } }
         public SpriteFont shopTitleFont { get { return fonts[4]; } }
-        private Shop shop;
 
         public int menuCoolDown;
 
@@ -135,6 +137,8 @@ namespace RoomRunner
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 1900;
             graphics.PreferredBackBufferHeight = 1000;
+
+            graphics.ApplyChanges();
         }
 
         /// <summary>
@@ -146,6 +150,8 @@ namespace RoomRunner
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            var form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(this.Window.Handle);
+            form.Location = new System.Drawing.Point(0, 0);
 
             //for shop
             clock = new List<Rectangle> { new Rectangle(0, 0, 32, 32), new Rectangle(32, 0, 32, 32), new Rectangle(64, 0, 32, 32), new Rectangle(96, 0, 32, 32), new Rectangle(128, 0, 32, 32), new Rectangle(0, 32, 32, 32), new Rectangle(32, 32, 32, 32), new Rectangle(64, 32, 32, 32) };
@@ -154,14 +160,13 @@ namespace RoomRunner
             magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
             
 
-            //I'm fixing you're stupid hard-coded mess, Owen - Samuel
-            items = new List<ShopItem>();
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
             bosses = new Dictionary<Levels, Boss>();
             CreateBosses();
 
+            
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
@@ -184,6 +189,8 @@ namespace RoomRunner
             multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
             multiplayerButtonStates = new List<bool> { true, false, false };
             iconTextures = new Texture2D[2];
+            CurrentPlayerInShop = 0;
+            Storage = new List<MenuThingie>();
 
             transition = false;
             endCurrentRoom = false;
@@ -252,6 +259,279 @@ namespace RoomRunner
 
         }
 
+        private void GenMens()
+        {
+            
+            List<MenuThingie> butts = new List<MenuThingie>
+            {
+                new Button(startButtonRectangle, new Color(0,255,0,255), menuFont, "Start")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                },
+                new Button(shopButtonRectangle, Color.Green, menuFont, "Enter Shop")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                },
+                new Button(MusicButtonRectangle, new Color(0,64,0,255), menuFont, "Settings")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
+                }
+            };
+            foreach (Rectangle r in multiplayerButtons)
+                butts.Add(new Button(r, iconTextures[0]));
+            (butts[3] as Button).Texture = iconTextures[1];
+
+            MenuThingie hold = new SelectionGrid(new Button[][]
+            {
+                new Button[] {butts[3] as Button, butts[0] as Button},
+                new Button[] {butts[4] as Button, butts[1] as Button},
+                new Button[] {butts[5] as Button, butts[2] as Button}
+            });
+            butts.Clear();
+            butts.Add(hold);
+
+            menus[GameState.Menu] = new Menu(butts.ToArray());
+            butts.Clear();
+
+            Animation[] anims = GenShopButts();
+            const int size = 75;
+            string[] names = new string[] { "Time Control", "Can't Die", "Instakill", "Magnet", "Ski Mask", "Construction", "Hair", "Headphones", "Santa Hat", "Headband", "Fire", "Army Hat", "Red Headband", "Blue Headband" };
+            for (int i = 0, j = 0, c = 0; c < 12; c++, i++)
+            {
+                if (i >= 4) { i = 0; j++; }
+                butts.Add(new Button(new Rectangle(window.Width * (i + 5) / 16 + size * i, window.Height * (j * 3 + 5) / 18, size, size), anims[c], shopFont, names[c])
+                {
+                    HitboxInset = 20
+                });
+            }
+            butts.Add(new Button(new Rectangle(window.Width * 6 / 16 + size, window.Height * 14 / 18, size, size), anims[12], shopFont, names[12])
+            {
+                HitboxInset = 20
+            });
+            butts.Add(new Button(new Rectangle(window.Width * 7 / 16 + size * 2, window.Height * 14 / 18, size, size), anims[13], shopFont, names[13])
+            {
+                HitboxInset = 20
+            });
+            foreach (MenuThingie a in butts)
+            {
+                Button b = a as Button;
+                b.TextPosition = new Vector2(b.TextPosition.X, b.TextPosition.Y + b.Rectangle.Height);
+            }
+            hold = new SelectionGrid(new Button[][]
+            {
+                new Button[] { butts[0] as Button, butts[1] as Button, butts[2] as Button, butts[3] as Button },
+                new Button[] { butts[4] as Button, butts[5] as Button, butts[6] as Button, butts[7] as Button },
+                new Button[] { butts[8] as Button, butts[9] as Button, butts[10] as Button, butts[11] as Button },
+                new Button[] {null, butts[12] as Button, butts[13] as Button, null }
+            })
+            {
+                BGColor = new Color(192, 192, 192, 255),
+                BorderWidth = 6,
+                HitboxInset = 75
+            };
+            butts.Clear();
+            butts.Add(hold);
+            butts.Add(new Box(new Rectangle(window.Width * 13 / 16, window.Height * 2 / 18, size, size), anims[14], shopFont, () => "Coins: " + players[CurrentPlayerInShop].Coins));
+            butts.Add(new Box(new Rectangle(window.Width * 5 / 32, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
+            butts.Add(new MenuText(shopTitleFont, "SHOP", new Vector2(window.Width / 2.43f, window.Height / 25)));
+            
+            foreach (MenuThingie a in butts)
+            {
+                if (a is Button)
+                {
+                    Button b = a as Button;
+                    b.TextPosition = new Vector2(b.TextPosition.X, b.TextPosition.Y + b.Rectangle.Height);
+                    continue;
+                }
+                if (a is Box)
+                {
+                    Box b = a as Box;
+                    b.TextPosition = new Vector2(b.TextPosition.X, b.TextPosition.Y + b.Rectangle.Height);
+                    continue;
+                }
+            }
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, size * 2), Color.Green, shopFont, "Go Back")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+
+            menus[GameState.Shop] = new Menu(butts.ToArray());
+            butts.Clear();
+
+            butts.AddRange(new MenuThingie[]
+            {
+                new SelectionGrid(new Button[][] { new Button[] {
+                        new Button(startButtonRectangle, Color.Green, menuFont, "Play Again")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White
+                        }
+                }, new Button[] {
+                        new Button(menuButtonRectangle, Color.Green, menuFont, "Menu")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White
+                        }
+                    }
+                }),
+                new MenuText(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19))
+                {
+                    TextColor = Color.White
+                }
+            });
+
+            menus[GameState.GameOver] = new Menu(butts.ToArray());
+            butts.Clear();
+        }
+        private Animation[] GenShopButts()
+        {
+            List<Animation> outp = new List<Animation>();
+            Texture2D sheet = collectableSheet;
+            Rectangle[] rects = Player.LoadSheet(5, 6, 32, 32, 1);
+            Animation hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Take(8).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(8).Take(5).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(13).Take(8).ToArray());
+            outp.Add(hold);
+            hold = new Animation("idle");
+            hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects.Skip(21).Take(4).ToArray());
+            outp.Add(hold);
+
+            sheet = cosmeticSheet;
+            rects = Player.LoadSheet(5, 5, 32, 32, 1);
+            for (int i = 0; i < 24; i+=2)
+            {
+                hold = new Animation("idle");
+                if (i == 12) { hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects[12], rects[14], rects[16]); i += 4; }
+                else hold.AddAnimation("idle", sheet, GraphicsDevice, 60, rects[i]);
+                outp.Add(hold);
+            }
+            hold = new Animation("idle");
+            rects = Player.LoadSheet(5, 6, 32, 32, 1);
+            hold.AddAnimation("idle", collectableSheet, GraphicsDevice, 10, rects[25], rects[26], rects[27], rects[28], rects[27], rects[26]);
+            outp.Add(hold);
+            hold = new Animation("idle");
+            rects = Player.LoadSheet(4, 3, 32, 32);
+            hold.AddAnimation("idle", jebSheet, GraphicsDevice, 60, rects[10]);
+            outp.Add(hold);
+            
+
+            return outp.ToArray();
+        }
+        private void UpdateShop()
+        {
+            //shopMenu length = 5
+            if (menuCoolDown > 0) return;
+            const int Price = 50;
+            if (menus[GameState.Shop].LinkedMenu != default)
+            {
+                UpdatePopup(Price);
+                return;
+            }
+            
+            MenuThingie[] shopMenu = menus[GameState.Shop].thingies.ToArray();
+            Player current = players[CurrentPlayerInShop];
+            KeyboardState kb = Keyboard.GetState();
+            Button b = (shopMenu[0] as SelectionGrid).Current;
+            Point p = (shopMenu[0] as SelectionGrid).Selected;
+            int c = p.X * 4 + p.Y - 4;
+
+            if (b.BGColor.Equals(Color.Green))
+            {
+                if (b.MouseClickedOnce || KeyPressed(kb, Keys.Space, Keys.Enter))
+                {
+                    if (c <= 6)
+                        current.currentHat = (PlayerHats)c + 1;
+                    else if (c == 7)
+                        current.currentHat = (PlayerHats)c + 3;
+                    else
+                        current.currentHat = (PlayerHats)c + 2;
+                    (shopMenu[2] as Box).Animation = b.Animation;
+                }
+            }
+            else if ((b.MouseClickedOnce || KeyPressed(kb, Keys.Space, Keys.Enter)) && current.Coins >= Price)
+            {
+                if (c >= 0)
+                {
+                    PlayerHats buying;
+                    if (c <= 6)
+                        buying = (PlayerHats)c + 1;
+                    else if (c == 7)
+                        buying = (PlayerHats)c + 3;
+                    else
+                        buying = (PlayerHats)c + 2;
+                    Storage.AddRange(new MenuThingie[] { b, shopMenu[2] });
+                    AddShopPopup(buying, menus[gameState], Price);
+                } 
+                else 
+                    current.Coins -= Price;
+            }
+            if ((shopMenu[4] as Button).MouseClickedOnce) { gameState = GameState.Menu; menuCoolDown = 2; }
+        }
+        private void AddShopPopup(PlayerHats buying, Menu current, int Price)
+        {
+            menuCoolDown = 2;
+            Pondering = buying;
+            List<MenuThingie> elements = new List<MenuThingie>
+            {
+                new Box(new Rectangle(window.Width / 2 - window.Width * 7 / 38, window.Height / 2 - window.Height * 2 / 19, window.Width / 3, window.Height / 3))
+                {
+                    BGColor = new Color(255,253,219,255),
+                    BorderWidth = 6
+                },
+                new MenuText(shopFont, "Buy "+buying+"?", new Vector2(window.Width / 2 - window.Width * 15 / 38 + window.Width / 3, window.Height / 2 - window.Height * 3 / 38)),
+                new MenuText(shopFont, "Price: "+Price+" Coins", new Vector2(window.Width / 2 - window.Width * 15 / 38 + window.Width / 3, window.Height / 2 - window.Height / 38)),
+                new SelectionGrid(
+                    new Button[][] {
+                        new Button[] {
+                            new Button(new Rectangle(window.Width / 2 - window.Width * 6 / 38, window.Height / 2 + window.Height / 19, (int)Math.Round(window.Width / 9.5), window.Height / 9), Color.Red, shopFontBold, "No")
+                            {
+                                BorderWidth = 6
+                            },
+                            new Button(new Rectangle(window.Width / 2 - window.Width * 12 / 38 + window.Width / 3, window.Height / 2 + window.Height / 19, (int)Math.Round(window.Width / 9.5), window.Height / 9), Color.Green, shopFontBold, "Yes")
+                            {
+                                BorderWidth = 6
+                            }
+                            
+                        }
+                    }
+                )
+            };
+            Menu popup = new Menu(elements.ToArray());
+
+            current.LinkedMenu = popup;
+        }
+        private void UpdatePopup(int Price)
+        {
+            if (menuCoolDown > 0) return;
+            Button b = (menus[gameState].LinkedMenu.thingies[3] as SelectionGrid).Current;
+            KeyboardState kb = Keyboard.GetState();
+            if (b.MouseClickedOnce || KeyPressed(kb, Keys.Enter, Keys.Space))
+            {
+                if (b.DrawColor.Equals(Color.Green))
+                {
+                    players[CurrentPlayerInShop].ownedHats.Add((int)Pondering);
+                    players[CurrentPlayerInShop].currentHat = Pondering;
+                    players[CurrentPlayerInShop].Coins -= Price;
+                    Storage[0].BGColor = Color.Green;
+                    (Storage[1] as Box).Animation = (Storage[0] as Button).Animation;
+                }
+                menus[gameState].LinkedMenu = default;
+                Pondering = default;
+                menuCoolDown = 2;
+                Storage.Clear();
+            }
+        }
+
+
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
@@ -281,32 +561,17 @@ namespace RoomRunner
             collectableSheet = this.Content.Load<Texture2D>("Shop/collectables");
             cosmeticSheet = this.Content.Load<Texture2D>("Shop/cosmetics");
 
-            //for shop, textures have to be loaded first before they can be sent as parameters
-            int[] collectNums = new int[] { 8, 5, 8, 4 };
-            string[] itemNames = new string[] { "Time Control", "Can't Die", "Instakill", "Magnet", "Ski Mask", "Construction", "Hair", "Headphones", "Santa Hat", "Headband", "Army Hat", "Red Headband", "Blue Headband" };
-            for (int i = 0, c = 0; i < collectNums.Length; c += collectNums[i], i++)
-                items.Add(new ShopItem(50, itemNames[i], collectableRect.Skip(c).Take(collectNums[i]).ToList(), collectableSheet));
-            for (int i = collectNums.Length, c = 0; i < itemNames.Length; i++, c += 2)
-            {
-                if (c == 12) //fire has multiple frames, so had to add a specific case for it
-                {
-                    items.Add(new ShopItem(50, "Fire", new List<Rectangle> { cosmeticRect[12], cosmeticRect[14], cosmeticRect[16] }, cosmeticSheet));
-                    c += 6;
-                }
-                items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
-            }
-            items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
             iconTextures[0] = Content.Load<Texture2D>("Icons/personIcon");
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
                 {
-                    Invulnerable = true,
+                    Invulnerable = false,
                     Up = new List<Keys> { Keys.W },
                     Down = new List<Keys> { Keys.S },
                     Left = new List<Keys> { Keys.A },
@@ -314,7 +579,8 @@ namespace RoomRunner
                 }
             };
 
-            shop = new Shop(items, players[0], jebSheet, idleAnimationRectangles[0]); //Needs changing for multiplayer
+            menus = new Dictionary<GameState, Menu>();
+            GenMens();
 
             loadGameSongs(0);
             loadSoundEffects();
@@ -378,6 +644,27 @@ namespace RoomRunner
             soundEffects.Add(Content.Load<SoundEffect>("Sounds/powerUp (1)"));
 
         }
+        private void GeneratePlayers(int amount)
+        {
+            if (amount <= 1) return;
+            players.Add(new Player(new Vector2(900, 500))
+            {
+                Invulnerable = false,
+                Up = new List<Keys> { Keys.Up },
+                Down = new List<Keys> { Keys.Down },
+                Left = new List<Keys> { Keys.Left },
+                Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+            });
+            if (amount == 2) return;
+            players.Add(new Player(new Vector2(500, 500))
+            {
+                Invulnerable = false,
+                Up = new List<Keys> { Keys.I },
+                Down = new List<Keys> { Keys.K },
+                Left = new List<Keys> { Keys.J },
+                Shoot = new List<Keys> { Keys.L }
+            });
+        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -401,39 +688,60 @@ namespace RoomRunner
             MouseState mouse = Mouse.GetState();
 
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboard.IsKeyDown(Keys.Escape))
-                this.Exit();
-
-
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || KeyPressed(keyboard, Keys.Escape))
+            {
+                if (menuCoolDown == 0)
+                    switch (gameState)
+                    {
+                        case GameState.Shop:
+                            gameState = GameState.Menu;
+                            menuCoolDown = 2;
+                            break;
+                        case GameState.Music:
+                            gameState = GameState.Menu;
+                            menuCoolDown = 2;
+                            break;
+                        default:
+                            this.Exit();
+                            break;
+                    }
+            }
+            Menu currentMenu = getCurrentMenu();
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
+            if (menuCoolDown == 0 && currentMenu != default)
             {
-                cutsceneDestination = GameState.Play;
-                gameState = GameState.Cutscene;
-                
-                Reset();
-                menuCoolDown = 60;
-            }
+                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
+                if ((b.MouseClickedOnce || KeyPressed(keyboard, Keys.Space, Keys.Enter)) && b.Text != default)
+                {
+                    if ((gameState == GameState.Menu && b.Text.Equals("Start")) || (gameState == GameState.GameOver && b.Text.Equals("Play Again")))
+                    {
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
-            {
-                gameState = GameState.Music;
-            }
+                        gameState = GameState.Cutscene;
+                        Reset();
+                        menuCoolDown = 2;
+                        GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count);
+                    }
+
+                    if ((gameState == GameState.Menu || gameState == GameState.GameOver) && b.Text.Equals("Settings"))
+                    {
+                        gameState = GameState.Music;
+                    }
+
+                    if (gameState == GameState.GameOver && b.Text.Equals("Menu"))
+                    {
+                        gameState = GameState.Menu;
+                        menuCoolDown = 2;
+                    }
 
 
-            if (gameState == GameState.GameOver && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, menuButtonRectangle) && menuCoolDown == 0)
-            {
-                gameState = GameState.Menu;
-                menuCoolDown = 60;
-            }
-                
-
-            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
-            {
-                gameState = GameState.Shop;
-                menuCoolDown = 60;
+                    if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
+                    {
+                        gameState = GameState.Shop;
+                        menuCoolDown = 2;
+                    }
+                }
             }
             if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
             {
@@ -453,91 +761,39 @@ namespace RoomRunner
             if (menuCoolDown > 0)
                 menuCoolDown--;
 
-            if (gameState == GameState.Menu)
+            if (gameState == GameState.Menu && menuCoolDown == 0)
             {
                 if (musicScreen.customMusic)
                     LoadCustomSongs();
 
-                gameSongListInstance[3].Volume = (float)musicVolume/5;
+                gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
-                Rectangle mouseRect = new Rectangle(mouse.X, mouse.Y, 1, 1);
-                for (int i = 0; i < multiplayerButtons.Count; i++)
+                if (currentMenu != default)
                 {
-                    if (mouseRect.Intersects(multiplayerButtons[i]) && mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                    SelectionGrid grid = currentMenu.thingies[0] as SelectionGrid;
+                    Button b = grid.Current;
+                    if (b.MouseClickedOnce || KeyPressed(keyboard, Keys.Enter, Keys.Space))
                     {
-                        if (i == 2)
+                        int i = grid.Butts.ToList().IndexOf(grid.Current);
+                        if (i % 2 == 0)
                         {
-                            if (!multiplayerButtonStates[i])
-                            {
-                                for (int j = 1; j < 3; j++)
-                                {
-                                    if (!multiplayerButtonStates[j])
-                                    {
-                                        multiplayerButtonStates[j] = true;
-                                        players.Add(
-                                        new Player(new Vector2(700 + j * 200, 500))
-                                        {
-                                            Invulnerable = false,
-                                            Up = new List<Keys> { Keys.Up },
-                                            Down = new List<Keys> { Keys.Down },
-                                            Left = new List<Keys> { Keys.Left },
-                                            Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                                        });
-                                    }
-                                    
-                                }
-                            }
-                            
-                            
+                            i /= 2;
+                            bool toSet = !multiplayerButtonStates[i];
+                            if (toSet)
+                                for (int j = i; j >= 0; j--)
+                                    multiplayerButtonStates[j] = true;
+                            else
+                                for (int j = 2; j >= i; j--)
+                                    multiplayerButtonStates[j] = false;
+                            for (int ii = 0; ii < 3; ii++)
+                                if (multiplayerButtonStates[ii])
+                                    grid.Butts[ii * 2].Texture = iconTextures[1];
+                                else
+                                    grid.Butts[ii * 2].Texture = iconTextures[0];
                         }
-                        else if (i == 1)
-                        {
-                            if (!multiplayerButtonStates[i])
-                            {
-                                multiplayerButtonStates[i] = true;
-                                players.Add(
-                                    new Player(new Vector2(700 + i * 200, 500))
-                                    {
-                                        Invulnerable = false,
-                                        Up = new List<Keys> { Keys.Up },
-                                        Down = new List<Keys> { Keys.Down },
-                                        Left = new List<Keys> { Keys.Left },
-                                        Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
-                                    });
-                            }
-                            
-                            if (multiplayerButtonStates[i + 1])
-                            {
-                                multiplayerButtonStates[i+1] = false;
-                                players.RemoveAt(i + 1);
-                                Player.players--;
-                            }
-                            
-                            
-                            
-                        }
-                        else
-                        {
-                            if (multiplayerButtonStates[i + 2])
-                            {
-                                multiplayerButtonStates[i + 2] = false;
-                                players.RemoveAt(i + 2);
-                                Player.players--;
-                            }
-                            if (multiplayerButtonStates[i + 1])
-                            {
-                                multiplayerButtonStates[i + 1] = false;
-                                players.RemoveAt(i + 1);
-                                Player.players--;
-                            }
-                        }
-                        
-                        
-
                     }
-                        
                 }
             }
             if (gameState == GameState.Shop)
@@ -782,7 +1038,10 @@ namespace RoomRunner
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
             }
+            if (gameState == GameState.Shop)
+                UpdateShop();
             oldMouse = mouse;
+            oldKB = Keyboard.GetState();
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -846,8 +1105,8 @@ namespace RoomRunner
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-            
 
+            
 
             
 
@@ -869,7 +1128,6 @@ namespace RoomRunner
                         spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
 
                     spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
-
 
                     // menu buttons
 
@@ -964,7 +1222,6 @@ namespace RoomRunner
                     }
                 }
 
-
             }
             if (gameState == GameState.Cutscene)
             {
@@ -982,7 +1239,7 @@ namespace RoomRunner
             // shop
             if (gameState == GameState.Shop)
             {
-                shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
@@ -1137,26 +1394,29 @@ namespace RoomRunner
             // game over screen and meny
             if(gameState == GameState.GameOver)
             {
-                spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - 200, 200), Color.White);
+                //spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19), Color.White);
 
-                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Play Again", new Vector2(startButtonRectangle.X + 50, startButtonRectangle.Y + 20), Color.White);
+                //spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                //spriteBatch.DrawString(buttonFont, "Play Again", new Vector2(startButtonRectangle.X + 50, startButtonRectangle.Y + 20), Color.White);
 
-                spriteBatch.Draw(pixel, menuButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
+                //spriteBatch.Draw(pixel, menuButtonRectangle, Color.Green);
+                //spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
 
             }
-            
 
-
-
-            
+            Menu val = getCurrentMenu();
+            if (val != null)
+                val.DrawAndUpdate(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        
+        private Menu getCurrentMenu()
+        {
+            menus.TryGetValue(gameState, out Menu val);
+            return val;
+        }
 
         private void SummonBoss()
         {
@@ -1239,7 +1499,12 @@ namespace RoomRunner
             }
             return new Color((int)r / pixels.Length, (int)g / pixels.Length, (int)b / pixels.Length);
         }
-
+        public static bool KeyPressed(Keys k, KeyboardState kb) { return kb.IsKeyDown(k) && !Program.Game.oldKB.IsKeyDown(k); }
+        public static bool KeyPressed(KeyboardState kb, params Keys[] k)
+        {
+            foreach (Keys kk in k) if (KeyPressed(kk, kb)) return true;
+            return false;
+        }
 
 
     }
