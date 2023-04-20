@@ -33,6 +33,9 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
+        List<Rectangle> multiplayerButtons;
+        List<bool> multiplayerButtonStates;
+        Texture2D[] iconTextures;
 
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
@@ -40,7 +43,7 @@ namespace RoomRunner
         Rectangle obstacleHitBox;
 
         public static Rectangle window;
-        public Player jeb;
+        public List<Player> players;
         public static Boss currentBoss;
         public SpriteFont[] fonts;
 
@@ -50,7 +53,6 @@ namespace RoomRunner
         public static Powerups powerups;
         public int activePowerupIndex;
         int slowTimeTemp;
-
 
 
         private int gameTimer;
@@ -79,6 +81,7 @@ namespace RoomRunner
         public int menuCoolDown;
 
         KeyboardState oldKB;
+        MouseState oldMouse;
 
         //for music and sounds
         FileDialogue files;
@@ -87,14 +90,24 @@ namespace RoomRunner
         int customSongIndex;
         List<SoundEffect> gameSongList;
         List<SoundEffectInstance> gameSongListInstance;
-        double musicVolume;
+        public static double musicVolume;
         public static double soundVolume;
         int songTimeElapsed;
         int gameSongListIndex;
-        int fileOpenCount = 0;
         bool debugMode = false;
-        
         public static List<SoundEffect> soundEffects;
+
+        //for cutsenes
+        Cutscene cutscenes;
+        GameState cutsceneDestination;
+
+        //tutorial stuff
+        Texture2D questionMark;
+        Rectangle tutorialRect;
+        public bool tutorialActive;
+        public int textboxesIndex;
+        public List<Textbox> textboxes;
+        public Textbox textbox;
 
         public enum GameState
         {
@@ -102,7 +115,8 @@ namespace RoomRunner
             Shop,
             Play,
             Music,
-            GameOver
+            GameOver,
+            Cutscene
         }
         
         public enum Levels
@@ -167,6 +181,10 @@ namespace RoomRunner
             levelTimer = 0;
             currentRoomIndex = 10;
 
+            multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
+            multiplayerButtonStates = new List<bool> { true, false, false };
+            iconTextures = new Texture2D[2];
+
             transition = false;
             endCurrentRoom = false;
 
@@ -207,23 +225,43 @@ namespace RoomRunner
 
 
             enemyHitBox = new Rectangle(30, 10, 40, 50);
-            playerHitBox = new Rectangle(25, 0, 80, 110);
-            coinHitBox = new Rectangle(-20, -15, 35, 35);
             obstacleHitBox = new Rectangle(0, 0, 0, 0);
+            playerHitBox = new Rectangle(35, 5, 60, 90);
+            coinHitBox = new Rectangle(5, 5, 40, 40);
 
+            cutscenes = new Cutscene();
+            cutsceneDestination = GameState.Menu;
+            oldMouse = Mouse.GetState();
+
+            tutorialActive = false;
+            tutorialRect = new Rectangle(window.Width/2, 280, 60, 60);
+            textboxes = new List<Textbox>
+            {
+                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
+                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
+                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(musicScreen.sliderHandleMusic.X, musicScreen.sliderHandleMusic.Y)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X+musicScreen.customMusicButton.Width/2, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
+                new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
+                new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
+                new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
+            };
+            textboxesIndex = 0 ;
             base.Initialize();
-            
 
+                                                                                                                                                                                    
 
         }
 
         private void CreateBosses()
         {
-            Texture2D sheet = loadImage("Enemies/Enemies", Content);
-            List<Boss> bos = new List<Boss>();
-
-            bos.Add(new Boss(Bosses.Bat, 200, sheet, GraphicsDevice));
-            bos.Add(new Boss(Bosses.Demon, 300, sheet, GraphicsDevice));
+            Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
+            List<Boss> bos = new List<Boss>
+            {
+                new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
+                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
+                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
+                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
+            };
 
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
@@ -258,15 +296,25 @@ namespace RoomRunner
                 items.Add(new ShopItem(50, itemNames[i], new List<Rectangle> { cosmeticRect[c] }, cosmeticSheet));
             }
             items.Add(new ShopItem(50, "Coin", new List<Rectangle> { collectableRect[25], collectableRect[26], collectableRect[27], collectableRect[28] }, collectableSheet));
-            
+
 
             jebSheet = this.Content.Load<Texture2D>("jeb");
-            
+            iconTextures[0] = Content.Load<Texture2D>("Icons/personIcon");
+            iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
+            questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            players = new List<Player> {
+                new Player(new Vector2(700, 500))
+                {
+                    Invulnerable = true,
+                    Up = new List<Keys> { Keys.W },
+                    Down = new List<Keys> { Keys.S },
+                    Left = new List<Keys> { Keys.A },
+                    Shoot = new List<Keys> { Keys.D }
+                }
+            };
 
-            jeb = new Player(new Vector2(900, 500), this);
-            jeb.Invulnerable = false;
-            shop = new Shop(items, jeb, jebSheet, idleAnimationRectangles[0]);
+            shop = new Shop(items, players[0], jebSheet, idleAnimationRectangles[0]); //Needs changing for multiplayer
 
             loadGameSongs(0);
             loadSoundEffects();
@@ -360,14 +408,16 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, startButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
-                gameState = GameState.Play;
+                cutsceneDestination = GameState.Play;
+                gameState = GameState.Cutscene;
+                
                 Reset();
                 menuCoolDown = 60;
             }
 
-            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0)
+            if ((gameState == GameState.Menu || gameState == GameState.GameOver) && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, MusicButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
                 gameState = GameState.Music;
             }
@@ -380,10 +430,23 @@ namespace RoomRunner
             }
                 
 
-            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0)
+            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, shopButtonRectangle) && menuCoolDown == 0 && !tutorialActive)
             {
                 gameState = GameState.Shop;
                 menuCoolDown = 60;
+            }
+            if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
+            {
+                tutorialActive = true;
+                cutsceneDestination = GameState.Menu;
+                gameState = GameState.Cutscene;
+            }
+            if (gameState == GameState.Cutscene)
+            {
+                if (cutscenes.phase == false)
+                {
+                    gameState = cutsceneDestination;
+                }
             }
 
 
@@ -398,8 +461,89 @@ namespace RoomRunner
                 gameSongListInstance[3].Volume = (float)musicVolume/5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
+
+                Rectangle mouseRect = new Rectangle(mouse.X, mouse.Y, 1, 1);
+                for (int i = 0; i < multiplayerButtons.Count; i++)
+                {
+                    if (mouseRect.Intersects(multiplayerButtons[i]) && mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                    {
+                        if (i == 2)
+                        {
+                            if (!multiplayerButtonStates[i])
+                            {
+                                for (int j = 1; j < 3; j++)
+                                {
+                                    if (!multiplayerButtonStates[j])
+                                    {
+                                        multiplayerButtonStates[j] = true;
+                                        players.Add(
+                                        new Player(new Vector2(700 + j * 200, 500))
+                                        {
+                                            Invulnerable = false,
+                                            Up = new List<Keys> { Keys.Up },
+                                            Down = new List<Keys> { Keys.Down },
+                                            Left = new List<Keys> { Keys.Left },
+                                            Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                        });
+                                    }
+                                    
+                                }
+                            }
+                            
+                            
+                        }
+                        else if (i == 1)
+                        {
+                            if (!multiplayerButtonStates[i])
+                            {
+                                multiplayerButtonStates[i] = true;
+                                players.Add(
+                                    new Player(new Vector2(700 + i * 200, 500))
+                                    {
+                                        Invulnerable = false,
+                                        Up = new List<Keys> { Keys.Up },
+                                        Down = new List<Keys> { Keys.Down },
+                                        Left = new List<Keys> { Keys.Left },
+                                        Shoot = new List<Keys> { Keys.Right, Keys.NumPad0 }
+                                    });
+                            }
+                            
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i+1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
+                            
+                            
+                            
+                        }
+                        else
+                        {
+                            if (multiplayerButtonStates[i + 2])
+                            {
+                                multiplayerButtonStates[i + 2] = false;
+                                players.RemoveAt(i + 2);
+                                Player.players--;
+                            }
+                            if (multiplayerButtonStates[i + 1])
+                            {
+                                multiplayerButtonStates[i + 1] = false;
+                                players.RemoveAt(i + 1);
+                                Player.players--;
+                            }
+                        }
+                        
+                        
+
+                    }
+                        
+                }
             }
-                
+            if (gameState == GameState.Shop)
+            {
+                shop.Update();
+            }
             
 
             if (gameState == GameState.Play)
@@ -409,22 +553,27 @@ namespace RoomRunner
                 soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
-                    if (songTimeElapsed == 0 && customSongIndex == 0)
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
-                    if (songTimeElapsed/60 > customSongList[customSongIndex].Duration.TotalSeconds)
+                    if (customSongList.Count != 0)
                     {
-                        customSongIndex++;
-                        if (customSongIndex >= customSongList.Count)
+                        if (songTimeElapsed == 0 && customSongIndex == 0)
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
+                        if (songTimeElapsed / 60 > customSongList[customSongIndex].Duration.TotalSeconds)
                         {
-                            customSongIndex = 0;
+                            customSongIndex++;
+                            if (customSongIndex >= customSongList.Count)
+                            {
+                                customSongIndex = 0;
+                            }
+                            songTimeElapsed = 0;
+                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
                         }
-                        songTimeElapsed = 0;
-                        customSongList[customSongIndex].Play(volume: (float)musicVolume/2, pitch: 0.0f, pan: 0.0f);
+                        else
+                        {
+                            songTimeElapsed++;
+                        }
+
                     }
-                    else
-                    {
-                        songTimeElapsed++;
-                    }
+                    
                 }
                 else //regular game music
                 {
@@ -454,6 +603,12 @@ namespace RoomRunner
                         return;
 
                 }
+                for (int i = 0; i < players.Count; i++)
+                {
+                    if (players[i].IsAlive)
+                        players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
+                }
+                    
 
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
@@ -480,10 +635,11 @@ namespace RoomRunner
                 // damages player if enemy intercepts them
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                 {
-                    if (activePowerupIndex != 1 && enemy != null && 
-                        new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
-                        .Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
-                            jeb.Damage();
+                    if (activePowerupIndex != 1)
+                        if (enemy != null)
+                            foreach (Player p in players)
+                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
+                                p.Damage();
                 }
 
                 // player coin collection
@@ -491,10 +647,11 @@ namespace RoomRunner
                 {
                     foreach(Coin coin in coinGrid)
                     {
-                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
+                        foreach (Player p in players)
+                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
                         {
                             coin.Destroy();
-                            jeb.Coins++;
+                            p.Coins++;
                             soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
@@ -517,16 +674,23 @@ namespace RoomRunner
                 }
 
                 foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
-                    if (activePowerupIndex != 1 && enemy != null && jeb.PlayerRectangle.Intersects(enemy.rectangle))
-                        jeb.Damage();
+                    foreach (Player p in players)
+                        if (activePowerupIndex != 1 && enemy != null && p.PlayerRectangle.Intersects(enemy.rectangle))
+                            p.Damage();
 
 
-                Jeb:
+                        Jeb:
 
-                jeb.Idle = gameState != GameState.Play;
-                jeb.Update();
+                bool weLiving = false;
+                foreach (Player p in players)
+                {
+                    p.Idle = gameState != GameState.Play;
+                    p.Update();
 
-                if (!jeb.IsAlive)
+                    if (p.IsAlive)
+                        weLiving = true;
+                }
+                if (!weLiving)
                     gameState = GameState.GameOver;
 
                 UpdateProjList(projectileList);
@@ -590,6 +754,11 @@ namespace RoomRunner
             gameTimer++;
             if (gameState == GameState.GameOver)
             {
+                for (int i = 0; i < players.Count; i++)
+                {
+                    players[i].distanceTraveled = 0;
+                }
+
                 if (musicScreen.customMusic)
                 {
                     LoadCustomSongs();
@@ -608,7 +777,7 @@ namespace RoomRunner
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
             }
-
+            oldMouse = mouse;
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -627,17 +796,20 @@ namespace RoomRunner
         {
             p.Update();
 
-            if (p.DamagesBoss && bossFight && p.Rect.Intersects(currentBoss.Rectangle))
+            if (p.DamagesBoss && bossFight && p.Rectangle.Intersects(currentBoss.Rectangle))
             {
                 currentBoss.Damage(p.BossDamage);
                 p.DeltDamage = true;
             }
-            if (p.DamagesPlayer && p.Rect.Intersects(jeb.PlayerRectangle))
-            {
-                jeb.Damage();
-                p.DeltDamage = true;
-            }
+            foreach (Player pp in players)
+                if (p.DamagesPlayer && p.Rectangle.Intersects(pp.PlayerRectangle))
+                {
+                    pp.Damage();
+                    p.DeltDamage = true;
+                }
         }
+
+        
 
         private void Reset()
         {
@@ -645,17 +817,20 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoomIndex = 0;
-            scrollSpeed = 10;
-            jeb.Health = Player.MaxHealth;
-            jeb.IsAlive = true;
+            scrollSpeed = 0;
+            foreach (Player p in players)
+            {
+                p.Health = Player.MaxHealth;
+                p.IsAlive = true;
+                p.Position.Y = Player.floorHeight + p.PlayerRectangle.Height;
+                p.delayLeft = Player.InputDelay;
+            }
 
             transition = false;
             endCurrentRoom = false;
 
             projectileList.Clear();
             currentBoss = null;
-            jeb.Position.Y = Player.floorHeight + jeb.PlayerRectangle.Height;
-            jeb.delayLeft = Player.InputDelay;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
         }
@@ -674,49 +849,150 @@ namespace RoomRunner
             // menu
             if(gameState == GameState.Menu)
             {
-                int halfSeconds = gameTimer / 30;
-                Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
-                
-                Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
+                if (!tutorialActive)
+                {
+                    int halfSeconds = gameTimer / 30;
+                    Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
+
+                    Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
 
 
-                // Title screen animation
-                if (halfSeconds % 2 == 0)
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
+                    // Title screen animation
+                    if (halfSeconds % 2 == 0)
+                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
+                    else
+                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+
+                    spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
+
+
+                    // menu buttons
+
+                    spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
+
+
+                    spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
+
+                    spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
+                    spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X + 20, MusicButtonRectangle.Y + 20), Color.White);
+
+                    spriteBatch.Draw(questionMark, tutorialRect, Color.White);
+
+                    for (int i = 0; i < multiplayerButtons.Count; i++)
+                    {
+                        if (multiplayerButtonStates[i])
+                            spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
+                        else
+                            spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
+                    }
+
+                    cutscenes.Draw(spriteBatch, pixel);
+                    if (cutscenes.alpha < 1 && !cutscenes.phase)
+                    {
+                        cutscenes = new Cutscene();
+                    }
+                }
                 else
-                    spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
+                {
+                    switch (textboxesIndex)
+                    {
+                        case 0:
+                            //menu.draw once samuel does it
+                            break;
+                        case 1:
+                            shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            break;
+                        case 2:
+                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            break;
+                        case 3:
+                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            break;
+                        
+                        default:
+                            if (!transition)
+                                levelTimer++;
+                            Rectangle roomRectangle = roomList[currentRoomIndex].backgroundRectangle;
 
-                spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
+                            spriteBatch.Draw(roomList[currentRoomIndex].background1, roomRectangle, Color.White);
+                            spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
-                // menu buttons
+                            powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
+
+                            //score and coins
+                            int y = 70;
+                            for (int i = 0; i < players.Count; i++)
+                            {
+                                spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
+                                spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
+                                spriteBatch.DrawString(fonts[3], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                                //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
+                                y += 140;
+                            }
+                            break;
+                    }
+
+                    textboxes[textboxesIndex].Draw(spriteBatch, pixel, fonts[3]);
+                    textboxes[textboxesIndex].Update();
+                    if (textboxes[textboxesIndex].exited)
+                        if (textboxesIndex == 6)
+                        {
+                            textboxesIndex = 0;
+                            tutorialActive = false;
+                            cutsceneDestination = GameState.Menu;
+                            gameState = GameState.Cutscene;
+                            for (int i = 0; i < textboxes.Count; i++)
+                            {
+                                textboxes[i].exited = false;
+                            }
+                        }
+
+                        else
+                            textboxesIndex++;
+                    cutscenes.Draw(spriteBatch, pixel);
+                    if (cutscenes.alpha < 1 && !cutscenes.phase)
+                    {
+                        cutscenes = new Cutscene();
+                    }
+                }
+
+
+            }
+            if (gameState == GameState.Cutscene)
+            {
                 
-                spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
-
-
-                spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
-
-                spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X+20, MusicButtonRectangle.Y+20), Color.White);
-
+                    
+                cutscenes.cutseneActive = true;
+                cutscenes.Draw(spriteBatch, pixel);
+                
+                //if (cutscenes.phase == false)
+                //{
+                //    gameState = GameState.Play;
+                //}
             }
 
             // shop
             if (gameState == GameState.Shop)
             {
                 shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
-                
-                    
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
+
             }
             if (gameState == GameState.Music)
             {
                 musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                musicVolume = musicScreen.musicVolume;
+                gameSongListInstance[3].Volume = (float)musicVolume / 5;
+                if (gameSongListInstance[3].State != SoundState.Playing)
+                    gameSongListInstance[3].Play();
             }
             if (gameState == GameState.Play)
             {
-                
+
                 
 
 
@@ -803,14 +1079,24 @@ namespace RoomRunner
                 if(bossFight)
                     spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
-
-                jeb.Draw(spriteBatch);
+                foreach (Player p in players)
+                    p.Draw(spriteBatch);
                 if (currentBoss != null) currentBoss.Draw(spriteBatch);
                 foreach (Projectile p in projectileList)
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
 
+                //score and coins
+                int y = 70;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
+                    spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
+                    spriteBatch.DrawString(fonts[3], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                    //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
+                    y += 140;
+                }
 
                 // draws hitboxes to help debug them if debugMode is active
 
@@ -829,10 +1115,18 @@ namespace RoomRunner
                                 spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
                         }
                     }
-                    spriteBatch.Draw(pixel, new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
+                    foreach (Player p in players)
+                        spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
                 }
 
                 
+                
+
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha < 1 && !cutscenes.phase)
+                {
+                    cutscenes = new Cutscene();
+                }
 
             }
             // game over screen and meny

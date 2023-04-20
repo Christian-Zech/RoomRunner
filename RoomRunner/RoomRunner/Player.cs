@@ -32,14 +32,16 @@ namespace RoomRunner
         public Rectangle PlayerRectangle, HatRectangle;
         private bool wasStateSet, onGround;
         private KeyboardState oldkb;
+        public List<Keys> Up, Down, Left, Shoot;
         private MouseState oldms;
-        public int Coins, Health;
+        public int Coins, Health, distanceTraveled;
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat;
         public List<int> ownedHats;
-        private readonly Game1 game;
         public static Texture2D Heart;
+        public static int players;
+        private readonly int id;
         
         static Player()
         {
@@ -49,14 +51,15 @@ namespace RoomRunner
             floorHeight = 0;
             JumpMultiplier = GravityMultiplier = 1.0f;
             Heart = Program.Game.Content.Load<Texture2D>("Heart");
+            players = 0;
         }
-        public Player(Vector2 pos, Game1 game) : this(game)
+        public Player(Vector2 pos) : this()
         {
             Position = pos;
         }
-        public Player(Game1 game) : base(States)
+        public Player() : base(States)
         {
-            this.game = game;
+            id = players++;
             ownedHats = new List<int>();
             PlayerRectangle = new Rectangle((int)Position.X, (int)Position.Y, 150, 100);
             HatRectangle = new Rectangle(PlayerRectangle.X, PlayerRectangle.Y, 150, 100); //head is 13 x 12
@@ -69,25 +72,32 @@ namespace RoomRunner
             wasStateSet = false;
             Idle = false;
             Invulnerable = false;
+            Up = new List<Keys> { Keys.Up, Keys.W, Keys.Space };
+            Down = new List<Keys> { Keys.Down, Keys.S };
+            Left = new List<Keys> { Keys.Left, Keys.A };
+            Shoot = new List<Keys> { Keys.Right, Keys.D };
             delayLeft = InputDelay;
             InvinciblityTimer = MaxInvinciblity;
             FlashTimer = 0;
             currentHat = PlayerHats.None;
             Coins = 1000;
+            distanceTraveled = 0;
             fireCooldown = 0;
-            MakePlayerAnimations(game);
-            MakePlayerHats(game);
+            MakePlayerAnimations();
+            MakePlayerHats();
         }
 
-        private void MakePlayerHats(Game1 game)
+        private void MakePlayerHats()
         {
+            Game1 game = Program.Game;
             Rectangle[] rects = LoadSheet(5, 5, 32, 32, 1);
             Texture2D sheet = game.cosmeticSheet;
             for (int i = 1, c = 0; i < rects.Length; i += 2, c++)
                 Hats[(PlayerHats)c + 1] = RectToTxt(game.graphics.GraphicsDevice, sheet, rects[i])[0];
         }
-        private void MakePlayerAnimations(Game1 game)
+        private void MakePlayerAnimations()
         {
+            Game1 game = Program.Game;
             Rectangle[] jebList = LoadSheet(4, 3, 32, 32);
             Texture2D jebSheet = game.jebSheet;
             GraphicsDevice graphics = game.graphics.GraphicsDevice;
@@ -101,6 +111,7 @@ namespace RoomRunner
         }
         public new void Update()
         {
+            if (!IsAlive) return;
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
             bool stateSet = false;
@@ -110,15 +121,14 @@ namespace RoomRunner
                 goto Gravity;
             }
 
-            if (IsPressed(kb, Keys.W, Keys.Up, Keys.Space) || ms.LeftButton == ButtonState.Pressed && oldms.LeftButton != ButtonState.Pressed)
+            if (IsPressed(kb, Up.ToArray()))
             {
-                Game1.soundEffects[1].Play(volume: (float)Game1.soundVolume/10, pitch: 0.0f, pan: 0.0f);
                 if (onGround) Velocity.Y = InitialJumpMovement * JumpMultiplier;
                 else Velocity.Y = JumpMovement * JumpMultiplier;
                 SetState("Jumping");
                 stateSet = true;
             }
-            if (IsPressed(kb, Keys.S, Keys.Down))
+            if (IsPressed(kb, Down.ToArray()))
                 Velocity.Y = -JumpMovement * JumpMultiplier;
 
             Gravity:
@@ -150,7 +160,7 @@ namespace RoomRunner
                 HatRectangle.Y -= 2;
 
             if (fireCooldown > 0) fireCooldown--;
-            if (IsHeld(kb, Keys.D, Keys.LeftAlt, Keys.Right) && fireCooldown == 0)
+            if (IsHeld(kb, Shoot.ToArray()) && fireCooldown == 0)
             {
                 Projectile toLaunch = Projectile.Defaults[Projectiles.PlayerShot].Clone();
                 toLaunch.Rect.X = (int)Position.X;
@@ -205,8 +215,10 @@ namespace RoomRunner
             }
             if (Idle) return;
 
-            for (int i = 0, x = 0; i < Health; i++, x += 55)
-                sb.Draw(Heart, new Rectangle(x, 0, 50, 50), Color.White);
+            const int shift = 75;
+            Color col = new Color(255 - shift * id, 255, 255);
+            for (int i = 0, x = 180*id; i < Health; i++, x += 55)
+                sb.Draw(Heart, new Rectangle(x, 0, 50, 50), col);
         }
         public void Damage()
         {

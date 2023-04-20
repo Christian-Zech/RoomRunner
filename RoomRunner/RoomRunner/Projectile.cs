@@ -11,7 +11,9 @@ namespace RoomRunner
     {
         public readonly static Dictionary<Projectiles, Projectile> Defaults;
 
-        public Rectangle Rect;
+        public Rectangle Rectangle { get { if (getRect != default) return getRect.Invoke(); return rect; } }
+        private Rectangle rect;
+        private Func<Rectangle> getRect;
         public int BossDamage;
         public readonly bool HasGravity;
         public Point Velocity;
@@ -20,11 +22,19 @@ namespace RoomRunner
         public bool Persists;
         public int Lifespan;
         public OnetimeAnimation anim;
-        public bool ToRemove { get { return !InFrame || DeltDamage; } }
+        public bool ToRemove { get { return !InFrame || DeltDamage; } } // placeholder: public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } }
 
         private readonly static int FrameWidth, FrameHeight;
 
         public bool DamagesPlayer, DamagesBoss;
+        public Point Position
+        {
+            set
+            {
+                rect.X = value.X;
+                rect.Y = value.Y;
+            }
+        }
 
         static Projectile()
         {
@@ -43,7 +53,7 @@ namespace RoomRunner
         public Projectile(Rectangle rect, int bossDmg, Point velo, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
         {
             this.anim = anim;
-            Rect = rect;
+            this.rect = rect;
             BossDamage = bossDmg;
             Velocity = velo;
             Lifespan = -1;
@@ -59,7 +69,7 @@ namespace RoomRunner
         public Projectile(Rectangle rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
         {
             this.anim = anim;
-            Rect = rect;
+            this.rect = rect;
             BossDamage = bossDmg;
             Velocity = Point.Zero;
             Lifespan = lifespan;
@@ -73,6 +83,23 @@ namespace RoomRunner
         {
             Persists = persists;
         }
+        public Projectile(Func<Rectangle> rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false)
+        {
+            this.anim = anim;
+            getRect = rect;
+            BossDamage = bossDmg;
+            Velocity = Point.Zero;
+            Lifespan = lifespan;
+            HasGravity = hasGravity;
+            DamagesBoss = dmgBoss;
+            DamagesPlayer = dmgPlayer;
+            Persists = false;
+            InFrame = true;
+        }
+        public Projectile(bool persists, Func<Rectangle> rect, int bossDmg, int lifespan, OnetimeAnimation anim = default, bool dmgBoss = true, bool dmgPlayer = false, bool hasGravity = false) : this(rect, bossDmg, lifespan, anim, dmgBoss, dmgPlayer, hasGravity)
+        {
+            Persists = persists;
+        }
 
         public void Update()
         {
@@ -80,37 +107,37 @@ namespace RoomRunner
             if (Lifespan > 0) Lifespan--;
             IsInFrame();
             if (Lifespan == 0) { InFrame = false; DeltDamage = true; }
-            Rect.X += Velocity.X;
-            Rect.Y += Velocity.Y;
+            rect.X += Velocity.X;
+            rect.Y += Velocity.Y;
         }
 
         
 
         private void IsInFrame()
         {
-            if (!InFrame || Persists) return;
+            if (!InFrame) return;
             bool a, b, c, d;
-            a = Rect.X + Rect.Width < 0;
-            b = Rect.X > FrameWidth;
-            c = Rect.Y + Rect.Height < 0;
-            d = Rect.Y > FrameHeight;
+            a = rect.X + rect.Width < 0;
+            b = rect.X > FrameWidth;
+            c = rect.Y + rect.Height < 0;
+            d = rect.Y > FrameHeight;
             InFrame = !(a || b || c || d);
         }
-        public Projectile Clone() { return new Projectile(new Rectangle(Rect.X, Rect.Y, Rect.Width, Rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
+        public Projectile Clone() { return new Projectile(new Rectangle(rect.X, rect.Y, rect.Width, rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
         {
             Draw(sb, false, false);
         }
         public void Draw(SpriteBatch sb, bool flipX, bool flipY)
         {
-            if (anim == default) { sb.Draw(Game1.pixel, Rect, Color.Red); return; }
+            if (anim == default) { sb.Draw(Game1.pixel, rect, Color.Red); return; }
             Texture2D txt = anim.CurrentTexture;
             if (flipX)
-                sb.Draw(txt, Rect, null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipHorizontally, 0.0f);
+                sb.Draw(txt, rect, null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipHorizontally, 0.0f);
             else if (flipY)
-                sb.Draw(txt, new Rectangle(Rect.X, Rect.Y + Rect.Height / 2, Rect.Width, Rect.Height), null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipVertically, 0.0f);
+                sb.Draw(txt, new Rectangle(rect.X, rect.Y + rect.Height / 2, rect.Width, rect.Height), null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipVertically, 0.0f);
             else
-                sb.Draw(txt, Rect, Color.White);
+                sb.Draw(txt, rect, Color.White);
         }
     }
     public class ProjectileClump
@@ -126,12 +153,11 @@ namespace RoomRunner
             FlipY = flipY;
             Delete = false;
         }
-
         public void DrawAndUpdate(SpriteBatch sb)
         {
             if (Delete) return;
             Program.Game.UpdateProjectile(Current);
-            if (!Current.InFrame || Current.DeltDamage) projs.Dequeue();
+            if (!Current.InFrame || (!Current.Persists && Current.DeltDamage)) projs.Dequeue();
             if (projs.Count == 0)
             {
                 Delete = true;

@@ -73,6 +73,7 @@
     <Compile Include="Room.cs" />
     <Compile Include="Shop.cs" />
     <Compile Include="ShopItem.cs" />
+    <Compile Include="Textbox.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
