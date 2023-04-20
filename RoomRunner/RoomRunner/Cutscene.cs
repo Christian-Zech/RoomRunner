@@ -35,7 +35,7 @@ namespace RoomRunner
                     alpha+=3;
                 else
                     alpha-=3;
-                
+                Console.WriteLine(alpha);
             }
 
         }

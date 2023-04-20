@@ -307,10 +307,14 @@ namespace RoomRunner
 
             oldMouse = mouse;
         }
+        public void Update()
+        {
+            updateSelection();
+        }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font, SpriteFont bold, SpriteFont title, Texture2D pixel)
         {
-            updateSelection();
+            //updateSelection();
             spriteBatch.Draw(texture, new Rectangle(300, 410, 100, 100), source, Color.White);
             if (equippedHat != null)
                 spriteBatch.Draw(equippedHat, equippedRect, new Rectangle(0, 0, 32, 32), Color.White);

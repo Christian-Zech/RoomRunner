@@ -196,7 +196,13 @@
   <ItemGroup>
     <Compile Include="Level1\Enemies\EnemiesButBetter.png">
       <Name>EnemiesButBetter</Name>
-
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Icons\questionMark.png">
+      <Name>questionMark</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
