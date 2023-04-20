@@ -138,8 +138,8 @@ namespace RoomRunner
             Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
             for (int i = 0; i < amountOfObstacles; i++)
             {
-                int height = rand.Next(200, 400);
-                int width = height / 2;
+                int height = rand.Next(100, 300);
+                int width = (int)(height / 2.5);
                 obstacleList.Add(new ProjectileClump(false, false, new Projectile(true, new Rectangle(rand.Next(Game1.window.Width, Game1.window.Width * 4), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - height), width, height), 1, new Point(0, 0),
                     new OnetimeAnimation(15, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
                     {
