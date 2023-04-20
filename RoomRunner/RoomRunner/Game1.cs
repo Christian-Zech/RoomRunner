@@ -661,10 +661,15 @@ namespace RoomRunner
                // damages player if obstacle intercepts them
                foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
                 {
-                    if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
-                        .Intersects(new Rectangle(obstacle.Current.Rect.X + obstacleHitBox.X, obstacle.Current.Rect.Y + obstacleHitBox.Y, 
-                        obstacle.Current.Rect.Width + obstacleHitBox.Width, obstacle.Current.Rect.Height + obstacleHitBox.Height)))
+
+                    foreach(Player jeb in players)
+                    {
+                        if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
+                            .Intersects(new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y,
+                            obstacle.Current.Rectangle.Width + obstacleHitBox.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height)))
                             jeb.Damage();
+                    }
+                        
                 }
 
                     if (bossFight)
@@ -1067,7 +1072,7 @@ namespace RoomRunner
                     foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
                     {
                         obstacle.Current.Velocity.X = scrollSpeed;
-                        if (obstacle.Current.Rect.Intersects(window))
+                        if (obstacle.Current.Rectangle.Intersects(window))
                             obstacle.Current.anim.Idle = false;
                         obstacle.DrawAndUpdate(spriteBatch);
                     }

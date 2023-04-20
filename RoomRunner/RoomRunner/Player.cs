@@ -163,9 +163,8 @@ namespace RoomRunner
             if (IsHeld(kb, Shoot.ToArray()) && fireCooldown == 0)
             {
                 Projectile toLaunch = Projectile.Defaults[Projectiles.PlayerShot].Clone();
-                toLaunch.Rect.X = (int)Position.X;
-                toLaunch.Rect.Y = (int)Position.Y + 50;
-                game.projectileList.Add(toLaunch);
+                toLaunch.Position = new Point((int)Position.X, (int)Position.Y + 50);
+                Program.Game.projectileList.Add(toLaunch);
                 fireCooldown = FireDelay;
             }
 

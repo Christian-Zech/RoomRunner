@@ -207,7 +207,7 @@ namespace RoomRunner
             {
                 for(int j = i+1; j < obstacleList.Count; j++)
                 {
-                    if (obstacleList[i].Current.Rect.Intersects(obstacleList[j].Current.Rect))
+                    if (obstacleList[i].Current.Rectangle.Intersects(obstacleList[j].Current.Rectangle))
                         obstacleList.RemoveAt(i);
                 }
             }
@@ -249,11 +249,22 @@ namespace RoomRunner
             }
 
 
-            foreach(ProjectileClump obstacle in obstacleList)
+            for(int i = 0; i < obstacleList.Count; i++)
             {
+                ProjectileClump obstacle = obstacleList[i];
+
+                if(obstacle.Delete)
+                {
+                    obstacleList.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+
                 obstacle.Current.Velocity.X = -scrollSpeed;
-                if (obstacle.Current.Rect.Intersects(Game1.window))
+                if (obstacle.Current.Rectangle.Intersects(Game1.window))
                     obstacle.Current.anim.Idle = false;
+                
             }
 
 
