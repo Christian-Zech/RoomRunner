@@ -252,7 +252,7 @@ namespace RoomRunner
                 new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
             };
-            textboxesIndex = 0 ;
+            textboxesIndex = 0;
             base.Initialize();
 
                                                                                                                                                                                     
@@ -1226,11 +1226,6 @@ namespace RoomRunner
                     
                 cutscenes.cutseneActive = true;
                 cutscenes.Draw(spriteBatch, pixel);
-                
-                //if (cutscenes.phase == false)
-                //{
-                //    gameState = GameState.Play;
-                //}
             }
 
             // shop
@@ -1345,7 +1340,7 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
-
+                
                 //score and coins
                 int y = 70;
                 for (int i = 0; i < players.Count; i++)
@@ -1386,18 +1381,6 @@ namespace RoomRunner
                 {
                     cutscenes = new Cutscene();
                 }
-
-            }
-            // game over screen and meny
-            if(gameState == GameState.GameOver)
-            {
-                //spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19), Color.White);
-
-                //spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                //spriteBatch.DrawString(buttonFont, "Play Again", new Vector2(startButtonRectangle.X + 50, startButtonRectangle.Y + 20), Color.White);
-
-                //spriteBatch.Draw(pixel, menuButtonRectangle, Color.Green);
-                //spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
 
             }
 
