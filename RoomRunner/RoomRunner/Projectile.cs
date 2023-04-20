@@ -21,8 +21,8 @@ namespace RoomRunner
         public bool DeltDamage;
         public bool Persists;
         public int Lifespan;
-        private OnetimeAnimation anim;
-        public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } }
+        public OnetimeAnimation anim;
+        public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } } // placeholder: public bool ToRemove { get { return !InFrame || (!Persists && DeltDamage); } }
 
         private readonly static int FrameWidth, FrameHeight;
 
@@ -110,15 +110,17 @@ namespace RoomRunner
             rect.X += Velocity.X;
             rect.Y += Velocity.Y;
         }
+
+        
+
         private void IsInFrame()
         {
             if (!InFrame) return;
-            bool a, b, c, d;
+            bool a, c, d;
             a = rect.X + rect.Width < 0;
-            b = rect.X > FrameWidth;
             c = rect.Y + rect.Height < 0;
             d = rect.Y > FrameHeight;
-            InFrame = !(a || b || c || d);
+            InFrame = !(a || c || d);
         }
         public Projectile Clone() { return new Projectile(new Rectangle(rect.X, rect.Y, rect.Width, rect.Height), BossDamage, Velocity, anim.Clone(), DamagesBoss, DamagesPlayer, HasGravity); }
         public void Draw(SpriteBatch sb)
@@ -141,7 +143,12 @@ namespace RoomRunner
     {
         public Queue<Projectile> projs;
         public bool FlipX, FlipY, Delete;
-        public Projectile Current { get { return projs.Peek(); } }
+        public Projectile Current 
+        { 
+            get {
+                return projs.Peek(); 
+            } 
+        }
 
         public ProjectileClump(bool flipX, bool flipY, params Projectile[] projs)
         {
