@@ -386,6 +386,11 @@ namespace RoomRunner
 
             menus[GameState.GameOver] = new Menu(butts.ToArray());
             butts.Clear();
+
+            butts.Add(new Slider(new Rectangle(MusicButtonRectangle.X, MusicButtonRectangle.Y, 600, 25)));
+
+            menus[GameState.Music] = new Menu(butts.ToArray());
+            butts.Clear();
         }
         private Animation[] GenShopButts()
         {
@@ -710,8 +715,9 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if (menuCoolDown == 0 && currentMenu != default)
+            if (menuCoolDown == 0 && currentMenu != default && currentMenu.thingies[0] is SelectionGrid)
             {
+
                 Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
                 if ((b.MouseClickedOnce || KeyPressed(keyboard, Keys.Space, Keys.Enter)) && b.Text != default)
                 {
@@ -1126,18 +1132,6 @@ namespace RoomRunner
 
                     spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
-                    // menu buttons
-
-                    spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
-
-
-                    spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
-
-                    spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X + 20, MusicButtonRectangle.Y + 20), Color.White);
-
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
 
                     for (int i = 0; i < multiplayerButtons.Count; i++)
@@ -1231,14 +1225,13 @@ namespace RoomRunner
             // shop
             if (gameState == GameState.Shop)
             {
-                //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
             }
             if (gameState == GameState.Music)
             {
-                musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                //musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
                 musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)

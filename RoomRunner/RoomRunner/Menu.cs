@@ -194,6 +194,7 @@ namespace RoomRunner
         {
             return new Vector2(rect.Center.X, rect.Center.Y) - font.MeasureString(text) / 2;
         }
+
     }
     public class Box : MenuThingie
     {
@@ -506,5 +507,60 @@ namespace RoomRunner
             d = p.Y >= Grid[p.X].Length;
             return b || d;
         }
+    }
+    public class Slider : MenuThingie
+    {
+        public static Button Default
+        {
+            get
+            {
+                return new Button(new Rectangle(0, 0, Game1.window.Width / 38, Game1.window.Height / 18), Color.Green)
+                {
+                    BorderWidth = 3
+                };
+            }
+        }
+
+        public Button Knob;
+        public float Percent;
+        private bool Held;
+
+        public Slider(Rectangle r) : base(r)
+        {
+            Knob = new Button(new Rectangle(r.X - r.Width / 100, r.Y - r.Height + Rectangle.Height / 2, r.Width / 50, r.Height * 2), Color.Green)
+            {
+                BorderWidth = 3
+            };
+            Inset = r.Height;
+            Rectangle.X -= r.Height;
+            Rectangle.Width += r.Height * 2;
+            Percent = 0.0f;
+            BGColor = Color.Black;
+            BorderColor = Color.Silver;
+            BorderWidth = 3;
+        }
+
+        public override void DrawAndUpdate(SpriteBatch sb)
+        {
+            if (!Shown) return;
+            base.DrawAndUpdate(sb);
+
+            MouseState ms = Mouse.GetState();
+
+            if (Held || (ms.LeftButton == ButtonState.Pressed && MouseInBounds(ms)))
+            {
+                Held = true;
+                if (ms.X >= DrawRectangle.X && ms.X <= DrawRectangle.X + DrawRectangle.Width)
+                    Knob.DrawRectangle.X = ms.X - Knob.DrawRectangle.Width / 2;
+                else
+                    if (ms.X < DrawRectangle.X)
+                        Knob.DrawRectangle.X = DrawRectangle.X - Knob.DrawRectangle.Width / 2;
+                    else
+                        Knob.DrawRectangle.X = DrawRectangle.X + DrawRectangle.Width - Knob.DrawRectangle.Width / 2;
+            }
+            if (Held && ms.LeftButton != ButtonState.Pressed) Held = false;
+            Knob.DrawAndUpdate(sb);
+        }
+
     }
 }
