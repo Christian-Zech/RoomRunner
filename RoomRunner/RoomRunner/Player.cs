@@ -34,11 +34,11 @@ namespace RoomRunner
         private KeyboardState oldkb;
         public List<Keys> Up, Down, Left, Shoot;
         private MouseState oldms;
-        public int Coins, Health, distanceTraveled;
+        public int Coins, Health, distanceTraveled, distanceHighScore; //save these
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
-        public PlayerHats currentHat;
-        public List<int> ownedHats;
+        public PlayerHats currentHat; //save this
+        public List<int> ownedHats; //save this
         public static Texture2D Heart;
         public static int players;
         private readonly int id;
@@ -82,9 +82,11 @@ namespace RoomRunner
             currentHat = PlayerHats.None;
             Coins = 1000;
             distanceTraveled = 0;
+            distanceHighScore = 0;
             fireCooldown = 0;
             MakePlayerAnimations();
             MakePlayerHats();
+            Load();
         }
 
         private void MakePlayerHats()
@@ -184,9 +186,10 @@ namespace RoomRunner
                 Shown = !Shown;
                 FlashTimer = FrameBetweenFlash;
             }
+            if (distanceTraveled > distanceHighScore)
+                distanceHighScore = distanceTraveled;
 
-
-
+            
             base.Update();
 
             oldkb = kb;
@@ -243,11 +246,23 @@ namespace RoomRunner
         }
         public void Save()
         {
-            SaveAndLoad.Save<Player>(this, "PlayerData.txt");
+            string hats = "";
+            for (int i = 0; i < ownedHats.Count; i++)
+                hats += ownedHats[i] + " ";
+            
+            string str = Coins + "\n" + distanceHighScore + "\n" + currentHat + "\n" + hats;
+            SaveAndLoad.Save(str, "playerData.txt");
         }
         public void Load()
         {
-            SaveAndLoad.Load<Player>("PlayerData.txt");
+            string data = SaveAndLoad.Load("playerData.txt");
+            string[] lines = data.Split('\n');
+            Coins = Int32.Parse(lines[0]);
+            distanceHighScore = Int32.Parse(lines[1]);
+            currentHat = (PlayerHats)Enum.Parse(typeof(PlayerHats), lines[2]);
+            string[] hats = lines[3].Split(' ');
+            for (int i = 0; i < hats.Length; i++)
+                ownedHats.Add(Int32.Parse(hats[i]));
         }
     }
     public enum PlayerHats

@@ -796,6 +796,8 @@ namespace RoomRunner
                         }
                     }
                 }
+                foreach (Player player in players)
+                    player.Save();
             }
             
 
