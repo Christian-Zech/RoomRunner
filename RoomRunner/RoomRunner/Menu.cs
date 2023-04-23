@@ -103,64 +103,61 @@ namespace RoomRunner
     }
     public class Button : MenuThingie
     {
-        private readonly string text;
-        public string Text { get { return text; } }
-        public SpriteFont Font;
+        public readonly MenuText MText;
+        public string Text { get { return MText.Text; } }
+        public SpriteFont Font { get { return MText.Font; } }
         private Color col;
-        public Color TextColor;
+        public Color TextColor { get { return MText.TextColor; } set { MText.TextColor = value; } }
         public Color DrawColor { get { return col; }  set { col = value; } }
         private Texture2D txt;
         public Texture2D Texture { get { return txt; } set { txt = value; } }
         public bool MouseClicked, MouseClickedOnce;
         private MouseState oldms;
-        private Vector2 txtPos;
-        public Vector2 TextPosition { get { return txtPos; } set { txtPos = value; } }
+        public Vector2 TextPosition { get { return MText.Position; } set { MText.Position = value; } }
         public Animation Animation;
+        private Rectangle OldRect;
 
         public Button(Rectangle rect, Color c) : base(rect)
         {
             col = c;
             txt = Game1.pixel;
-            TextColor = Color.Black;
+            OldRect = Rectangle;
         }
         public Button(Rectangle rect, Texture2D txt) : base(rect)
         {
             this.txt = txt;
             col = Color.White;
-            TextColor = Color.Black;
+            OldRect = Rectangle;
         }
         public Button(Rectangle rect, Animation anim) : base(rect)
         {
             Animation = anim;
             col = Color.White;
-            TextColor = Color.Black;
+            OldRect = Rectangle;
         }
         public Button(Rectangle rect, Color c, SpriteFont sf, string text) : base(rect)
         {
             col = c;
-            Font = sf;
-            this.text = text;
-            txtPos = calcTxt();
+            MText = new MenuText(sf, text, CalcTxt(sf, rect, text));
             txt = Game1.pixel;
             TextColor = Color.Black;
+            OldRect = Rectangle;
         }
         public Button(Rectangle rect, Texture2D txt, SpriteFont sf, string text) : base(rect)
         {
             this.txt = txt;
-            this.text = text;
-            Font = sf;
-            txtPos = calcTxt();
+            MText = new MenuText(sf, text, CalcTxt(sf, rect, text));
             col = Color.White;
             TextColor = Color.Black;
+            OldRect = Rectangle;
         }
         public Button(Rectangle rect, Animation anim, SpriteFont sf, string text) : base(rect)
         {
             Animation = anim;
-            this.text = text;
-            Font = sf;
-            txtPos = calcTxt();
+            MText = new MenuText(sf, text, CalcTxt(sf, rect, text));
             col = Color.White;
             TextColor = Color.Black;
+            OldRect = Rectangle;
         }
 
         public override void DrawAndUpdate(SpriteBatch sb)
@@ -183,16 +180,21 @@ namespace RoomRunner
                 sb.Draw(Animation.CurrentTexture, DrawRectangle, col);
                 Animation.Update();
             }
-            if (Font != default && text != "")
-                sb.DrawString(Font, text, txtPos, TextColor); 
-        }
-        private Vector2 calcTxt()
-        {
-            return new Vector2(DrawRectangle.Center.X, DrawRectangle.Center.Y) - Font.MeasureString(text) / 2;
+            if (MText != default)
+            {
+                MText.DrawAndUpdate(sb);
+                if (!OldRect.Equals(Rectangle))
+                    CalcTxt();
+            }
+            OldRect = Rectangle;
         }
         public static Vector2 CalcTxt(SpriteFont font, Rectangle rect, string text)
         {
             return new Vector2(rect.Center.X, rect.Center.Y) - font.MeasureString(text) / 2;
+        }
+        private void CalcTxt()
+        {
+            MText.Position += new Vector2(Rectangle.X - OldRect.X, Rectangle.Y - OldRect.Y);
         }
 
     }
@@ -302,22 +304,15 @@ namespace RoomRunner
     }
     public class MenuText : MenuThingie
     {
-        public string Text { 
-            get
-            {
-                return text;
-            }
-        }
-        private string text;
-        private readonly Func<string> TextGetter;
-        public Vector2 TextPosition { get { return Position; } }
+        public string Text;
+        public Func<string> TextGetter;
         public SpriteFont Font;
         public Color TextColor;
 
         public MenuText(SpriteFont font, string text, Vector2 TextPos) : base(TextPos)
         {
             Font = font;
-            this.text = text;
+            Text = text;
             TextColor = Color.Black;
             Vector2 size = font.MeasureString(text);
             Rectangle.Width = (int)size.X;
@@ -336,15 +331,15 @@ namespace RoomRunner
             if (!Shown) return;
             base.DrawAndUpdate(sb);
             UpdateText();
-            sb.DrawString(Font, text, TextPosition, TextColor);
+            sb.DrawString(Font, Text, Position, TextColor);
         }
         private void UpdateText()
         {
             if (TextGetter == default) return;
-            string val = Text;
-            if (val.Equals(text)) return;
-            text = val;
-            Vector2 size = Font.MeasureString(text);
+            string val = TextGetter.Invoke();
+            if (val.Equals(Text)) return;
+            Text = val;
+            Vector2 size = Font.MeasureString(Text);
             Rectangle.Width = (int)size.X;
             Rectangle.Height = (int)size.Y;
             DrawRectangle = Rectangle;
@@ -510,27 +505,19 @@ namespace RoomRunner
     }
     public class Slider : MenuThingie
     {
-        public static Button Default
-        {
-            get
-            {
-                return new Button(new Rectangle(0, 0, Game1.window.Width / 38, Game1.window.Height / 18), Color.Green)
-                {
-                    BorderWidth = 3
-                };
-            }
-        }
 
         public Button Knob;
         public float Percent;
         private bool Held;
+        private MouseState oldMS;
 
         public Slider(Rectangle r) : base(r)
         {
-            Knob = new Button(new Rectangle(r.X - r.Width / 100, r.Y - r.Height + Rectangle.Height / 2, r.Width / 50, r.Height * 2), Color.Green)
+            Knob = new Button(new Rectangle(r.X - r.Width / 100, r.Y - r.Height + Rectangle.Height / 2, r.Width / 50, r.Height * 2), Color.Green, Program.Game.buttonFont, "")
             {
                 BorderWidth = 3
             };
+            Knob.MText.TextGetter = () => (int)Math.Round(Percent*100)+"%";
             Inset = r.Height;
             Rectangle.X -= r.Height;
             Rectangle.Width += r.Height * 2;
@@ -546,20 +533,26 @@ namespace RoomRunner
             base.DrawAndUpdate(sb);
 
             MouseState ms = Mouse.GetState();
-
-            if (Held || (ms.LeftButton == ButtonState.Pressed && MouseInBounds(ms)))
+            if (!(ms.X == oldMS.X && ms.Y == oldMS.Y && ms.LeftButton == oldMS.LeftButton))
             {
-                Held = true;
-                if (ms.X >= DrawRectangle.X && ms.X <= DrawRectangle.X + DrawRectangle.Width)
-                    Knob.DrawRectangle.X = ms.X - Knob.DrawRectangle.Width / 2;
-                else
-                    if (ms.X < DrawRectangle.X)
+                if (Held || (ms.LeftButton == ButtonState.Pressed && MouseInBounds(ms)))
+                {
+                    Held = true;
+                    if (ms.X >= DrawRectangle.X && ms.X <= DrawRectangle.X + DrawRectangle.Width)
+                        Knob.DrawRectangle.X = ms.X - Knob.DrawRectangle.Width / 2;
+                    else
+                        if (ms.X < DrawRectangle.X)
                         Knob.DrawRectangle.X = DrawRectangle.X - Knob.DrawRectangle.Width / 2;
                     else
                         Knob.DrawRectangle.X = DrawRectangle.X + DrawRectangle.Width - Knob.DrawRectangle.Width / 2;
+                    Knob.Rectangle = Knob.DrawRectangle;
+                    Percent = (Knob.Rectangle.Center.X - DrawRectangle.X) / (float)DrawRectangle.Width;
+                }
+                if (Held && ms.LeftButton != ButtonState.Pressed) Held = false;
+                    
             }
-            if (Held && ms.LeftButton != ButtonState.Pressed) Held = false;
             Knob.DrawAndUpdate(sb);
+            oldMS = ms;
         }
 
     }
