@@ -256,13 +256,19 @@ namespace RoomRunner
         public void Load()
         {
             string data = SaveAndLoad.Load("playerData.txt");
+            if (data.Equals(""))
+                return;
             string[] lines = data.Split('\n');
             Coins = Int32.Parse(lines[0]);
             distanceHighScore = Int32.Parse(lines[1]);
             currentHat = (PlayerHats)Enum.Parse(typeof(PlayerHats), lines[2]);
-            string[] hats = lines[3].Split(' ');
-            for (int i = 0; i < hats.Length; i++)
-                ownedHats.Add(Int32.Parse(hats[i]));
+            string[] hats = lines[4].Split(' ');
+            if (!hats[0].Equals(""))
+            {
+                for (int i = 0; i < hats.Length; i++)
+                    ownedHats.Add(Int32.Parse(hats[i]));
+            }
+            
         }
     }
     public enum PlayerHats

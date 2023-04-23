@@ -19,9 +19,18 @@ namespace RoomRunner
 
         public static string Load(string FileSpec)
         {
-            StreamReader fileIn = new StreamReader(FileSpec);
-            string output = fileIn.ReadToEnd();
-            return output;
+            try
+            {
+                StreamReader fileIn = new StreamReader(FileSpec);
+                string output = fileIn.ReadToEnd();
+                return output;
+            }
+            catch (Exception e)
+            {
+                return "";
+            }
+            
+            
         }
 
         public static void Save(string data, string FileSpec)
