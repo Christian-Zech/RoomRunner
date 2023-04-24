@@ -402,8 +402,23 @@ namespace RoomRunner
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
 
+            butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height * 2 / 10, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
+            {
+                BorderWidth = 3,
+                Shown = false
+            });
 
-
+            butts.Add(new MenuText(shopFont, () =>
+            {
+                string a = "Playlist:\n";
+                foreach (string b in musicScreen.customMusicNames)
+                    a += b.Substring(b.LastIndexOf('\\') + 1) + "\n";
+                return a;
+            },
+            new Vector2(window.Width / 19 * 15, window.Height / 10))
+            {
+                Shown = false
+            }); ;
 
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
@@ -783,15 +798,30 @@ namespace RoomRunner
                                 arr[c].BGColor = Color.Green;
                         menuCoolDown = 2;
                     }
-                    if (gameState == GameState.Music && b.Text.Equals("Game Music"))
+                    if (gameState == GameState.Music)
                     {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = true;
-                    }
-                    if (gameState == GameState.Music && b.Text.Equals("Custom Music"))
-                    {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = false;
+                        if (b.Text.Equals("Game Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = false;
+                        }
+                        if (b.Text.Equals("Custom Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = true;
+                        }
+                        if (b.Text.Equals("Add Music"))
+                        {
+                            int len = musicScreen.customMusicNames.Count;
+                            string s = new FileDialogue().Show();
+                            if (s != "")
+                                musicScreen.customMusicNames.Add(s);
+                            if (len != musicScreen.customMusicNames.Count)
+                            {
+                                (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
+                                (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
+                            }
+                        }
                     }
                 }
             }

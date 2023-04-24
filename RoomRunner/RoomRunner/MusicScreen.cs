@@ -210,7 +210,7 @@ namespace RoomRunner
                 
                 addMusic.Y = 50 + y;
                 spriteBatch.Draw(pixel, addMusic, new Color(75, 75, 75));
-                spriteBatch.DrawString(boldFont, "Add Music", new Vector2(1490, 80+y), Color.Black);
+                spriteBatch.DrawString(boldFont, "Add Music", new Vector2(1490, 80+y), Color.Black);//
             }
         }
     }

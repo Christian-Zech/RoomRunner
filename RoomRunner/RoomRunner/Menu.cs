@@ -555,6 +555,11 @@ namespace RoomRunner
             Knob.DrawAndUpdate(sb);
             oldMS = ms;
         }
+        public void SetPercent(float percent)
+        {
+            Percent = percent;
+            Knob.Rectangle.X = (int)Math.Round(DrawRectangle.X + 100 / (float)DrawRectangle.Width * percent);
+        }
 
     }
 }
