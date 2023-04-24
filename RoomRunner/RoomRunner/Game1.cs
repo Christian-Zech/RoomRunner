@@ -252,7 +252,7 @@ namespace RoomRunner
                 new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
             };
-            textboxesIndex = 0 ;
+            textboxesIndex = 0;
             base.Initialize();
 
                                                                                                                                                                                     
@@ -386,6 +386,27 @@ namespace RoomRunner
 
             menus[GameState.GameOver] = new Menu(butts.ToArray());
             butts.Clear();
+
+            butts.Add(new Button(new Rectangle(window.Width / 38 * 15 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Game Music")
+            {
+                BorderWidth = 3
+            });
+            butts.Add(new Button(new Rectangle(window.Width / 190 * 101 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Custom Music")
+            {
+                BorderWidth = 3
+            });
+
+            butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
+            butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
+
+            butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
+            butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
+
+
+
+
+            menus[GameState.Music] = new Menu(butts.ToArray());
+            butts.Clear();
         }
         private Animation[] GenShopButts()
         {
@@ -470,9 +491,12 @@ namespace RoomRunner
                         buying = (PlayerHats)c + 2;
                     Storage.AddRange(new MenuThingie[] { b, shopMenu[2] });
                     AddShopPopup(buying, menus[gameState], Price);
-                } 
-                else 
+                }
+                else
+                {
+                    powerups.quantities[c + 4]++;
                     current.Coins -= Price;
+                }
             }
             if ((shopMenu[4] as Button).MouseClickedOnce) { gameState = GameState.Menu; menuCoolDown = 2; }
         }
@@ -712,7 +736,14 @@ namespace RoomRunner
 
             if (menuCoolDown == 0 && currentMenu != default)
             {
-                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
+                Button b = default;
+                if (currentMenu.thingies[0] is SelectionGrid sg)
+                    b = sg.Current;
+                if (currentMenu.LastTouched is Button button)
+                    b = button;
+                if (b == default)
+                    goto SkipInputs;
+
                 if ((b.MouseClickedOnce || KeyPressed(keyboard, Keys.Space, Keys.Enter)) && b.Text != default)
                 {
                     if ((gameState == GameState.Menu && b.Text.Equals("Start")) || (gameState == GameState.GameOver && b.Text.Equals("Play Again")))
@@ -740,7 +771,27 @@ namespace RoomRunner
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
                         gameState = GameState.Shop;
+                        Button[] arr = (menus[gameState].thingies[0] as SelectionGrid).Butts;
+                        for (int c = 4, i = 1; i < arr.Length; i++,c++)
+                            if (i <= 7)
+                            {
+                                if (players[0].ownedHats.Contains(i))
+                                    arr[c].BGColor = Color.Green;
+                            }
+                            else
+                                if (players[0].ownedHats.Contains(i + 2))
+                                arr[c].BGColor = Color.Green;
                         menuCoolDown = 2;
+                    }
+                    if (gameState == GameState.Music && b.Text.Equals("Game Music"))
+                    {
+                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
+                            mt.Shown = true;
+                    }
+                    if (gameState == GameState.Music && b.Text.Equals("Custom Music"))
+                    {
+                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
+                            mt.Shown = false;
                     }
                 }
             }
@@ -757,7 +808,7 @@ namespace RoomRunner
                     gameState = cutsceneDestination;
                 }
             }
-
+            SkipInputs:
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
@@ -1123,18 +1174,6 @@ namespace RoomRunner
 
                     spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
-                    // menu buttons
-
-                    spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Start", new Vector2(startButtonRectangle.X + 110, startButtonRectangle.Y + 20), Color.White);
-
-
-                    spriteBatch.Draw(pixel, shopButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Enter Shop", new Vector2(shopButtonRectangle.X + 50, shopButtonRectangle.Y + 20), Color.White);
-
-                    spriteBatch.Draw(pixel, MusicButtonRectangle, Color.Green);
-                    spriteBatch.DrawString(buttonFont, "Music + Sound", new Vector2(MusicButtonRectangle.X + 20, MusicButtonRectangle.Y + 20), Color.White);
-
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
 
                     for (int i = 0; i < multiplayerButtons.Count; i++)
@@ -1223,24 +1262,18 @@ namespace RoomRunner
                     
                 cutscenes.cutseneActive = true;
                 cutscenes.Draw(spriteBatch, pixel);
-                
-                //if (cutscenes.phase == false)
-                //{
-                //    gameState = GameState.Play;
-                //}
             }
 
             // shop
             if (gameState == GameState.Shop)
             {
-                //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
 
             }
             if (gameState == GameState.Music)
             {
-                musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                //musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
                 musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
@@ -1342,7 +1375,7 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
-
+                
                 //score and coins
                 int y = 70;
                 for (int i = 0; i < players.Count; i++)
@@ -1390,18 +1423,6 @@ namespace RoomRunner
                 {
                     cutscenes = new Cutscene();
                 }
-
-            }
-            // game over screen and meny
-            if(gameState == GameState.GameOver)
-            {
-                //spriteBatch.DrawString(menuFont, "You Died! Whomp whomp", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19), Color.White);
-
-                //spriteBatch.Draw(pixel, startButtonRectangle, Color.Green);
-                //spriteBatch.DrawString(buttonFont, "Play Again", new Vector2(startButtonRectangle.X + 50, startButtonRectangle.Y + 20), Color.White);
-
-                //spriteBatch.Draw(pixel, menuButtonRectangle, Color.Green);
-                //spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
 
             }
 
