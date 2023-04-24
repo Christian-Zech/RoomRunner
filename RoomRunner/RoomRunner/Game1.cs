@@ -1530,6 +1530,14 @@ namespace RoomRunner
             return false;
         }
 
+        public void Save()
+        {
+            foreach (Player player in players)
+                player.Save();
+        }
+        public void Load()
+        {
 
+        }
     }
 }

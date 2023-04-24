@@ -556,5 +556,15 @@ namespace RoomRunner
             oldMS = ms;
         }
 
+        public void Save()
+        { 
+            //
+            string str = "";
+            SaveAndLoad.Save(str, "SettingsData.txt");
+        }
+        public void Load()
+        {
+
+        }
     }
 }
