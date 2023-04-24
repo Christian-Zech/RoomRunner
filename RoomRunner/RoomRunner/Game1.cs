@@ -395,7 +395,49 @@ namespace RoomRunner
             menus[GameState.GameOver] = new Menu(butts.ToArray());
 
             butts.Clear();
-            butts.Add(new Button(difficultyButtonRectangle, Color.Green, menuFont, "Test"));
+            butts.AddRange(new MenuThingie[]
+            {
+                new SelectionGrid(new Button[][] { new Button[] {
+                        new Button(startButtonRectangle, Color.Green, menuFont, "Easy")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White,
+                            Shown = true
+                        },
+                        new Button(startButtonRectangle, Color.Green, menuFont, "Normal")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White,
+                            Shown = false
+                        },
+                        new Button(startButtonRectangle, Color.Green, menuFont, "Hard")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White,
+                            Shown = false
+                        },
+                        new Button(startButtonRectangle, Color.Green, menuFont, "Nightmare")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White,
+                            Shown = false
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Red, menuFont, "Return To Menu")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White
+                        }
+                    }
+                }),
+                new MenuText(menuFont, "Select your difficulty", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19))
+                {
+                    TextColor = Color.White
+                }
+            });
+
+
+
             menus[GameState.Difficulty] = new Menu(butts.ToArray());
             
 
@@ -718,6 +760,10 @@ namespace RoomRunner
                             gameState = GameState.Menu;
                             menuCoolDown = 2;
                             break;
+                        case GameState.Difficulty:
+                            gameState = GameState.Menu;
+                            menuCoolDown = 2;
+                            break;
                         default:
                             this.Exit();
                             break;
@@ -764,6 +810,18 @@ namespace RoomRunner
                         gameState = GameState.Difficulty;
                         menuCoolDown = 2;
                     }
+                    if (gameState == GameState.Difficulty)
+                    {
+                        switch(b.Text)
+                        {
+                            case "Return To Menu":
+                                gameState = GameState.Menu;
+                                menuCoolDown = 2;
+                                break;
+
+                        }
+                    }
+                    
 
                 }
             }
