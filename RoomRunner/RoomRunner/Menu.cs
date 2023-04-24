@@ -513,11 +513,12 @@ namespace RoomRunner
 
         public Slider(Rectangle r) : base(r)
         {
-            Knob = new Button(new Rectangle(r.X - r.Width / 100, r.Y - r.Height + Rectangle.Height / 2, r.Width / 50, r.Height * 2), Color.Green, Program.Game.buttonFont, "")
+            Knob = new Button(new Rectangle(r.X - r.Width / 100, r.Y - r.Height / 2, r.Width / 50, r.Height * 2), Color.Green, Program.Game.shopFont, "")
             {
-                BorderWidth = 3
+                BorderWidth = 3,
+                TextPosition = new Vector2(r.X - r.Width / 100, r.Y + r.Height * 3 / 2)
             };
-            Knob.MText.TextGetter = () => (int)Math.Round(Percent*100)+"%";
+            Knob.MText.TextGetter = () => (int)Math.Round(Percent * 100) + "%";
             Inset = r.Height;
             Rectangle.X -= r.Height;
             Rectangle.Width += r.Height * 2;

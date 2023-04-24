@@ -387,7 +387,23 @@ namespace RoomRunner
             menus[GameState.GameOver] = new Menu(butts.ToArray());
             butts.Clear();
 
-            butts.Add(new Slider(new Rectangle(MusicButtonRectangle.X, MusicButtonRectangle.Y, 600, 25)));
+            butts.Add(new Button(new Rectangle(window.Width / 38 * 15 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Game Music")
+            {
+                BorderWidth = 3
+            });
+            butts.Add(new Button(new Rectangle(window.Width / 190 * 101 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Custom Music")
+            {
+                BorderWidth = 3
+            });
+
+            butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
+            butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
+
+            butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
+            butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
+
+
+
 
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
@@ -715,10 +731,16 @@ namespace RoomRunner
 
             // controls the main menu with each gamestate representing a different portion of the game
 
-            if (menuCoolDown == 0 && currentMenu != default && currentMenu.thingies[0] is SelectionGrid)
+            if (menuCoolDown == 0 && currentMenu != default)
             {
+                Button b = default;
+                if (currentMenu.thingies[0] is SelectionGrid sg)
+                    b = sg.Current;
+                if (currentMenu.LastTouched is Button button)
+                    b = button;
+                if (b == default)
+                    goto SkipInputs;
 
-                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
                 if ((b.MouseClickedOnce || KeyPressed(keyboard, Keys.Space, Keys.Enter)) && b.Text != default)
                 {
                     if ((gameState == GameState.Menu && b.Text.Equals("Start")) || (gameState == GameState.GameOver && b.Text.Equals("Play Again")))
@@ -748,6 +770,16 @@ namespace RoomRunner
                         gameState = GameState.Shop;
                         menuCoolDown = 2;
                     }
+                    if (gameState == GameState.Music && b.Text.Equals("Game Music"))
+                    {
+                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
+                            mt.Shown = true;
+                    }
+                    if (gameState == GameState.Music && b.Text.Equals("Custom Music"))
+                    {
+                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
+                            mt.Shown = false;
+                    }
                 }
             }
             if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
@@ -763,7 +795,7 @@ namespace RoomRunner
                     gameState = cutsceneDestination;
                 }
             }
-
+            SkipInputs:
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
