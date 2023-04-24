@@ -231,8 +231,8 @@ namespace RoomRunner
             oldKB = Keyboard.GetState();
 
 
-            enemyHitBox = new Rectangle(30, 10, 40, 50);
-            obstacleHitBox = new Rectangle(0, 0, 0, 0);
+            enemyHitBox = new Rectangle(30, 10, -60, -50);
+            obstacleHitBox = new Rectangle(20, 20, -40, -60);
             playerHitBox = new Rectangle(35, 5, 60, 90);
             coinHitBox = new Rectangle(5, 5, 40, 40);
 
@@ -891,7 +891,7 @@ namespace RoomRunner
                     if (activePowerupIndex != 1)
                         if (enemy != null)
                             foreach (Player p in players)
-                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height)))
+                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height)))
                                 p.Damage();
                 }
 
@@ -917,10 +917,12 @@ namespace RoomRunner
 
                     foreach(Player jeb in players)
                     {
+
+
                         if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
                             .Intersects(new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y,
-                            obstacle.Current.Rectangle.Width + obstacleHitBox.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height)))
-                            jeb.Damage();
+                            obstacle.Current.Rectangle.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height)))
+                                jeb.Damage();
                     }
                         
                 }
@@ -931,13 +933,8 @@ namespace RoomRunner
                     goto Jeb;
                 }
 
-                foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
-                    foreach (Player p in players)
-                        if (activePowerupIndex != 1 && enemy != null && p.PlayerRectangle.Intersects(enemy.rectangle))
-                            p.Damage();
 
-
-                        Jeb:
+                Jeb:
 
                 bool weLiving = false;
                 foreach (Player p in players)
@@ -1363,7 +1360,7 @@ namespace RoomRunner
                 {
                     foreach (Enemy enemy in roomList[currentRoomIndex].enemyArray)
                     {
-                        spriteBatch.Draw(pixel, new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemyHitBox.Width, enemyHitBox.Height), Color.Black);
+                        spriteBatch.Draw(pixel, new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height), Color.Black * 0.5f);
                     }
 
                     foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
@@ -1371,11 +1368,18 @@ namespace RoomRunner
                         foreach (Coin coin in coinGrid)
                         {
                             if (coin != null)
-                                spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black);
+                                spriteBatch.Draw(pixel, new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height), Color.Black * 0.5f);
                         }
                     }
                     foreach (Player p in players)
-                        spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black);
+                        spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black * 0.5f);
+
+
+                    foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                    {
+                        if(!obstacle.Delete)
+                            spriteBatch.Draw(pixel, new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y, obstacle.Current.Rectangle.Width + obstacleHitBox.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height), Color.Black * 0.5f);
+                    }
                 }
 
                 
