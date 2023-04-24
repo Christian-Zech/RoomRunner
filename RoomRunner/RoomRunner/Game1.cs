@@ -491,9 +491,12 @@ namespace RoomRunner
                         buying = (PlayerHats)c + 2;
                     Storage.AddRange(new MenuThingie[] { b, shopMenu[2] });
                     AddShopPopup(buying, menus[gameState], Price);
-                } 
-                else 
+                }
+                else
+                {
+                    powerups.quantities[c + 4]++;
                     current.Coins -= Price;
+                }
             }
             if ((shopMenu[4] as Button).MouseClickedOnce) { gameState = GameState.Menu; menuCoolDown = 2; }
         }
@@ -768,6 +771,16 @@ namespace RoomRunner
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
                         gameState = GameState.Shop;
+                        Button[] arr = (menus[gameState].thingies[0] as SelectionGrid).Butts;
+                        for (int c = 4, i = 1; i < arr.Length; i++,c++)
+                            if (i <= 7)
+                            {
+                                if (players[0].ownedHats.Contains(i))
+                                    arr[c].BGColor = Color.Green;
+                            }
+                            else
+                                if (players[0].ownedHats.Contains(i + 2))
+                                arr[c].BGColor = Color.Green;
                         menuCoolDown = 2;
                     }
                     if (gameState == GameState.Music && b.Text.Equals("Game Music"))
