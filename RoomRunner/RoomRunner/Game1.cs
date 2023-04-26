@@ -22,9 +22,12 @@ namespace RoomRunner
 
         public static Texture2D pixel;
         public Texture2D jebSheet;
+        public Texture2D difficultyArrow;
 
-        public SpriteFont menuFont { get { return fonts[1]; } }
+        public SpriteFont menuFont { get { return fonts[2]; } }
         public SpriteFont buttonFont { get { return fonts[0]; } }
+
+        
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -77,9 +80,13 @@ namespace RoomRunner
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
         public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont { get { return fonts[2]; } }
-        public SpriteFont shopFontBold { get { return fonts[3]; } }
-        public SpriteFont shopTitleFont { get { return fonts[4]; } }
+        public SpriteFont shopFont { get { return fonts[4]; } }
+        public SpriteFont shopFontBold { get { return fonts[5]; } }
+        public SpriteFont shopTitleFont { get { return fonts[6]; } }
+
+        public SpriteFont menuFontBold {  get { return fonts[3]; } }
+
+        public SpriteFont largeFont { get { return fonts[1]; } }
 
         public int menuCoolDown;
 
@@ -130,8 +137,16 @@ namespace RoomRunner
             Level3
         }
 
+        public enum Difficulty
+        {
+            Easy,
+            Normal,
+            Hard
+        }
+
         public static Levels levels;
         public static GameState gameState;
+        public static Difficulty difficulty;
 
         public Game1()
         {
@@ -398,41 +413,35 @@ namespace RoomRunner
             butts.AddRange(new MenuThingie[]
             {
                 new SelectionGrid(new Button[][] { new Button[] {
-                        new Button(startButtonRectangle, Color.Green, menuFont, "Easy")
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 3, window.Width / 5, window.Height / 10), Color.Green, menuFont, "Easy")
                         {
                             BorderWidth = 6,
-                            TextColor = Color.White,
-                            Shown = true
-                        },
-                        new Button(startButtonRectangle, Color.Green, menuFont, "Normal")
+                            TextColor = Color.Black
+                        } 
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 2, window.Width / 5, window.Height / 10), Color.Orange, menuFont, "Normal")
                         {
                             BorderWidth = 6,
-                            TextColor = Color.White,
-                            Shown = false
-                        },
-                        new Button(startButtonRectangle, Color.Green, menuFont, "Hard")
-                        {
-                            BorderWidth = 6,
-                            TextColor = Color.White,
-                            Shown = false
-                        },
-                        new Button(startButtonRectangle, Color.Green, menuFont, "Nightmare")
-                        {
-                            BorderWidth = 6,
-                            TextColor = Color.White,
-                            Shown = false
+                            TextColor = Color.Black
                         }
                 }, new Button[] {
-                        new Button(new Rectangle(window.Width / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Red, menuFont, "Return To Menu")
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, (int)(window.Height / 1.5), window.Width / 5, window.Height / 10), Color.Red, menuFont, "Hard")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 4) / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Black, menuFont, "Return To Menu")
                         {
                             BorderWidth = 6,
                             TextColor = Color.White
                         }
                     }
                 }),
-                new MenuText(menuFont, "Select your difficulty", new Vector2(window.Width / 2 - window.Width * 2 / 19, window.Width * 2 / 19))
+                new MenuText(largeFont, "Select your difficulty!", new Vector2(window.Width / 2 - largeFont.MeasureString("Select your difficulty!").X/2, window.Height / 6))
                 {
                     TextColor = Color.White
+
                 }
             });
 
@@ -626,6 +635,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            difficultyArrow = this.Content.Load<Texture2D>("difficultyArrow");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -1184,6 +1194,8 @@ namespace RoomRunner
         /// This is called when the game should draw itself.
         protected override void Draw(GameTime gameTime)
         {
+            KeyboardState kb = Keyboard.GetState();
+
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
@@ -1485,6 +1497,56 @@ namespace RoomRunner
                 //spriteBatch.DrawString(buttonFont, "Menu", new Vector2(menuButtonRectangle.X + 120, menuButtonRectangle.Y + 20), Color.White);
 
             }
+
+            Menu currentMenu = getCurrentMenu();
+
+
+
+            
+
+
+            if (gameState == GameState.Difficulty)
+            {
+                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
+
+                if (kb.IsKeyDown(Keys.Enter) || b.MouseClickedOnce)
+                {
+                    if (b.Text.Equals("Easy"))
+                        difficulty = Difficulty.Easy;
+                    if (b.Text.Equals("Normal"))
+                        difficulty = Difficulty.Normal;
+                    if (b.Text.Equals("Hard"))
+                        difficulty = Difficulty.Hard;
+
+                }
+
+                b = null;
+
+                switch (difficulty)
+                {
+
+                    case Difficulty.Easy:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[0];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Normal:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[1];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Hard:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[2];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                }
+
+                
+                
+                    
+            }
+
 
             Menu val = getCurrentMenu();
             if (val != null)
