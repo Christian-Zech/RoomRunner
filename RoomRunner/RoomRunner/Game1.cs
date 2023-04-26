@@ -111,6 +111,13 @@ namespace RoomRunner
         public List<Textbox> textboxes;
         public Textbox textbox;
 
+        //quest stuff
+        public Quest quest;
+        public int questID;
+        Texture2D runningGuy;
+        Rectangle coinSource;
+        int collectedCoins;
+
         public enum GameState
         {
             Menu,
@@ -158,7 +165,7 @@ namespace RoomRunner
             skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
             nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
             magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
-            
+            coinSource = new Rectangle(0, 160, 32, 32);
 
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
@@ -253,6 +260,10 @@ namespace RoomRunner
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
             };
             textboxesIndex = 0;
+
+            questID = rand.Next(0, 2);
+            quest = new Quest(questID);
+            collectedCoins = 0;
             base.Initialize();
 
                                                                                                                                                                                     
@@ -591,6 +602,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            runningGuy = Content.Load<Texture2D>("runningGuy");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -847,6 +859,8 @@ namespace RoomRunner
                         }
                     }
                 }
+                foreach (Player player in players)
+                    player.Save();
             }
             
 
@@ -907,12 +921,39 @@ namespace RoomRunner
                         return;
 
                 }
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rectangle.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
                         players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
                 }
-                    
+                if (!quest.completedAnim)
+                {
+                    quest.Update();
+                }
+                if (quest.completedQuest)
+                    quest.completedUpdate();
+                if (!quest.completedQuest)
+                {
+                    if (questID == 1 && quest.amnt <= collectedCoins)
+                    {
+                        quest.completedQuest = true;
+                    }
+                    else if (questID == 0 && quest.dist <= players[0].distanceTraveled)
+                    {
+                        quest.completedQuest = true;
+                    }
+                }
 
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
@@ -921,9 +962,6 @@ namespace RoomRunner
                 scrollSpeed = currentRoomIndex + 10;
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
-
-                
-
 
 
 
@@ -956,6 +994,7 @@ namespace RoomRunner
                         {
                             coin.Destroy();
                             p.Coins++;
+                            collectedCoins++;
                             soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
@@ -997,7 +1036,18 @@ namespace RoomRunner
                         weLiving = true;
                 }
                 if (!weLiving)
-                    gameState = GameState.GameOver;
+                    if (quest.completedQuest)
+                    {
+                        weLiving = true;
+                        foreach (Player p in players)
+                        {
+                            p.Health = 3;
+                            p.IsAlive = true;
+                        }
+                        quest.completedQuest = false;
+                    }
+                    else
+                        gameState = GameState.GameOver;
 
                 UpdateProjList(projectileList);
 
@@ -1082,11 +1132,17 @@ namespace RoomRunner
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
+
+                collectedCoins = 0;
+                questID = rand.Next(0, 2);
+                quest = new Quest(questID);
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
+
+            
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -1302,8 +1358,8 @@ namespace RoomRunner
                     levelTimer = 0;
                     levels++;
                 }
-                
 
+                
 
                 // scrolling calculations
                 
@@ -1350,17 +1406,7 @@ namespace RoomRunner
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
-                if (transition)
-                {
-                    //draws the obstacles in the next room
-                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
-                    {
-                        obstacle.Current.Velocity.X = scrollSpeed;
-                        if (obstacle.Current.Rectangle.Intersects(window))
-                            obstacle.Current.anim.Idle = false;
-                        obstacle.DrawAndUpdate(spriteBatch);
-                    }
-                }
+                
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
@@ -1415,8 +1461,19 @@ namespace RoomRunner
                     }
                 }
 
-                
-                
+
+                if (!quest.completedAnim || quest.completedQuest)
+                {
+                    if (questID == 1)
+                    {
+                        quest.Draw(spriteBatch, shopFontBold, collectableSheet, coinSource, pixel);
+                    }
+                    else
+                    {
+                        quest.Draw(spriteBatch, shopFontBold, jebSheet, new Rectangle(0, 0, 32, 32), pixel);
+                    }
+                }
+                    
 
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1528,6 +1585,14 @@ namespace RoomRunner
             return false;
         }
 
+        public void Save()
+        {
+            foreach (Player player in players)
+                player.Save();
+        }
+        public void Load()
+        {
 
+        }
     }
 }
