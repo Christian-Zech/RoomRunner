@@ -921,6 +921,17 @@ namespace RoomRunner
                         return;
 
                 }
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rectangle.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
@@ -936,11 +947,11 @@ namespace RoomRunner
                 {
                     if (questID == 1 && quest.amnt <= collectedCoins)
                     {
-                        //quest.completedQuest = true;
+                        quest.completedQuest = true;
                     }
                     else if (questID == 0 && quest.dist <= players[0].distanceTraveled)
                     {
-                        //quest.completedQuest = true;
+                        quest.completedQuest = true;
                     }
                 }
 
@@ -951,9 +962,6 @@ namespace RoomRunner
                 scrollSpeed = currentRoomIndex + 10;
 
                 roomList[currentRoomIndex].Update(scrollSpeed);
-
-                
-
 
 
 
@@ -1028,7 +1036,18 @@ namespace RoomRunner
                         weLiving = true;
                 }
                 if (!weLiving)
-                    gameState = GameState.GameOver;
+                    if (quest.completedQuest)
+                    {
+                        weLiving = true;
+                        foreach (Player p in players)
+                        {
+                            p.Health = 3;
+                            p.IsAlive = true;
+                        }
+                        quest.completedQuest = false;
+                    }
+                    else
+                        gameState = GameState.GameOver;
 
                 UpdateProjList(projectileList);
 
@@ -1387,17 +1406,7 @@ namespace RoomRunner
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
-                if (transition)
-                {
-                    //draws the obstacles in the next room
-                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
-                    {
-                        obstacle.Current.Velocity.X = scrollSpeed;
-                        if (obstacle.Current.Rectangle.Intersects(window))
-                            obstacle.Current.anim.Idle = false;
-                        obstacle.DrawAndUpdate(spriteBatch);
-                    }
-                }
+                
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);

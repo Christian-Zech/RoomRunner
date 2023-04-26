@@ -29,7 +29,7 @@ namespace RoomRunner
             rnd = new Random();
             if (i == 1)
             {
-                amnt = rnd.Next(100, 200);
+                amnt = rnd.Next(50, 100);
                 text = "Collect " + amnt + " coins for a chance to revive once you die!";
             }
             else
