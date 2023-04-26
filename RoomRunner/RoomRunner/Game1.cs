@@ -111,6 +111,10 @@ namespace RoomRunner
         public List<Textbox> textboxes;
         public Textbox textbox;
 
+        //quest stuff
+        public Quest quest;
+        public int questID;
+
         public enum GameState
         {
             Menu,
@@ -253,6 +257,9 @@ namespace RoomRunner
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
             };
             textboxesIndex = 0;
+
+            questID = 1;
+            quest = new Quest(questID);
             base.Initialize();
 
                                                                                                                                                                                     
@@ -914,7 +921,10 @@ namespace RoomRunner
                     if (players[i].IsAlive)
                         players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
                 }
-                    
+                if (!quest.completed)
+                {
+                    quest.Update(questID);
+                }
 
                 if (bossFight && currentBoss.IsDead)
                     currentBoss = null;
@@ -1304,8 +1314,8 @@ namespace RoomRunner
                     levelTimer = 0;
                     levels++;
                 }
-                
 
+                
 
                 // scrolling calculations
                 
@@ -1417,8 +1427,19 @@ namespace RoomRunner
                     }
                 }
 
-                
-                
+
+                if (!quest.completed)
+                {
+                    if (questID == 1)
+                    {
+                        quest.Draw(spriteBatch, shopFontBold, pixel, pixel);
+                    }
+                    else
+                    {
+
+                    }
+                }
+                    
 
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)

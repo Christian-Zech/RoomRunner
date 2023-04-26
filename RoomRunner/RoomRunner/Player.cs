@@ -262,11 +262,12 @@ namespace RoomRunner
             Coins = Int32.Parse(lines[0]);
             distanceHighScore = Int32.Parse(lines[1]);
             currentHat = (PlayerHats)Enum.Parse(typeof(PlayerHats), lines[2]);
-            string[] hats = lines[4].Split(' ');
+            string[] hats = lines[3].Split(' ');
             if (!hats[0].Equals(""))
             {
                 for (int i = 0; i < hats.Length; i++)
-                    ownedHats.Add(Int32.Parse(hats[i]));
+                    if (!hats[i].Equals("\r"))
+                        ownedHats.Add(Int32.Parse(hats[i]));
             }
             
         }
