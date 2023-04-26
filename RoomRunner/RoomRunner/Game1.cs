@@ -22,9 +22,12 @@ namespace RoomRunner
 
         public static Texture2D pixel;
         public Texture2D jebSheet;
+        public Texture2D difficultyArrow;
 
-        public SpriteFont menuFont { get { return fonts[1]; } }
+        public SpriteFont menuFont { get { return fonts[2]; } }
         public SpriteFont buttonFont { get { return fonts[0]; } }
+
+        
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -33,6 +36,7 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
+        Rectangle difficultyButtonRectangle;
         List<Rectangle> multiplayerButtons;
         List<bool> multiplayerButtonStates;
         Texture2D[] iconTextures;
@@ -76,9 +80,13 @@ namespace RoomRunner
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
         public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont { get { return fonts[2]; } }
-        public SpriteFont shopFontBold { get { return fonts[3]; } }
-        public SpriteFont shopTitleFont { get { return fonts[4]; } }
+        public SpriteFont shopFont { get { return fonts[4]; } }
+        public SpriteFont shopFontBold { get { return fonts[5]; } }
+        public SpriteFont shopTitleFont { get { return fonts[6]; } }
+
+        public SpriteFont menuFontBold {  get { return fonts[3]; } }
+
+        public SpriteFont largeFont { get { return fonts[1]; } }
 
         public int menuCoolDown;
 
@@ -125,7 +133,8 @@ namespace RoomRunner
             Play,
             Music,
             GameOver,
-            Cutscene
+            Cutscene,
+            Difficulty
         }
         
         public enum Levels
@@ -135,8 +144,16 @@ namespace RoomRunner
             Level3
         }
 
+        public enum Difficulty
+        {
+            Easy,
+            Normal,
+            Hard
+        }
+
         public static Levels levels;
         public static GameState gameState;
+        public static Difficulty difficulty;
 
         public Game1()
         {
@@ -218,6 +235,7 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
             MusicButtonRectangle = new Rectangle(window.Width / 2 - 140, 800, 350, 100);
+            difficultyButtonRectangle = new Rectangle(window.Width / 2 + 300, 400, 350, 100);
 
             powerups = new Powerups();
             activePowerupIndex = -1;
@@ -272,7 +290,7 @@ namespace RoomRunner
 
         private void GenMens()
         {
-            
+
             List<MenuThingie> butts = new List<MenuThingie>
             {
                 new Button(startButtonRectangle, new Color(0,255,0,255), menuFont, "Start")
@@ -289,17 +307,23 @@ namespace RoomRunner
                 {
                     BorderWidth = 6,
                     TextColor = Color.White
+                },
+                new Button(difficultyButtonRectangle, Color.Purple, menuFont, "Difficulty")
+                {
+                    BorderWidth = 6,
+                    TextColor = Color.White
                 }
+                
             };
             foreach (Rectangle r in multiplayerButtons)
                 butts.Add(new Button(r, iconTextures[0]));
-            (butts[3] as Button).Texture = iconTextures[1];
+            (butts[4] as Button).Texture = iconTextures[1];
 
             MenuThingie hold = new SelectionGrid(new Button[][]
             {
-                new Button[] {butts[3] as Button, butts[0] as Button},
-                new Button[] {butts[4] as Button, butts[1] as Button},
-                new Button[] {butts[5] as Button, butts[2] as Button}
+                new Button[] {butts[4] as Button, butts[0] as Button, butts[3] as Button},
+                new Button[] {butts[5] as Button, butts[1] as Button},
+                new Button[] {butts[6] as Button, butts[2] as Button}
             });
             butts.Clear();
             butts.Add(hold);
@@ -394,8 +418,49 @@ namespace RoomRunner
                     TextColor = Color.White
                 }
             });
-
             menus[GameState.GameOver] = new Menu(butts.ToArray());
+
+            butts.Clear();
+            butts.AddRange(new MenuThingie[]
+            {
+                new SelectionGrid(new Button[][] { new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 3, window.Width / 5, window.Height / 10), Color.Green, menuFont, "Easy")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        } 
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 2, window.Width / 5, window.Height / 10), Color.Orange, menuFont, "Normal")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, (int)(window.Height / 1.5), window.Width / 5, window.Height / 10), Color.Red, menuFont, "Hard")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 4) / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Black, menuFont, "Return To Menu")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White
+                        }
+                    }
+                }),
+                new MenuText(largeFont, "Select your difficulty!", new Vector2(window.Width / 2 - largeFont.MeasureString("Select your difficulty!").X/2, window.Height / 6))
+                {
+                    TextColor = Color.White
+
+                }
+            });
+
+
+
+            menus[GameState.Difficulty] = new Menu(butts.ToArray());
+            
+
             butts.Clear();
 
             butts.Add(new Button(new Rectangle(window.Width / 38 * 15 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Game Music")
@@ -603,6 +668,7 @@ namespace RoomRunner
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
             runningGuy = Content.Load<Texture2D>("runningGuy");
+            difficultyArrow = this.Content.Load<Texture2D>("difficultyArrow");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -737,6 +803,10 @@ namespace RoomRunner
                             gameState = GameState.Menu;
                             menuCoolDown = 2;
                             break;
+                        case GameState.Difficulty:
+                            gameState = GameState.Menu;
+                            menuCoolDown = 2;
+                            break;
                         default:
                             this.Exit();
                             break;
@@ -805,6 +875,22 @@ namespace RoomRunner
                         foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
                             mt.Shown = false;
                     }
+                    if(gameState == GameState.Menu && b.Text.Equals("Difficulty"))
+                    {
+                        gameState = GameState.Difficulty;
+                        menuCoolDown = 2;
+                    }
+                    if (gameState == GameState.Difficulty)
+                    {
+                        switch(b.Text)
+                        {
+                            case "Return To Menu":
+                                gameState = GameState.Menu;
+                                menuCoolDown = 2;
+                                break;
+
+                        }
+                    }
                 }
             }
             if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
@@ -841,9 +927,13 @@ namespace RoomRunner
                     if (b.MouseClickedOnce || KeyPressed(keyboard, Keys.Enter, Keys.Space))
                     {
                         int i = grid.Butts.ToList().IndexOf(grid.Current);
-                        if (i % 2 == 0)
+                        int[] hardCode = new int[] { 0, 3, 5 };
+                        if (hardCode.Contains(i))
                         {
-                            i /= 2;
+                            if (i == 3)
+                                i = 1;
+                            else if (i == 5)
+                                i = 2;
                             bool toSet = !multiplayerButtonStates[i];
                             if (toSet)
                                 for (int j = i; j >= 0; j--)
@@ -853,9 +943,9 @@ namespace RoomRunner
                                     multiplayerButtonStates[j] = false;
                             for (int ii = 0; ii < 3; ii++)
                                 if (multiplayerButtonStates[ii])
-                                    grid.Butts[ii * 2].Texture = iconTextures[1];
+                                    grid.Butts[hardCode[ii]].Texture = iconTextures[1];
                                 else
-                                    grid.Butts[ii * 2].Texture = iconTextures[0];
+                                    grid.Butts[hardCode[ii]].Texture = iconTextures[0];
                         }
                     }
                 }
@@ -1203,6 +1293,8 @@ namespace RoomRunner
         /// This is called when the game should draw itself.
         protected override void Draw(GameTime gameTime)
         {
+            KeyboardState kb = Keyboard.GetState();
+
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
@@ -1482,6 +1574,56 @@ namespace RoomRunner
                 }
 
             }
+
+            Menu currentMenu = getCurrentMenu();
+
+
+
+            
+
+
+            if (gameState == GameState.Difficulty)
+            {
+                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
+
+                if (kb.IsKeyDown(Keys.Enter) || b.MouseClickedOnce)
+                {
+                    if (b.Text.Equals("Easy"))
+                        difficulty = Difficulty.Easy;
+                    if (b.Text.Equals("Normal"))
+                        difficulty = Difficulty.Normal;
+                    if (b.Text.Equals("Hard"))
+                        difficulty = Difficulty.Hard;
+
+                }
+
+                b = null;
+
+                switch (difficulty)
+                {
+
+                    case Difficulty.Easy:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[0];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Normal:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[1];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Hard:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[2];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                }
+
+                
+                
+                    
+            }
+
 
             Menu val = getCurrentMenu();
             if (val != null)

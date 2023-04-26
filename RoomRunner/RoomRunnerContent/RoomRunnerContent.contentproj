@@ -229,6 +229,25 @@
       <Name>runningGuy</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
+     </Compile>
+    <Compile Include="SpriteFonts\largeFont.spritefont">
+      <Name>largeFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="SpriteFonts\menuFontBold.spritefont">
+      <Name>menuFontBold</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="difficultyArrow.png">
+      <Name>difficultyArrow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

@@ -348,6 +348,7 @@ namespace RoomRunner
     public class SelectionGrid : MenuThingie
     {
         public readonly static Animation Pointer;
+        
 
         public Button[][] Grid;
         public Button Current { get { return GetSelected(Selected); } }
