@@ -114,6 +114,9 @@ namespace RoomRunner
         //quest stuff
         public Quest quest;
         public int questID;
+        Texture2D runningGuy;
+        Rectangle coinSource;
+        int collectedCoins;
 
         public enum GameState
         {
@@ -162,7 +165,7 @@ namespace RoomRunner
             skull = new List<Rectangle> { new Rectangle(96, 32, 32, 32), new Rectangle(128, 32, 32, 32), new Rectangle(0, 64, 32, 32), new Rectangle(32, 64, 32, 32), new Rectangle(64, 64, 32, 32) };
             nuke = new List<Rectangle> { new Rectangle(96, 64, 32, 32), new Rectangle(128, 64, 32, 32), new Rectangle(0, 96, 32, 32), new Rectangle(32, 96, 32, 32), new Rectangle(64, 96, 32, 32), new Rectangle(96, 96, 32, 32), new Rectangle(128, 96, 32, 32), new Rectangle(0, 128, 32, 32) };
             magnet = new List<Rectangle> { new Rectangle(32, 128, 32, 32), new Rectangle(64, 128, 32, 32), new Rectangle(96, 128, 32, 32), new Rectangle(128, 128, 32, 32) };
-            
+            coinSource = new Rectangle(0, 160, 32, 32);
 
             collectableRect = Player.LoadSheet(5, 6, 32, 32, 1);
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
@@ -258,8 +261,9 @@ namespace RoomRunner
             };
             textboxesIndex = 0;
 
-            questID = 1;
+            questID = rand.Next(0, 2);
             quest = new Quest(questID);
+            collectedCoins = 0;
             base.Initialize();
 
                                                                                                                                                                                     
@@ -598,6 +602,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            runningGuy = Content.Load<Texture2D>("runningGuy");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -921,9 +926,22 @@ namespace RoomRunner
                     if (players[i].IsAlive)
                         players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
                 }
-                if (!quest.completed)
+                if (!quest.completedAnim)
                 {
-                    quest.Update(questID);
+                    quest.Update();
+                }
+                if (quest.completedQuest)
+                    quest.completedUpdate();
+                if (!quest.completedQuest)
+                {
+                    if (questID == 1 && quest.amnt <= collectedCoins)
+                    {
+                        //quest.completedQuest = true;
+                    }
+                    else if (questID == 0 && quest.dist <= players[0].distanceTraveled)
+                    {
+                        //quest.completedQuest = true;
+                    }
                 }
 
                 if (bossFight && currentBoss.IsDead)
@@ -968,6 +986,7 @@ namespace RoomRunner
                         {
                             coin.Destroy();
                             p.Coins++;
+                            collectedCoins++;
                             soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
                         }
                     }
@@ -1094,11 +1113,17 @@ namespace RoomRunner
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
+
+                collectedCoins = 0;
+                questID = rand.Next(0, 2);
+                quest = new Quest(questID);
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
+
+            
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -1428,15 +1453,15 @@ namespace RoomRunner
                 }
 
 
-                if (!quest.completed)
+                if (!quest.completedAnim || quest.completedQuest)
                 {
                     if (questID == 1)
                     {
-                        quest.Draw(spriteBatch, shopFontBold, pixel, pixel);
+                        quest.Draw(spriteBatch, shopFontBold, collectableSheet, coinSource, pixel);
                     }
                     else
                     {
-
+                        quest.Draw(spriteBatch, shopFontBold, jebSheet, new Rectangle(0, 0, 32, 32), pixel);
                     }
                 }
                     
