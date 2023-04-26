@@ -13,6 +13,7 @@ namespace RoomRunner
         public List<MenuThingie> thingies;
         public MenuThingie LastTouched;
         public Menu LinkedMenu;
+        public Texture2D Background;
         public Menu(params MenuThingie[] butts)
         {
             thingies = new List<MenuThingie>(butts);
@@ -20,6 +21,7 @@ namespace RoomRunner
 
         public void DrawAndUpdate(SpriteBatch sb)
         {
+            if (Background != default) sb.Draw(Background, Game1.window, new Color(255, 255, 255, 200));
             bool hasLink = LinkedMenu != default;
             foreach (MenuThingie b in thingies)
             {
@@ -558,7 +560,7 @@ namespace RoomRunner
         public void SetPercent(float percent)
         {
             Percent = percent;
-            Knob.Rectangle.X = (int)Math.Round(DrawRectangle.X + 100 / (float)DrawRectangle.Width * percent);
+            Knob.Rectangle.X = (int)Math.Round(DrawRectangle.X + (float)DrawRectangle.Width * percent);
         }
 
     }

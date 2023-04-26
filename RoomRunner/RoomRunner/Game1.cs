@@ -54,6 +54,8 @@ namespace RoomRunner
         public static Powerups powerups;
         public int activePowerupIndex;
         int slowTimeTemp;
+        public Texture2D DeathTxt;
+        public byte DeathTimer;
 
 
         private int gameTimer;
@@ -118,7 +120,8 @@ namespace RoomRunner
             Play,
             Music,
             GameOver,
-            Cutscene
+            Cutscene,
+            Death
         }
         
         public enum Levels
@@ -422,6 +425,11 @@ namespace RoomRunner
 
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
+
+            menus[GameState.Menu].Background = Content.Load<Texture2D>("MenuBGs/BG");
+            menus[GameState.Shop].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.Music].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.GameOver].Background = Content.Load<Texture2D>("MenuBGs/Death_blurred");
         }
         private Animation[] GenShopButts()
         {
@@ -606,6 +614,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            DeathTxt = Content.Load<Texture2D>("MenuBGs/Death");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -746,6 +755,9 @@ namespace RoomRunner
                     }
             }
             Menu currentMenu = getCurrentMenu();
+
+            if (DeathTimer > 0)
+                DeathTimer--;
 
             // controls the main menu with each gamestate representing a different portion of the game
 
@@ -1030,7 +1042,11 @@ namespace RoomRunner
                         weLiving = true;
                 }
                 if (!weLiving)
-                    gameState = GameState.GameOver;
+                {
+                    gameState = GameState.Cutscene;
+                    cutsceneDestination = GameState.Death;
+                    DeathTimer = byte.MaxValue;
+                }
 
                 UpdateProjList(projectileList);
 
@@ -1115,6 +1131,15 @@ namespace RoomRunner
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
+
+            }
+            if (gameState == GameState.Death)
+            {
+                if (DeathTimer == 0)
+                {
+                    gameState = GameState.Cutscene;
+                    cutsceneDestination = GameState.GameOver;
+                }
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
@@ -1180,16 +1205,20 @@ namespace RoomRunner
         /// This is called when the game should draw itself.
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
+            if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene || gameState == GameState.GameOver) GraphicsDevice.Clear(Color.Black);
+            else GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
+            Menu val = getCurrentMenu();
+            if (val != null)
+                val.DrawAndUpdate(spriteBatch);
+            if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene)
 
-            
 
-            
+
 
             // menu
-            if(gameState == GameState.Menu)
+            if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
@@ -1197,15 +1226,6 @@ namespace RoomRunner
                     Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
 
                     Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
-
-
-                    // Title screen animation
-                    if (halfSeconds % 2 == 0)
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
-                    else
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
-                    spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
 
@@ -1312,7 +1332,7 @@ namespace RoomRunner
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
             }
-            if (gameState == GameState.Play)
+            if (gameState == GameState.Play || (cutsceneDestination == GameState.Death && gameState == GameState.Cutscene))
             {
 
                 
@@ -1451,10 +1471,21 @@ namespace RoomRunner
                 }
 
             }
+            if (gameState == GameState.Death) spriteBatch.Draw(DeathTxt, window, Color.White);
+            if (gameState == GameState.Cutscene && cutsceneDestination == GameState.GameOver)
+            {
+                spriteBatch.Draw(DeathTxt, window, Color.White);
+                spriteBatch.Draw(pixel, window, new Color(0, 0, 0, cutscenes.alpha));
+            }
+            if (gameState == GameState.Death || gameState == GameState.GameOver)
+            {
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha < 1 && !cutscenes.phase)
+                {
+                    cutscenes = new Cutscene();
+                }
+            }
 
-            Menu val = getCurrentMenu();
-            if (val != null)
-                val.DrawAndUpdate(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
