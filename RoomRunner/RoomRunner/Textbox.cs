@@ -53,6 +53,11 @@ namespace RoomRunner
                 exited = true;
             }
         }
+        public void Recalculate(Vector2 newPoint)
+        {
+            distance = (int)Math.Sqrt(Math.Pow(rect.X + rect.Width / 2 - newPoint.X, 2) + Math.Pow(rect.Y + rect.Height / 2 - newPoint.Y, 2));
+            angle = (float)Math.Atan2(rect.Y + rect.Height / 2 - newPoint.Y, rect.X + rect.Width / 2 - newPoint.X);
+        }
         public void Draw(SpriteBatch spriteBatch, Texture2D pixel, SpriteFont font)
         {
             if (arrowEndPoint != null)
