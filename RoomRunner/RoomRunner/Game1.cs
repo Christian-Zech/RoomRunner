@@ -249,16 +249,8 @@ namespace RoomRunner
 
             tutorialActive = false;
             tutorialRect = new Rectangle(window.Width/2, 280, 60, 60);
-            textboxes = new List<Textbox>
-            {
-                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
-                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
-                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(musicScreen.sliderHandleMusic.X, musicScreen.sliderHandleMusic.Y)),
-                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X+musicScreen.customMusicButton.Width/2, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
-                new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
-                new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
-                new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
-            };
+
+            
             textboxesIndex = 0;
 
             questID = rand.Next(0, 2);
@@ -623,7 +615,16 @@ namespace RoomRunner
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
 
-
+            textboxes = new List<Textbox>
+            {
+                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
+                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
+                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(menus[GameState.Music].thingies[0].Rectangle.X, musicScreen.sliderHandleMusic.Y)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X+musicScreen.customMusicButton.Width/2, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
+                new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
+                new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
+                new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
+            };
         }
         private void LoadFonts()
         {
@@ -1206,13 +1207,18 @@ namespace RoomRunner
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-
+            if (!tutorialActive)
+            {
+                Menu val = getCurrentMenu();
+                if (val != null)
+                    val.DrawAndUpdate(spriteBatch);
+            }
             
 
-            
+
 
             // menu
-            if(gameState == GameState.Menu)
+            if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
@@ -1251,16 +1257,31 @@ namespace RoomRunner
                     switch (textboxesIndex)
                     {
                         case 0:
-                            //menu.draw once samuel does it
+                            menus[GameState.Menu].DrawAndUpdate(spriteBatch);
                             break;
                         case 1:
-                            //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            menus[GameState.Shop].DrawAndUpdate(spriteBatch);
+                            Button[] arr = (menus[GameState.Shop].thingies[0] as SelectionGrid).Butts;
+                            for (int c = 4, i = 1; i < arr.Length; i++, c++)
+                                if (i <= 7)
+                                {
+                                    if (players[0].ownedHats.Contains(i))
+                                        arr[c].BGColor = Color.Green;
+                                }
+                                else
+                                    if (players[0].ownedHats.Contains(i + 2))
+                                    arr[c].BGColor = Color.Green;
+                            menuCoolDown = 2;
                             break;
                         case 2:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
+                            Slider temp = menus[GameState.Music].thingies[2] as Slider;
+                            //textboxes[textboxesIndex].arrowEndPoint.X = temp.Knob.Rectangle.X;
+                            Console.WriteLine(temp.Knob.Rectangle.X);
+                            //textboxes[textboxesIndex].Recalculate(new Vector2(temp.Knob.Rectangle.X, temp.Knob.Rectangle.Y)) ;
                             break;
                         case 3:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
                             break;
                         
                         default:
@@ -1483,9 +1504,7 @@ namespace RoomRunner
 
             }
 
-            Menu val = getCurrentMenu();
-            if (val != null)
-                val.DrawAndUpdate(spriteBatch);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
