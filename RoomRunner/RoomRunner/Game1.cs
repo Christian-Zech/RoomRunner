@@ -1206,13 +1206,18 @@ namespace RoomRunner
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-
+            if (!tutorialActive)
+            {
+                Menu val = getCurrentMenu();
+                if (val != null)
+                    val.DrawAndUpdate(spriteBatch);
+            }
             
 
-            
+
 
             // menu
-            if(gameState == GameState.Menu)
+            if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
@@ -1251,16 +1256,27 @@ namespace RoomRunner
                     switch (textboxesIndex)
                     {
                         case 0:
-                            //menu.draw once samuel does it
+                            menus[GameState.Menu].DrawAndUpdate(spriteBatch);
                             break;
                         case 1:
-                            //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            menus[GameState.Shop].DrawAndUpdate(spriteBatch);
+                            Button[] arr = (menus[GameState.Shop].thingies[0] as SelectionGrid).Butts;
+                            for (int c = 4, i = 1; i < arr.Length; i++, c++)
+                                if (i <= 7)
+                                {
+                                    if (players[0].ownedHats.Contains(i))
+                                        arr[c].BGColor = Color.Green;
+                                }
+                                else
+                                    if (players[0].ownedHats.Contains(i + 2))
+                                    arr[c].BGColor = Color.Green;
+                            menuCoolDown = 2;
                             break;
                         case 2:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
                             break;
                         case 3:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
                             break;
                         
                         default:
@@ -1483,9 +1499,7 @@ namespace RoomRunner
 
             }
 
-            Menu val = getCurrentMenu();
-            if (val != null)
-                val.DrawAndUpdate(spriteBatch);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
