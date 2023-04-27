@@ -104,6 +104,13 @@ namespace RoomRunner
         public void Update()
         {
             if (!InFrame) return;
+            if (Program.Game.activePowerupIndex == 0)
+            {
+                //Program.Game.slowTimeTemp++;
+                if (Program.Game.slowTimeTemp % 2 == 0)
+                    return;
+
+            }
             if (Lifespan > 0) Lifespan--;
             IsInFrame();
             if (Lifespan == 0) { InFrame = false; DeltDamage = true; }

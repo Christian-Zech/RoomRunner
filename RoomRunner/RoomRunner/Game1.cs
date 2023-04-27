@@ -53,7 +53,7 @@ namespace RoomRunner
         private int amountOfRooms;
         public static Powerups powerups;
         public int activePowerupIndex;
-        int slowTimeTemp;
+        public int slowTimeTemp;
 
 
         private int gameTimer;
