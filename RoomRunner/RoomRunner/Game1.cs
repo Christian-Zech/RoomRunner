@@ -117,6 +117,7 @@ namespace RoomRunner
         Texture2D runningGuy;
         Rectangle coinSource;
         int collectedCoins;
+        bool revived;
 
         public enum GameState
         {
@@ -256,6 +257,7 @@ namespace RoomRunner
             questID = rand.Next(0, 2);
             quest = new Quest(questID);
             collectedCoins = 0;
+            revived = false;
             base.Initialize();
 
                                                                                                                                                                                     
@@ -922,17 +924,7 @@ namespace RoomRunner
                         return;
 
                 }
-                if (transition)
-                {
-                    //draws the obstacles in the next room
-                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
-                    {
-                        obstacle.Current.Velocity.X = scrollSpeed;
-                        if (obstacle.Current.Rectangle.Intersects(window))
-                            obstacle.Current.anim.Idle = false;
-                        obstacle.DrawAndUpdate(spriteBatch);
-                    }
-                }
+                
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
@@ -944,7 +936,7 @@ namespace RoomRunner
                 }
                 if (quest.completedQuest)
                     quest.completedUpdate();
-                if (!quest.completedQuest)
+                if (!quest.completedQuest && !revived)
                 {
                     if (questID == 1 && quest.amnt <= collectedCoins)
                     {
@@ -1045,7 +1037,7 @@ namespace RoomRunner
                             p.Health = 3;
                             p.IsAlive = true;
                         }
-                        quest.completedQuest = false;
+                        revived = true;
                     }
                     else
                         gameState = GameState.GameOver;
@@ -1137,6 +1129,7 @@ namespace RoomRunner
                 collectedCoins = 0;
                 questID = rand.Next(0, 2);
                 quest = new Quest(questID);
+                revived = false;
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
@@ -1359,7 +1352,17 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
 
-                
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rectangle.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
 
 
 
