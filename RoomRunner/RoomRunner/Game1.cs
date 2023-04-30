@@ -122,6 +122,10 @@ namespace RoomRunner
         bool revived;
         private bool HasReset;
 
+        bool saving;
+        string savingText;
+        Color saveColor;
+
         public enum GameState
         {
             Menu,
@@ -258,7 +262,9 @@ namespace RoomRunner
 
 
             textboxesIndex = 0;
-
+            savingText = "saving...";
+            saving = false;
+            saveColor = Color.Black;
             questID = rand.Next(0, 2);
             quest = new Quest(questID);
             collectedCoins = 0;
@@ -857,7 +863,7 @@ namespace RoomRunner
                         gameState = GameState.Music;
                         menuCoolDown = 2;
                     }
-
+                    
                     if (gameState == GameState.GameOver && b.Text.Equals("Menu"))
                     {
                         gameState = GameState.Menu;
@@ -872,6 +878,7 @@ namespace RoomRunner
                     if (gameState == GameState.Music && b.Text.Equals("Save"))
                     {
                         Save();
+                        saving = true;
                     }
 
                     if (gameState == GameState.Music && b.Text.Equals("Clear Save*"))
@@ -1340,6 +1347,21 @@ namespace RoomRunner
         }
 
         /// This is called when the game should draw itself.
+        /// 
+        public void DrawSavingText()
+        {
+            if (saving && savingText.Equals("saved") && saveColor != new Color(0, 0, 0, 0))
+                saveColor = new Color(0, 0, 0, (byte)(saveColor.A-3));
+            else
+            {
+                savingText = "saving...";
+                saving = false;
+                saveColor = Color.Black;
+                return;
+            }
+                
+            spriteBatch.DrawString(shopFontBold, savingText, new Vector2(window.Width - shopFont.MeasureString(savingText).X - 20, window.Height - shopFontBold.MeasureString(savingText).Y - 10), saveColor);
+        }
         protected override void Draw(GameTime gameTime)
         {
             if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene || gameState == GameState.GameOver) GraphicsDevice.Clear(Color.Black);
@@ -1452,6 +1474,10 @@ namespace RoomRunner
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
+                if (saving)
+                {
+                    DrawSavingText();
+                }
             }
             if (gameState == GameState.Play || (cutsceneDestination == GameState.Death && gameState == GameState.Cutscene))
             {
@@ -1726,6 +1752,7 @@ namespace RoomRunner
                 player.Save();
             string str = musicVolume + "\n" + soundVolume;
             SaveAndLoad.Save(str, "SettingsData.txt");
+            savingText = "saved";
         }
         public void Load()
         {
