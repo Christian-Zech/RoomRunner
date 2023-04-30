@@ -807,7 +807,9 @@ namespace RoomRunner
                     {
                         gameState = GameState.Shop;
                         Button[] arr = (menus[gameState].thingies[0] as SelectionGrid).Butts;
-                        for (int c = 4, i = 1; i < arr.Length; i++,c++)
+                        for (int c = 4, i = 1; i < arr.Length; i++, c++)
+                        {
+                            if (c == 12 || c == 15) continue;
                             if (i <= 7)
                             {
                                 if (players[0].ownedHats.Contains(i))
@@ -816,6 +818,7 @@ namespace RoomRunner
                             else
                                 if (players[0].ownedHats.Contains(i + 2))
                                 arr[c].BGColor = Color.Green;
+                        }
                         menuCoolDown = 2;
                     }
                     if (gameState == GameState.Music)
