@@ -1212,30 +1212,14 @@ namespace RoomRunner
             Menu val = getCurrentMenu();
             if (val != null)
                 val.DrawAndUpdate(spriteBatch);
-            if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene)
-
-
-
 
             // menu
             if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
-                    int halfSeconds = gameTimer / 30;
-                    Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
-
-                    Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
 
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
-
-                    for (int i = 0; i < multiplayerButtons.Count; i++)
-                    {
-                        if (multiplayerButtonStates[i])
-                            spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
-                        else
-                            spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
-                    }
 
                     cutscenes.Draw(spriteBatch, pixel);
                     if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1243,23 +1227,26 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-                else
+
+            }
+            if (tutorialActive)
+            {
                 {
                     switch (textboxesIndex)
                     {
                         case 0:
-                            //menu.draw once samuel does it
+                            gameState = GameState.Menu;
                             break;
                         case 1:
-                            //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            gameState = GameState.Shop;
                             break;
                         case 2:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            gameState = GameState.Music;
                             break;
                         case 3:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            gameState = GameState.Music;
                             break;
-                        
+
                         default:
                             if (!transition)
                                 levelTimer++;
@@ -1307,7 +1294,6 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-
             }
             if (gameState == GameState.Cutscene)
             {

@@ -106,16 +106,16 @@ namespace RoomRunner
     public class Button : MenuThingie
     {
         public readonly MenuText MText;
-        public string Text { get { return MText.Text; } }
-        public SpriteFont Font { get { return MText.Font; } }
+        public string Text { get { if (MText == default) return default; return MText.Text; } }
+        public SpriteFont Font { get { if (MText == default) return default; return MText.Font; } }
         private Color col;
-        public Color TextColor { get { return MText.TextColor; } set { MText.TextColor = value; } }
+        public Color TextColor { get { if (MText == default) return default; return MText.TextColor; } set { if (MText == default) return; MText.TextColor = value; } }
         public Color DrawColor { get { return col; }  set { col = value; } }
         private Texture2D txt;
         public Texture2D Texture { get { return txt; } set { txt = value; } }
         public bool MouseClicked, MouseClickedOnce;
         private MouseState oldms;
-        public Vector2 TextPosition { get { return MText.Position; } set { MText.Position = value; } }
+        public Vector2 TextPosition { get { if (MText == default) return default; return MText.Position; } set { if (MText == default) return; MText.Position = value; } }
         public Animation Animation;
         private Rectangle OldRect;
 
