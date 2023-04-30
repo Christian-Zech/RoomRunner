@@ -120,6 +120,7 @@ namespace RoomRunner
         Rectangle coinSource;
         int collectedCoins;
         bool revived;
+        private bool HasReset;
 
         public enum GameState
         {
@@ -196,6 +197,7 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoomIndex = 10;
+            HasReset = true;
 
             multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
             multiplayerButtonStates = new List<bool> { true, false, false };
@@ -876,12 +878,10 @@ namespace RoomRunner
                         }
                         if (b.Text.Equals("Add Music"))
                         {
-                            int len = musicScreen.customMusicNames.Count;
                             string s = new FileDialogue().Show();
                             if (s != "")
-                                musicScreen.customMusicNames.Add(s);
-                            if (len != musicScreen.customMusicNames.Count)
                             {
+                                musicScreen.customMusicNames.Add(s);
                                 (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
                                 (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
                             }
@@ -907,10 +907,11 @@ namespace RoomRunner
             if (menuCoolDown > 0)
                 menuCoolDown--;
 
+            if (gameState == GameState.Menu && musicScreen.customMusicNames.Count > 0 && menuCoolDown != 0)
+                LoadCustomSongs();
             if (gameState == GameState.Menu && menuCoolDown == 0)
             {
-                if (musicScreen.customMusic)
-                    LoadCustomSongs();
+                
 
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
@@ -948,8 +949,9 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
+                if (HasReset) HasReset = false;
                 gameSongListInstance[3].Stop();
-                if (musicScreen.customMusic) //if custom music is selected
+                if (musicScreen.customMusicNames.Count > 0) //if custom music is selected
                 {
                     if (customSongList.Count != 0)
                     {
@@ -1187,28 +1189,8 @@ namespace RoomRunner
             gameTimer++;
             if (gameState == GameState.Death)
             {
-                for (int i = 0; i < players.Count; i++)
-                {
-                    players[i].distanceTraveled = 0;
-                }
-
-                if (musicScreen.customMusic)
-                {
-                    LoadCustomSongs();
-                    loadSoundEffects();
-                    customSongIndex = 0;
-                    songTimeElapsed = 0;
-                }
-                else
-                {
-                    loadGameSongs(1);
-                    loadSoundEffects();
-                    gameSongListIndex = 0;
-                    songTimeElapsed = 0;
-                }
-
-                activePowerupIndex = -1;
-                powerups.RemovePowerups();
+                if (!HasReset)
+                Reset();
             }
             if (gameState == GameState.Death)
             {
@@ -1271,6 +1253,30 @@ namespace RoomRunner
 
         private void Reset()
         {
+            HasReset = true;
+            for (int i = 0; i < players.Count; i++)
+            {
+                players[i].distanceTraveled = 0;
+            }
+
+            if (musicScreen.customMusicNames.Count > 0)
+            {
+                LoadCustomSongs();
+                loadSoundEffects();
+                customSongIndex = 0;
+                songTimeElapsed = 0;
+            }
+            else
+            {
+                loadGameSongs(1);
+                loadSoundEffects();
+                gameSongListIndex = 0;
+                songTimeElapsed = 0;
+            }
+
+            activePowerupIndex = -1;
+            powerups.RemovePowerups();
+
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
