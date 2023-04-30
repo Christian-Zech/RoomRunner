@@ -56,7 +56,6 @@ namespace RoomRunner
         public int slowTimeTemp;
         public Texture2D DeathTxt;
         public byte DeathTimer;
-        public int slowTimeTemp;
 
 
         private int gameTimer;
@@ -1082,18 +1081,18 @@ namespace RoomRunner
                     if (p.IsAlive)
                         weLiving = true;
                 }
-                if (quest.completedQuest)
+                if (!weLiving)
                 {
-                    weLiving = true;
-                    foreach (Player p in players)
+                    if (quest.completedQuest && !revived)
                     {
-                        p.Health = Player.MaxHealth;
-                        p.IsAlive = true;
+                        weLiving = true;
+                        foreach (Player p in players)
+                        {
+                            p.Health = Player.MaxHealth;
+                            p.IsAlive = true;
+                        }
+                        revived = true;
                     }
-                    revived = true;
-                }
-                else
-                {
                     gameState = GameState.Cutscene;
                     cutsceneDestination = GameState.Death;
                     DeathTimer = byte.MaxValue;
@@ -1300,31 +1299,16 @@ namespace RoomRunner
                     switch (textboxesIndex)
                     {
                         case 0:
-                            menus[GameState.Menu].DrawAndUpdate(spriteBatch);
+                            gameState = GameState.Menu;
                             break;
                         case 1:
-                            menus[GameState.Shop].DrawAndUpdate(spriteBatch);
-                            Button[] arr = (menus[GameState.Shop].thingies[0] as SelectionGrid).Butts;
-                            for (int c = 4, i = 1; i < arr.Length; i++, c++)
-                                if (i <= 7)
-                                {
-                                    if (players[0].ownedHats.Contains(i))
-                                        arr[c].BGColor = Color.Green;
-                                }
-                                else
-                                    if (players[0].ownedHats.Contains(i + 2))
-                                    arr[c].BGColor = Color.Green;
-                            menuCoolDown = 2;
+                            gameState = GameState.Shop;
                             break;
                         case 2:
-                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
-                            Slider temp = menus[GameState.Music].thingies[2] as Slider;
-                            //textboxes[textboxesIndex].arrowEndPoint.X = temp.Knob.Rectangle.X;
-                            Console.WriteLine(temp.Knob.Rectangle.X);
-                            //textboxes[textboxesIndex].Recalculate(new Vector2(temp.Knob.Rectangle.X, temp.Knob.Rectangle.Y)) ;
+                            gameState = GameState.Music;
                             break;
                         case 3:
-                            menus[GameState.Music].DrawAndUpdate(spriteBatch);
+                            gameState = GameState.Music;
                             break;
 
                         default:
@@ -1420,7 +1404,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)

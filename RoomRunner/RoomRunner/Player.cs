@@ -274,15 +274,15 @@ namespace RoomRunner
             if (data.Equals(""))
                 return;
             string[] lines = data.Split('\n');
-            Coins = Int32.Parse(lines[0]);
-            distanceHighScore = Int32.Parse(lines[1]);
+            Coins = int.Parse(lines[0]);
+            distanceHighScore = int.Parse(lines[1]);
             currentHat = (PlayerHats)Enum.Parse(typeof(PlayerHats), lines[2]);
             string[] hats = lines[3].Split(' ');
             if (!hats[0].Equals(""))
             {
                 for (int i = 0; i < hats.Length; i++)
                     if (!hats[i].Equals("\r"))
-                        ownedHats.Add(Int32.Parse(hats[i]));
+                        ownedHats.Add(int.Parse(hats[i]));
             }
             
         }
