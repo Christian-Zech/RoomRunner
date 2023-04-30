@@ -403,7 +403,7 @@ namespace RoomRunner
             {
                 BorderWidth = 3
             });
-
+            
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
             (butts[2] as Slider).SetPercent((float)soundVolume);
@@ -412,24 +412,36 @@ namespace RoomRunner
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
 
-            butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height * 2 / 10, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
+            butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height / 10 * 3, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
             {
                 BorderWidth = 3,
                 Shown = false
             });
 
-            butts.Add(new MenuText(shopFont, () =>
+            butts.Add(new MenuText(shopFontBold, () =>
             {
-                string a = "Playlist:\n";
+                string a = "            Playlist:\n\n";
+                int i = 1;
+                Vector2 ogLen = shopFontBold.MeasureString("Playlist:");
                 foreach (string b in musicScreen.customMusicNames)
-                    a += b.Substring(b.LastIndexOf('\\') + 1) + "\n";
+                {
+                    string s = b.Substring(b.LastIndexOf('\\') + 1);
+                    Vector2 len = shopFontBold.MeasureString(i + ". " + s);
+                    int xDiff = (int)(len.X - ogLen.X);
+                    Console.WriteLine(xDiff);
+                    for (int x = 12; x > xDiff/20; x--)
+                        a += " ";
+                    a += i + ". " + b.Substring(b.LastIndexOf('\\') + 1) + "\n";
+                    i++;
+                }
+                    
                 return a;
             },
-            new Vector2(window.Width / 19 * 15, window.Height / 10))
+            new Vector2(window.Width / 19 * 15 - shopFontBold.MeasureString("            ").X, window.Height / 10 * 3 - 80))
             {
                 Shown = false
             }); ;
-
+            butts.Add(new MenuText(shopTitleFont, "SETTINGS", new Vector2(window.Width / 2.79f, window.Height / 25)));
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
 
@@ -650,13 +662,14 @@ namespace RoomRunner
             loadSoundEffects();
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
-
+            Slider temp = menus[GameState.Music].thingies[2] as Slider;
+            Rectangle knobRect = temp.Knob.Rectangle;
             textboxes = new List<Textbox>
             {
                 new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
                 new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
                 new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(menus[GameState.Music].thingies[0].Rectangle.X, musicScreen.sliderHandleMusic.Y)),
-                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X+musicScreen.customMusicButton.Width/2, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(temp.Knob.Rectangle.X+temp.Knob.Rectangle.Width, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
                 new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
                 new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
@@ -844,6 +857,7 @@ namespace RoomRunner
                         {
                             foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
                                 mt.Shown = false;
+                            //b.BGColor = new Color(44, 44, 44);
                         }
                         if (b.Text.Equals("Custom Music"))
                         {
@@ -1093,9 +1107,13 @@ namespace RoomRunner
                         }
                         revived = true;
                     }
-                    gameState = GameState.Cutscene;
-                    cutsceneDestination = GameState.Death;
-                    DeathTimer = byte.MaxValue;
+                    else
+                    {
+                        gameState = GameState.Cutscene;
+                        cutsceneDestination = GameState.Death;
+                        DeathTimer = byte.MaxValue;
+                    }
+                    
                 }
 
                 UpdateProjList(projectileList);
