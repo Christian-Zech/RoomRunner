@@ -120,7 +120,6 @@ namespace RoomRunner
         Rectangle coinSource;
         int collectedCoins;
         bool revived;
-        private bool HasReset;
 
         public enum GameState
         {
@@ -132,7 +131,7 @@ namespace RoomRunner
             Cutscene,
             Death
         }
-        
+
         public enum Levels
         {
             Level1,
@@ -185,7 +184,7 @@ namespace RoomRunner
             jebList = new List<Rectangle>();
             projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
-            
+
 
             amountOfRooms = 5;
             scrollSpeed = 10;
@@ -197,7 +196,6 @@ namespace RoomRunner
             gameTimer = 0;
             levelTimer = 0;
             currentRoomIndex = 10;
-            HasReset = true;
 
             multiplayerButtons = new List<Rectangle> { new Rectangle(550, 420, 80, 80), new Rectangle(550, 620, 80, 80), new Rectangle(550, 800, 80, 80) };
             multiplayerButtonStates = new List<bool> { true, false, false };
@@ -254,9 +252,9 @@ namespace RoomRunner
             oldMouse = Mouse.GetState();
 
             tutorialActive = false;
-            tutorialRect = new Rectangle(window.Width/2, 280, 60, 60);
+            tutorialRect = new Rectangle(window.Width / 2, 280, 60, 60);
 
-            
+
             textboxesIndex = 0;
 
             questID = rand.Next(0, 2);
@@ -265,13 +263,13 @@ namespace RoomRunner
             revived = false;
             base.Initialize();
 
-                                                                                                                                                                                    
+
 
         }
 
         private void GenMens()
         {
-            
+
             List<MenuThingie> butts = new List<MenuThingie>
             {
                 new Button(startButtonRectangle, new Color(0,255,0,255), menuFont, "Start")
@@ -347,7 +345,7 @@ namespace RoomRunner
             butts.Add(new Box(new Rectangle(window.Width * 13 / 16, window.Height * 2 / 18, size, size), anims[14], shopFont, () => "Coins: " + players[CurrentPlayerInShop].Coins));
             butts.Add(new Box(new Rectangle(window.Width * 5 / 32, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
             butts.Add(new MenuText(shopTitleFont, "SHOP", new Vector2(window.Width / 2.43f, window.Height / 25)));
-            
+
             foreach (MenuThingie a in butts)
             {
                 if (a is Button)
@@ -405,7 +403,7 @@ namespace RoomRunner
             {
                 BorderWidth = 3
             });
-            
+
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
             (butts[2] as Slider).SetPercent((float)soundVolume);
@@ -431,12 +429,12 @@ namespace RoomRunner
                     Vector2 len = shopFontBold.MeasureString(i + ". " + s);
                     int xDiff = (int)(len.X - ogLen.X);
                     Console.WriteLine(xDiff);
-                    for (int x = 12; x > xDiff/20; x--)
+                    for (int x = 12; x > xDiff / 20; x--)
                         a += " ";
                     a += i + ". " + b.Substring(b.LastIndexOf('\\') + 1) + "\n";
                     i++;
                 }
-                    
+
                 return a;
             },
             new Vector2(window.Width / 19 * 15 - shopFontBold.MeasureString("            ").X, window.Height / 10 * 3 - 80))
@@ -444,11 +442,23 @@ namespace RoomRunner
                 Shown = false
             }); ;
             butts.Add(new MenuText(shopTitleFont, "SETTINGS", new Vector2(window.Width / 2.79f, window.Height / 25)));
-            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5*size)), Color.Green, shopFont, "Go Back")
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5 * size)), Color.Green, shopFont, "Go Back")
             {
                 BorderWidth = 4,
                 TextColor = Color.White
             });
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 2, size * 3, size), Color.Green, shopFont, "Save")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 2 + butts[butts.Count - 1].Rectangle.Height + 50, size * 3, size), Color.Red, shopFont, "Clear Save*")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+            butts.Add(new MenuText(shopFontBold, "* settings require a restart", new Vector2(40, window.Height - shopFontBold.MeasureString("* settings require a restart").Y - 10)));
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
 
@@ -477,7 +487,7 @@ namespace RoomRunner
 
             sheet = cosmeticSheet;
             rects = Player.LoadSheet(5, 5, 32, 32, 1);
-            for (int i = 0; i < 24; i+=2)
+            for (int i = 0; i < 24; i += 2)
             {
                 hold = new Animation("idle");
                 if (i == 12) { hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects[12], rects[14], rects[16]); i += 4; }
@@ -492,7 +502,7 @@ namespace RoomRunner
             rects = Player.LoadSheet(4, 3, 32, 32);
             hold.AddAnimation("idle", jebSheet, GraphicsDevice, 60, rects[10]);
             outp.Add(hold);
-            
+
 
             return outp.ToArray();
         }
@@ -506,7 +516,7 @@ namespace RoomRunner
                 UpdatePopup(Price);
                 return;
             }
-            
+
             MenuThingie[] shopMenu = menus[GameState.Shop].thingies.ToArray();
             Player current = players[CurrentPlayerInShop];
             KeyboardState kb = Keyboard.GetState();
@@ -573,7 +583,7 @@ namespace RoomRunner
                             {
                                 BorderWidth = 6
                             }
-                            
+
                         }
                     }
                 )
@@ -664,7 +674,7 @@ namespace RoomRunner
 
             menus = new Dictionary<GameState, Menu>();
             GenMens();
-
+            Load();
             loadGameSongs(0);
             loadSoundEffects();
 
@@ -686,7 +696,7 @@ namespace RoomRunner
         {
             string fontFolder = "SpriteFonts/";
 
-            FileInfo[] fontFiles = new DirectoryInfo("Content/"+fontFolder).GetFiles();
+            FileInfo[] fontFiles = new DirectoryInfo("Content/" + fontFolder).GetFiles();
             fonts = new SpriteFont[fontFiles.Length];
             for (int i = 0; i < fontFiles.Length; i++)
                 fonts[i] = Content.Load<SpriteFont>(fontFolder + Path.GetFileNameWithoutExtension(fontFiles[i].FullName));
@@ -728,7 +738,7 @@ namespace RoomRunner
                         gameSongListInstance[i].Pause();
                 }
             }
-            
+
         }
         public void loadSoundEffects()
         {
@@ -766,7 +776,7 @@ namespace RoomRunner
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
-            
+
         }
 
         /// <summary>
@@ -776,7 +786,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            
+
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -831,6 +841,7 @@ namespace RoomRunner
                     if ((gameState == GameState.Menu || gameState == GameState.GameOver) && b.Text.Equals("Settings"))
                     {
                         gameState = GameState.Music;
+                        //menuCoolDown = 60;
                     }
 
                     if (gameState == GameState.GameOver && b.Text.Equals("Menu"))
@@ -843,7 +854,15 @@ namespace RoomRunner
                         gameState = GameState.Menu;
                         menuCoolDown = 2;
                     }
+                    if (gameState == GameState.Music && b.Text.Equals("Save"))
+                    {
+                        Save();
+                    }
 
+                    if (gameState == GameState.Music && b.Text.Equals("Clear Save*"))
+                    {
+                        ClearSave();
+                    }
 
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
@@ -856,10 +875,12 @@ namespace RoomRunner
                             {
                                 if (players[0].ownedHats.Contains(i))
                                     arr[c].BGColor = Color.Green;
+
                             }
                             else
                                 if (players[0].ownedHats.Contains(i + 2))
                                 arr[c].BGColor = Color.Green;
+
                         }
                         menuCoolDown = 2;
                     }
@@ -878,10 +899,12 @@ namespace RoomRunner
                         }
                         if (b.Text.Equals("Add Music"))
                         {
+                            int len = musicScreen.customMusicNames.Count;
                             string s = new FileDialogue().Show();
                             if (s != "")
-                            {
                                 musicScreen.customMusicNames.Add(s);
+                            if (len != musicScreen.customMusicNames.Count)
+                            {
                                 (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
                                 (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
                             }
@@ -902,16 +925,15 @@ namespace RoomRunner
                     gameState = cutsceneDestination;
                 }
             }
-            SkipInputs:
+        SkipInputs:
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
 
-            if (gameState == GameState.Menu && musicScreen.customMusicNames.Count > 0 && menuCoolDown != 0)
-                LoadCustomSongs();
             if (gameState == GameState.Menu && menuCoolDown == 0)
             {
-                
+                if (musicScreen.customMusic)
+                    LoadCustomSongs();
 
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
@@ -942,16 +964,15 @@ namespace RoomRunner
                         }
                     }
                 }
-                foreach (Player player in players)
-                    player.Save();
+                //foreach (Player player in players)
+                //    player.Save();
             }
-            
+
 
             if (gameState == GameState.Play)
             {
-                if (HasReset) HasReset = false;
                 gameSongListInstance[3].Stop();
-                if (musicScreen.customMusicNames.Count > 0) //if custom music is selected
+                if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (customSongList.Count != 0)
                     {
@@ -973,11 +994,11 @@ namespace RoomRunner
                         }
 
                     }
-                    
+
                 }
                 else //regular game music
                 {
-                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume/15);
+                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume / 15);
                     if (songTimeElapsed == 0 && gameSongListIndex == 0)
                         gameSongListInstance[gameSongListIndex].Play();
                     if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
@@ -1003,7 +1024,7 @@ namespace RoomRunner
                         return;
 
                 }
-                
+
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
@@ -1039,7 +1060,7 @@ namespace RoomRunner
 
                 if (bossFight)
                 {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0)
                         roomList[currentRoomIndex].enemyArray.Clear();
 
                     goto Jeb;
@@ -1052,51 +1073,51 @@ namespace RoomRunner
                     if (activePowerupIndex != 1)
                         if (enemy != null)
                             foreach (Player p in players)
-                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height)))
-                                p.Damage();
+                                if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height)))
+                                    p.Damage();
                 }
 
                 // player coin collection
                 foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
                 {
-                    foreach(Coin coin in coinGrid)
+                    foreach (Coin coin in coinGrid)
                     {
                         foreach (Player p in players)
-                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
-                        {
-                            coin.Destroy();
-                            p.Coins++;
-                            collectedCoins++;
-                            soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
-                        }
+                            if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
+                            {
+                                coin.Destroy();
+                                p.Coins++;
+                                collectedCoins++;
+                                soundEffects[0].Play(volume: (float)soundVolume / 180, pitch: 0.0f, pan: 0.0f);
+                            }
                     }
                 }
 
 
-               // damages player if obstacle intercepts them
-               foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                // damages player if obstacle intercepts them
+                foreach (ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
                 {
 
-                    foreach(Player jeb in players)
+                    foreach (Player jeb in players)
                     {
 
 
                         if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
                             .Intersects(new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y,
                             obstacle.Current.Rectangle.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height)))
-                                jeb.Damage();
+                            jeb.Damage();
                     }
-                        
+
                 }
 
-                    if (bossFight)
+                if (bossFight)
                 {
                     if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
                 }
 
 
-                Jeb:
+            Jeb:
 
                 bool weLiving = false;
                 foreach (Player p in players)
@@ -1125,14 +1146,14 @@ namespace RoomRunner
                         cutsceneDestination = GameState.Death;
                         DeathTimer = byte.MaxValue;
                     }
-                    
+
                 }
 
                 UpdateProjList(projectileList);
 
 
-                
-                
+
+
 
 
 
@@ -1155,13 +1176,13 @@ namespace RoomRunner
                 if (powerups.ActivePowerups())
                 {
                     activePowerupIndex = powerups.ActivePowerupsIndex();
-                    
-                    
+
+
                     if (activePowerupIndex == 2)
                     {
 
                         roomList[currentRoomIndex].enemyArray.Clear();
-                        
+
                     }
                     if (activePowerupIndex == 3)
                     {
@@ -1185,12 +1206,32 @@ namespace RoomRunner
 
                 powerups.Update();
             }
-            
+
             gameTimer++;
             if (gameState == GameState.Death)
             {
-                if (!HasReset)
-                Reset();
+                for (int i = 0; i < players.Count; i++)
+                {
+                    players[i].distanceTraveled = 0;
+                }
+
+                if (musicScreen.customMusic)
+                {
+                    LoadCustomSongs();
+                    loadSoundEffects();
+                    customSongIndex = 0;
+                    songTimeElapsed = 0;
+                }
+                else
+                {
+                    loadGameSongs(1);
+                    loadSoundEffects();
+                    gameSongListIndex = 0;
+                    songTimeElapsed = 0;
+                }
+
+                activePowerupIndex = -1;
+                powerups.RemovePowerups();
             }
             if (gameState == GameState.Death)
             {
@@ -1217,7 +1258,7 @@ namespace RoomRunner
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
 
-            
+
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -1249,34 +1290,10 @@ namespace RoomRunner
                 }
         }
 
-        
+
 
         private void Reset()
         {
-            HasReset = true;
-            for (int i = 0; i < players.Count; i++)
-            {
-                players[i].distanceTraveled = 0;
-            }
-
-            if (musicScreen.customMusicNames.Count > 0)
-            {
-                LoadCustomSongs();
-                loadSoundEffects();
-                customSongIndex = 0;
-                songTimeElapsed = 0;
-            }
-            else
-            {
-                loadGameSongs(1);
-                loadSoundEffects();
-                gameSongListIndex = 0;
-                songTimeElapsed = 0;
-            }
-
-            activePowerupIndex = -1;
-            powerups.RemovePowerups();
-
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
@@ -1395,8 +1412,8 @@ namespace RoomRunner
             }
             if (gameState == GameState.Cutscene)
             {
-                
-                    
+
+
                 cutscenes.cutseneActive = true;
                 cutscenes.Draw(spriteBatch, pixel);
             }
@@ -1448,16 +1465,16 @@ namespace RoomRunner
                     levels++;
                 }
 
-                
+
 
                 // scrolling calculations
-                
+
                 bool loopImage = roomList[currentRoomIndex].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
 
 
-                
-                
+
+
 
 
                 // checks if the transition period is over so we can move on to the next room
@@ -1485,7 +1502,7 @@ namespace RoomRunner
 
                 //Console.WriteLine("LoopImage: " + loopImage + "\ntransition: " + transition + "\nendCurrentRoom: " + endCurrentRoom);
 
-                
+
 
                 // draws the room
 
@@ -1495,7 +1512,7 @@ namespace RoomRunner
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
-                
+
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
@@ -1507,7 +1524,7 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
-                
+
                 //score and coins
                 int y = 70;
                 for (int i = 0; i < players.Count; i++)
@@ -1540,9 +1557,9 @@ namespace RoomRunner
                         spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black * 0.5f);
 
 
-                    foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
                     {
-                        if(!obstacle.Delete)
+                        if (!obstacle.Delete)
                             spriteBatch.Draw(pixel, new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y, obstacle.Current.Rectangle.Width + obstacleHitBox.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height), Color.Black * 0.5f);
                     }
                 }
@@ -1559,7 +1576,7 @@ namespace RoomRunner
                         quest.Draw(spriteBatch, shopFontBold, jebSheet, new Rectangle(0, 0, 32, 32), pixel);
                     }
                 }
-                    
+
 
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1611,13 +1628,13 @@ namespace RoomRunner
             currentRoomIndex = 0;
             roomList.Clear();
 
-            for(int i = 0; i < amountOfRooms; i++)
+            for (int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content, window));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1, Enemy.EnemyNames), GraphicsDevice, Content, window));
             }
 
-            
+
         }
 
         // directory should be the name of a FOLDER with the images you want to load.
@@ -1685,10 +1702,31 @@ namespace RoomRunner
         {
             foreach (Player player in players)
                 player.Save();
+            string str = musicVolume + "\n" + soundVolume;
+            SaveAndLoad.Save(str, "SettingsData.txt");
         }
         public void Load()
         {
-
+            foreach (Player player in players)
+                player.Load();
+            string str = SaveAndLoad.Load("SettingsData.txt");
+            string[] lines = str.Split('\n');
+            musicVolume = double.Parse(lines[0]);
+            soundVolume = double.Parse(lines[1]);
+            (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)musicVolume);
+            (menus[GameState.Music].thingies[3] as Slider).SetPercent((float)soundVolume);
+        }
+        public void ClearSave()
+        {
+            foreach (Player player in players)
+            {
+                player.ClearSave();
+            }
+            musicVolume = 1;
+            soundVolume = 1;
+            string str = musicVolume + "\n" + soundVolume;
+            SaveAndLoad.Save(str, "SettingsData.txt");
+            this.Exit();
         }
     }
 }
