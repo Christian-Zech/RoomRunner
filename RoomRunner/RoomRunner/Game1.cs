@@ -361,7 +361,7 @@ namespace RoomRunner
                     continue;
                 }
             }
-            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, size * 2), Color.Green, shopFont, "Go Back")
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5 * size)), Color.Green, shopFont, "Go Back")
             {
                 BorderWidth = 4,
                 TextColor = Color.White
@@ -442,6 +442,11 @@ namespace RoomRunner
                 Shown = false
             }); ;
             butts.Add(new MenuText(shopTitleFont, "SETTINGS", new Vector2(window.Width / 2.79f, window.Height / 25)));
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5*size)), Color.Green, shopFont, "Go Back")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
 
@@ -663,13 +668,13 @@ namespace RoomRunner
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
             Slider temp = menus[GameState.Music].thingies[2] as Slider;
-            Rectangle knobRect = temp.Knob.Rectangle;
+            Rectangle knobRect = temp.Knob.DrawRectangle;
             textboxes = new List<Textbox>
             {
-                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
+                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)), //window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125
                 new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
-                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(menus[GameState.Music].thingies[0].Rectangle.X, musicScreen.sliderHandleMusic.Y)),
-                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(temp.Knob.Rectangle.X+temp.Knob.Rectangle.Width, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
+                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(knobRect.X + knobRect.Width, knobRect.Y + knobRect.Height/2)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(window.Width / 190 * 101 - window.Width / 76 + window.Width / 190 * 17 / 2, window.Height / 10 * 3 + window.Height / 10)),
                 new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
                 new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
                 new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
