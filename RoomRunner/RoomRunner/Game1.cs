@@ -1312,7 +1312,8 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
-
+            questID = rand.Next(0, 2);
+            quest = new Quest(questID);
             GenerateRooms(amountOfRooms, backgroundImages, window);
             CreateBosses();
         }
