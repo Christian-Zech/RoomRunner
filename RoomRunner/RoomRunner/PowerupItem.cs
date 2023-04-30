@@ -29,7 +29,7 @@ namespace RoomRunner
         }
         public void Activate()
         {
-            if (active = true)
+            if (active == true)
                 duration--;
             else
                 active = true;
