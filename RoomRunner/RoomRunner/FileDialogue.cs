@@ -13,19 +13,21 @@ using System.Windows.Forms;
 
 namespace RoomRunner
 {
-    class FileDialogue
+    public class FileDialogue
     {
         public bool done;
         public FileDialogue()
         {
             done = false;
         }
-        public String Show()
+        public string Show()
         {
             done = false;
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "Select Music";
-            ofd.Filter = "WAV|*.wav";
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Title = "Select Music",
+                Filter = "WAV|*.wav"
+            };
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 done = true;

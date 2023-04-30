@@ -42,6 +42,7 @@ namespace RoomRunner
         public static Texture2D Heart;
         public static int players;
         private readonly int id;
+        private int FireTimer;
         
         static Player()
         {
@@ -79,6 +80,7 @@ namespace RoomRunner
             delayLeft = InputDelay;
             InvinciblityTimer = MaxInvinciblity;
             FlashTimer = 0;
+            FireTimer = 10;
             currentHat = PlayerHats.None;
             Coins = 1000;
             distanceTraveled = 0;
@@ -213,7 +215,20 @@ namespace RoomRunner
             {
                 sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
                 if (currentHat != PlayerHats.None)
+                {
+                    if (currentHat - 7 >= 0 && (int)(currentHat - 7) <= 2)
+                    {
+                        if (FireTimer == 0)
+                        {
+                            currentHat++;
+                            if (currentHat > PlayerHats.Fire3)
+                                currentHat = PlayerHats.Fire1;
+                            FireTimer = 10;
+                        }
+                        else FireTimer--;
+                    }
                     sb.Draw(Hats[currentHat], HatRectangle, Color.White);
+                }
             }
             if (Idle) return;
 

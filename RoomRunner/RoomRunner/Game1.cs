@@ -54,6 +54,9 @@ namespace RoomRunner
         public static Powerups powerups;
         public int activePowerupIndex;
         public int slowTimeTemp;
+        public Texture2D DeathTxt;
+        public byte DeathTimer;
+        public int slowTimeTemp;
 
 
         private int gameTimer;
@@ -126,7 +129,8 @@ namespace RoomRunner
             Play,
             Music,
             GameOver,
-            Cutscene
+            Cutscene,
+            Death
         }
         
         public enum Levels
@@ -172,16 +176,16 @@ namespace RoomRunner
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
             bosses = new Dictionary<Levels, Boss>();
+            rand = new Random();
             CreateBosses();
 
-            
+
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
-            rand = new Random();
-
+            
 
             amountOfRooms = 5;
             scrollSpeed = 10;
@@ -403,15 +407,37 @@ namespace RoomRunner
 
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
+            (butts[2] as Slider).SetPercent((float)soundVolume);
+            (butts[3] as Slider).SetPercent((float)musicVolume);
 
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
 
+            butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height * 2 / 10, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
+            {
+                BorderWidth = 3,
+                Shown = false
+            });
 
-
+            butts.Add(new MenuText(shopFont, () =>
+            {
+                string a = "Playlist:\n";
+                foreach (string b in musicScreen.customMusicNames)
+                    a += b.Substring(b.LastIndexOf('\\') + 1) + "\n";
+                return a;
+            },
+            new Vector2(window.Width / 19 * 15, window.Height / 10))
+            {
+                Shown = false
+            }); ;
 
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
+
+            menus[GameState.Menu].Background = Content.Load<Texture2D>("MenuBGs/BG");
+            menus[GameState.Shop].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.Music].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.GameOver].Background = Content.Load<Texture2D>("MenuBGs/Death_blurred");
         }
         private Animation[] GenShopButts()
         {
@@ -564,14 +590,22 @@ namespace RoomRunner
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
+            sbyte[] order = new sbyte[4];
+            List<sbyte> numsLeft = new List<sbyte>() { 0, 1, 2, 3 };
+            for (sbyte i = 0; i < order.Length; i++)
+            {
+                order[i] = numsLeft[rand.Next(order.Length - i)];
+                numsLeft.Remove(order[i]);
+            }
             List<Boss> bos = new List<Boss>
             {
-                new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
-                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
-                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
-                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
+                new Boss((Bosses)order[0], 200, sheet, GraphicsDevice),
+                new Boss((Bosses)order[1], 300, sheet, GraphicsDevice),
+                new Boss((Bosses)order[2], 500, sheet, GraphicsDevice),
+                new Boss((Bosses)order[3], 1000, sheet, GraphicsDevice)
             };
 
+            bosses.Clear();
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
         }
@@ -596,6 +630,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            DeathTxt = Content.Load<Texture2D>("MenuBGs/Death");
             runningGuy = Content.Load<Texture2D>("runningGuy");
 
             players = new List<Player> {
@@ -747,6 +782,9 @@ namespace RoomRunner
             }
             Menu currentMenu = getCurrentMenu();
 
+            if (DeathTimer > 0)
+                DeathTimer--;
+
             // controls the main menu with each gamestate representing a different portion of the game
 
             if (menuCoolDown == 0 && currentMenu != default)
@@ -787,7 +825,9 @@ namespace RoomRunner
                     {
                         gameState = GameState.Shop;
                         Button[] arr = (menus[gameState].thingies[0] as SelectionGrid).Butts;
-                        for (int c = 4, i = 1; i < arr.Length; i++,c++)
+                        for (int c = 4, i = 1; i < arr.Length; i++, c++)
+                        {
+                            if (c == 12 || c == 15) continue;
                             if (i <= 7)
                             {
                                 if (players[0].ownedHats.Contains(i))
@@ -796,17 +836,33 @@ namespace RoomRunner
                             else
                                 if (players[0].ownedHats.Contains(i + 2))
                                 arr[c].BGColor = Color.Green;
+                        }
                         menuCoolDown = 2;
                     }
-                    if (gameState == GameState.Music && b.Text.Equals("Game Music"))
+                    if (gameState == GameState.Music)
                     {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = true;
-                    }
-                    if (gameState == GameState.Music && b.Text.Equals("Custom Music"))
-                    {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = false;
+                        if (b.Text.Equals("Game Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = false;
+                        }
+                        if (b.Text.Equals("Custom Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = true;
+                        }
+                        if (b.Text.Equals("Add Music"))
+                        {
+                            int len = musicScreen.customMusicNames.Count;
+                            string s = new FileDialogue().Show();
+                            if (s != "")
+                                musicScreen.customMusicNames.Add(s);
+                            if (len != musicScreen.customMusicNames.Count)
+                            {
+                                (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
+                                (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
+                            }
+                        }
                     }
                 }
             }
@@ -870,8 +926,6 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
                 gameSongListInstance[3].Stop();
-                musicVolume = musicScreen.musicVolume;
-                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (customSongList.Count != 0)
@@ -1028,19 +1082,22 @@ namespace RoomRunner
                     if (p.IsAlive)
                         weLiving = true;
                 }
-                if (!weLiving)
-                    if (quest.completedQuest)
+                if (quest.completedQuest)
+                {
+                    weLiving = true;
+                    foreach (Player p in players)
                     {
-                        weLiving = true;
-                        foreach (Player p in players)
-                        {
-                            p.Health = 3;
-                            p.IsAlive = true;
-                        }
-                        revived = true;
+                        p.Health = Player.MaxHealth;
+                        p.IsAlive = true;
                     }
-                    else
-                        gameState = GameState.GameOver;
+                    revived = true;
+                }
+                else
+                {
+                    gameState = GameState.Cutscene;
+                    cutsceneDestination = GameState.Death;
+                    DeathTimer = byte.MaxValue;
+                }
 
                 UpdateProjList(projectileList);
 
@@ -1101,7 +1158,7 @@ namespace RoomRunner
             }
             
             gameTimer++;
-            if (gameState == GameState.GameOver)
+            if (gameState == GameState.Death)
             {
                 for (int i = 0; i < players.Count; i++)
                 {
@@ -1125,7 +1182,14 @@ namespace RoomRunner
 
                 activePowerupIndex = -1;
                 powerups.RemovePowerups();
-
+            }
+            if (gameState == GameState.Death)
+            {
+                if (DeathTimer == 0)
+                {
+                    gameState = GameState.Cutscene;
+                    cutsceneDestination = GameState.GameOver;
+                }
                 collectedCoins = 0;
                 questID = rand.Next(0, 2);
                 quest = new Quest(questID);
@@ -1133,6 +1197,14 @@ namespace RoomRunner
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
+            if (gameState == GameState.Music && currentMenu.thingies.Count > 1)
+            {
+                soundVolume = (currentMenu.thingies[2] as Slider).Percent;
+                musicVolume = (currentMenu.thingies[3] as Slider).Percent;
+            }
+
+
+
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
 
@@ -1192,52 +1264,27 @@ namespace RoomRunner
             currentBoss = null;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
+            CreateBosses();
         }
 
         /// This is called when the game should draw itself.
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Gray);
+            if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene || gameState == GameState.GameOver) GraphicsDevice.Clear(Color.Black);
+            else GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-            if (!tutorialActive)
-            {
-                Menu val = getCurrentMenu();
-                if (val != null)
-                    val.DrawAndUpdate(spriteBatch);
-            }
-            
-
-
+            Menu val = getCurrentMenu();
+            if (val != null)
+                val.DrawAndUpdate(spriteBatch);
 
             // menu
             if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
-                    int halfSeconds = gameTimer / 30;
-                    Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
-
-                    Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
-
-
-                    // Title screen animation
-                    if (halfSeconds % 2 == 0)
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
-                    else
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
-                    spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
-
-                    for (int i = 0; i < multiplayerButtons.Count; i++)
-                    {
-                        if (multiplayerButtonStates[i])
-                            spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
-                        else
-                            spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
-                    }
 
                     cutscenes.Draw(spriteBatch, pixel);
                     if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1245,7 +1292,10 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-                else
+
+            }
+            if (tutorialActive)
+            {
                 {
                     switch (textboxesIndex)
                     {
@@ -1276,7 +1326,7 @@ namespace RoomRunner
                         case 3:
                             menus[GameState.Music].DrawAndUpdate(spriteBatch);
                             break;
-                        
+
                         default:
                             if (!transition)
                                 levelTimer++;
@@ -1324,7 +1374,6 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-
             }
             if (gameState == GameState.Cutscene)
             {
@@ -1343,13 +1392,11 @@ namespace RoomRunner
             }
             if (gameState == GameState.Music)
             {
-                //musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
-                musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
             }
-            if (gameState == GameState.Play)
+            if (gameState == GameState.Play || (cutsceneDestination == GameState.Death && gameState == GameState.Cutscene))
             {
 
                 if (transition)
@@ -1373,7 +1420,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 999 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -1434,9 +1481,6 @@ namespace RoomRunner
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
-
-                if(bossFight)
-                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 foreach (Player p in players)
                     p.Draw(spriteBatch);
@@ -1506,8 +1550,20 @@ namespace RoomRunner
                 }
 
             }
-
-            
+            if (gameState == GameState.Death) spriteBatch.Draw(DeathTxt, window, Color.White);
+            if (gameState == GameState.Cutscene && cutsceneDestination == GameState.GameOver)
+            {
+                spriteBatch.Draw(DeathTxt, window, Color.White);
+                spriteBatch.Draw(pixel, window, new Color(0, 0, 0, cutscenes.alpha));
+            }
+            if (gameState == GameState.Death || gameState == GameState.GameOver)
+            {
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha < 1 && !cutscenes.phase)
+                {
+                    cutscenes = new Cutscene();
+                }
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);
