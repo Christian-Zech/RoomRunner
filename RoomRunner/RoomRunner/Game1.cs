@@ -167,16 +167,16 @@ namespace RoomRunner
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
             bosses = new Dictionary<Levels, Boss>();
+            rand = new Random();
             CreateBosses();
 
-            
+
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
-            rand = new Random();
-
+            
 
             amountOfRooms = 5;
             scrollSpeed = 10;
@@ -582,14 +582,22 @@ namespace RoomRunner
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
+            sbyte[] order = new sbyte[4];
+            List<sbyte> numsLeft = new List<sbyte>() { 0, 1, 2, 3 };
+            for (sbyte i = 0; i < order.Length; i++)
+            {
+                order[i] = numsLeft[rand.Next(order.Length - i)];
+                numsLeft.Remove(order[i]);
+            }
             List<Boss> bos = new List<Boss>
             {
-                new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
-                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
-                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
-                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
+                new Boss((Bosses)order[0], 200, sheet, GraphicsDevice),
+                new Boss((Bosses)order[1], 300, sheet, GraphicsDevice),
+                new Boss((Bosses)order[2], 500, sheet, GraphicsDevice),
+                new Boss((Bosses)order[3], 1000, sheet, GraphicsDevice)
             };
 
+            bosses.Clear();
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
         }
@@ -1200,6 +1208,7 @@ namespace RoomRunner
             currentBoss = null;
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
+            CreateBosses();
         }
 
         /// This is called when the game should draw itself.
@@ -1332,7 +1341,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 999 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 2 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -1403,9 +1412,6 @@ namespace RoomRunner
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
-
-                if(bossFight)
-                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 foreach (Player p in players)
                     p.Draw(spriteBatch);
