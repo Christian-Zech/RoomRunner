@@ -401,6 +401,8 @@ namespace RoomRunner
 
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
+            (butts[2] as Slider).SetPercent((float)soundVolume);
+            (butts[3] as Slider).SetPercent((float)musicVolume);
 
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
@@ -906,8 +908,6 @@ namespace RoomRunner
             if (gameState == GameState.Play)
             {
                 gameSongListInstance[3].Stop();
-                musicVolume = musicScreen.musicVolume;
-                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (customSongList.Count != 0)
@@ -1118,7 +1118,7 @@ namespace RoomRunner
             }
             
             gameTimer++;
-            if (gameState == GameState.GameOver)
+            if (gameState == GameState.Death)
             {
                 for (int i = 0; i < players.Count; i++)
                 {
@@ -1154,6 +1154,14 @@ namespace RoomRunner
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
+            if (gameState == GameState.Music && currentMenu.thingies.Count > 1)
+            {
+                soundVolume = (currentMenu.thingies[2] as Slider).Percent;
+                musicVolume = (currentMenu.thingies[3] as Slider).Percent;
+            }
+
+
+
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
             base.Update(gameTime);
@@ -1324,8 +1332,6 @@ namespace RoomRunner
             }
             if (gameState == GameState.Music)
             {
-                //musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
-                musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();

@@ -560,7 +560,8 @@ namespace RoomRunner
         public void SetPercent(float percent)
         {
             Percent = percent;
-            Knob.Rectangle.X = (int)Math.Round(DrawRectangle.X + (float)DrawRectangle.Width * percent);
+            Knob.DrawRectangle.X = (int)Math.Round(DrawRectangle.X + (float)DrawRectangle.Width * percent - Knob.DrawRectangle.Width / 2);
+            Knob.Rectangle = Knob.DrawRectangle;
         }
 
     }
