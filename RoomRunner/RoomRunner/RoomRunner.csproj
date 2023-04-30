@@ -72,7 +72,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="Quest.cs" />
     <Compile Include="Room.cs" />
+    <Compile Include="SaveAndLoad.cs" />
     <Compile Include="Shop.cs" />
     <Compile Include="ShopItem.cs" />
     <Compile Include="Textbox.cs" />

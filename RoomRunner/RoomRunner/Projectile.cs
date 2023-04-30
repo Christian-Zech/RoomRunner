@@ -104,6 +104,13 @@ namespace RoomRunner
         public void Update()
         {
             if (!InFrame) return;
+            if (Program.Game.activePowerupIndex == 0)
+            {
+                //Program.Game.slowTimeTemp++;
+                if (Program.Game.slowTimeTemp % 2 == 0)
+                    return;
+
+            }
             if (Lifespan > 0) Lifespan--;
             IsInFrame();
             if (Lifespan == 0) { InFrame = false; DeltDamage = true; }
@@ -137,6 +144,10 @@ namespace RoomRunner
                 sb.Draw(txt, new Rectangle(rect.X, rect.Y + rect.Height / 2, rect.Width, rect.Height), null, Color.White, 0.0f, new Vector2(txt.Width / 2, txt.Height / 2), SpriteEffects.FlipVertically, 0.0f);
             else
                 sb.Draw(txt, rect, Color.White);
+        }
+        public void Save()
+        {
+            SaveAndLoad temp = new SaveAndLoad();
         }
     }
     public class ProjectileClump

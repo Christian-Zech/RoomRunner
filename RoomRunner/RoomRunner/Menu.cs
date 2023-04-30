@@ -564,5 +564,18 @@ namespace RoomRunner
             Knob.Rectangle = Knob.DrawRectangle;
         }
 
+        public void Save()
+        {
+
+            string str = Percent + "\n" + Knob.Rectangle.X;
+            SaveAndLoad.Save(str, "SettingsData.txt");
+        }
+        public void Load()
+        {
+            string str = SaveAndLoad.Load("SettingsData.txt");
+            string[] lines = str.Split(' ');
+            Percent = float.Parse(lines[0]);
+            Knob.Rectangle.X = Int32.Parse(lines[1]);
+        }
     }
 }
