@@ -41,7 +41,7 @@ namespace RoomRunner
         public List<int> ownedHats; //save this
         public static Texture2D Heart;
         public static int players;
-        private readonly int id;
+        public readonly int id;
         private int FireTimer;
 
         static Player()

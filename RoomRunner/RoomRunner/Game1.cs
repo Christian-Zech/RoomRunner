@@ -120,6 +120,7 @@ namespace RoomRunner
         Rectangle coinSource;
         int collectedCoins;
         bool revived;
+        private bool HasReset;
 
         public enum GameState
         {
@@ -190,6 +191,7 @@ namespace RoomRunner
             scrollSpeed = 10;
             menuCoolDown = 0;
             bossCooldown = 0;
+            HasReset = true;
 
             gameState = GameState.Menu;
             levels = Levels.Level1;
@@ -428,7 +430,6 @@ namespace RoomRunner
                     string s = b.Substring(b.LastIndexOf('\\') + 1);
                     Vector2 len = shopFontBold.MeasureString(i + ". " + s);
                     int xDiff = (int)(len.X - ogLen.X);
-                    Console.WriteLine(xDiff);
                     for (int x = 12; x > xDiff / 20; x--)
                         a += " ";
                     a += i + ". " + b.Substring(b.LastIndexOf('\\') + 1) + "\n";
@@ -459,6 +460,18 @@ namespace RoomRunner
                 TextColor = Color.White
             });
             butts.Add(new MenuText(shopFontBold, "* settings require a restart", new Vector2(40, window.Height - shopFontBold.MeasureString("* settings require a restart").Y - 10)));
+            butts.Add(new MenuText(shopFont, () => 
+                {
+                    int highest = 0;
+                    sbyte pId = -1;
+                    foreach (Player p in players)
+                        if (p.distanceHighScore > highest) 
+                        {
+                            highest = p.distanceHighScore;
+                            pId = (sbyte)p.id;
+                        }
+                    return "Max Distance traveled was done by player " + (pId+1) + ", who traveled " + highest + " meters!";
+                }, new Vector2(window.Width / 100 * 2, window.Height * 9 / 10)));
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
 
@@ -833,21 +846,23 @@ namespace RoomRunner
 
                         cutsceneDestination = GameState.Play;
                         gameState = GameState.Cutscene;
+                        HasReset = false;
                         Reset();
                         menuCoolDown = 2;
-                        GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count);
+                        GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count); //the arrow function just finds all true values in list
                     }
 
                     if ((gameState == GameState.Menu || gameState == GameState.GameOver) && b.Text.Equals("Settings"))
                     {
                         gameState = GameState.Music;
-                        //menuCoolDown = 60;
+                        menuCoolDown = 2;
                     }
 
                     if (gameState == GameState.GameOver && b.Text.Equals("Menu"))
                     {
                         gameState = GameState.Menu;
                         menuCoolDown = 2;
+                        HasReset = false;
                     }
                     if (gameState == GameState.Music && b.Text.Equals("Go Back"))
                     {
@@ -890,12 +905,13 @@ namespace RoomRunner
                         {
                             foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
                                 mt.Shown = false;
-                            //b.BGColor = new Color(44, 44, 44);
+                            musicScreen.customMusic = false;
                         }
                         if (b.Text.Equals("Custom Music"))
                         {
                             foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
                                 mt.Shown = true;
+                            musicScreen.customMusic = true;
                         }
                         if (b.Text.Equals("Add Music"))
                         {
@@ -929,11 +945,12 @@ namespace RoomRunner
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
+            if (gameState == GameState.Menu && menuCoolDown != 0 && musicScreen.customMusic)
+                LoadCustomSongs();
 
             if (gameState == GameState.Menu && menuCoolDown == 0)
             {
-                if (musicScreen.customMusic)
-                    LoadCustomSongs();
+                
 
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
@@ -1210,28 +1227,7 @@ namespace RoomRunner
             gameTimer++;
             if (gameState == GameState.Death)
             {
-                for (int i = 0; i < players.Count; i++)
-                {
-                    players[i].distanceTraveled = 0;
-                }
-
-                if (musicScreen.customMusic)
-                {
-                    LoadCustomSongs();
-                    loadSoundEffects();
-                    customSongIndex = 0;
-                    songTimeElapsed = 0;
-                }
-                else
-                {
-                    loadGameSongs(1);
-                    loadSoundEffects();
-                    gameSongListIndex = 0;
-                    songTimeElapsed = 0;
-                }
-
-                activePowerupIndex = -1;
-                powerups.RemovePowerups();
+                
             }
             if (gameState == GameState.Death)
             {
@@ -1294,6 +1290,31 @@ namespace RoomRunner
 
         private void Reset()
         {
+            if (HasReset) return;
+            HasReset = true;
+            for (int i = 0; i < players.Count; i++)
+            {
+                players[i].distanceTraveled = 0;
+            }
+
+            if (musicScreen.customMusic)
+            {
+                LoadCustomSongs();
+                loadSoundEffects();
+                customSongIndex = 0;
+                songTimeElapsed = 0;
+            }
+            else
+            {
+                loadGameSongs(1);
+                loadSoundEffects();
+                gameSongListIndex = 0;
+                songTimeElapsed = 0;
+            }
+
+            activePowerupIndex = -1;
+            powerups.RemovePowerups();
+
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
@@ -1712,6 +1733,7 @@ namespace RoomRunner
                 player.Load();
             string str = SaveAndLoad.Load("SettingsData.txt");
             string[] lines = str.Split('\n');
+            if (lines.Length < 2) return;
             musicVolume = double.Parse(lines[0]);
             soundVolume = double.Parse(lines[1]);
             (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)musicVolume);
