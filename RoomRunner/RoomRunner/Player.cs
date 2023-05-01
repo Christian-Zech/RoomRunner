@@ -292,8 +292,7 @@ namespace RoomRunner
             distanceHighScore = 0;
             currentHat = PlayerHats.None;
             ownedHats.Clear();
-            Save();
-            Load();
+            //Save();
         }
     }
     public enum PlayerHats

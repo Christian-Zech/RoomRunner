@@ -1752,7 +1752,9 @@ namespace RoomRunner
         {
             foreach (Player player in players)
                 player.Save();
-            string str = musicVolume + "\n" + soundVolume;
+            string str = musicVolume + "\n" + soundVolume + "\n";
+            for (int i = 0; i < 4; i++)
+                str += powerups.quantities[i] + " ";
             SaveAndLoad.Save(str, "SettingsData.txt");
             savingText = "saved";
         }
@@ -1764,10 +1766,12 @@ namespace RoomRunner
             string[] lines = str.Split('\n');
             if (lines.Length < 2) return;
             musicVolume = double.Parse(lines[0]);
-            Console.WriteLine(musicVolume);
             soundVolume = double.Parse(lines[1]);
             (menus[GameState.Music].thingies[3] as Slider).SetPercent((float)musicVolume);
             (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)soundVolume);
+            string[] quants = lines[2].Split(' ');
+            for (int i = 0; i < 4; i++)
+                powerups.quantities[i] = Int32.Parse(quants[i]);
         }
         public void ClearSave()
         {
@@ -1777,8 +1781,11 @@ namespace RoomRunner
             }
             musicVolume = 1;
             soundVolume = 1;
-            string str = musicVolume + "\n" + soundVolume;
-            SaveAndLoad.Save(str, "SettingsData.txt");
+            for (int i = 0; i < 4; i++)
+                powerups.quantities[i] = 1;
+            //string str = musicVolume + "\n" + soundVolume;
+            //SaveAndLoad.Save(str, "SettingsData.txt");
+            Save();
             this.Exit();
         }
     }
