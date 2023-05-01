@@ -1254,6 +1254,8 @@ namespace RoomRunner
             {
                 soundVolume = (currentMenu.thingies[2] as Slider).Percent;
                 musicVolume = (currentMenu.thingies[3] as Slider).Percent;
+                if (musicVolume == 1)
+                    Console.WriteLine("how");
             }
 
 
@@ -1762,9 +1764,10 @@ namespace RoomRunner
             string[] lines = str.Split('\n');
             if (lines.Length < 2) return;
             musicVolume = double.Parse(lines[0]);
+            Console.WriteLine(musicVolume);
             soundVolume = double.Parse(lines[1]);
-            (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)musicVolume);
-            (menus[GameState.Music].thingies[3] as Slider).SetPercent((float)soundVolume);
+            (menus[GameState.Music].thingies[3] as Slider).SetPercent((float)musicVolume);
+            (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)soundVolume);
         }
         public void ClearSave()
         {
