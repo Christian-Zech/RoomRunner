@@ -308,11 +308,7 @@ namespace RoomRunner
                     BorderWidth = 6,
                     TextColor = Color.White
                 },
-                new Button(difficultyButtonRectangle, Color.Purple, menuFont, "Difficulty")
-                {
-                    BorderWidth = 6,
-                    TextColor = Color.White
-                }
+                
                 
             };
             foreach (Rectangle r in multiplayerButtons)
@@ -321,9 +317,9 @@ namespace RoomRunner
 
             MenuThingie hold = new SelectionGrid(new Button[][]
             {
-                new Button[] {butts[4] as Button, butts[0] as Button, butts[3] as Button},
-                new Button[] {butts[5] as Button, butts[1] as Button},
-                new Button[] {butts[6] as Button, butts[2] as Button}
+                new Button[] {butts[3] as Button, butts[0] as Button /*,butts[3] as Button*/},
+                new Button[] {butts[4] as Button, butts[1] as Button},
+                new Button[] {butts[5] as Button, butts[2] as Button}
             });
             butts.Clear();
             butts.Add(hold);
@@ -477,7 +473,11 @@ namespace RoomRunner
 
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
-
+            butts.Add(new Button(difficultyButtonRectangle, Color.Purple, menuFont, "Difficulty")
+            {
+                BorderWidth = 6,
+                TextColor = Color.White
+            });
 
 
 
