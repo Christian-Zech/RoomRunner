@@ -25,7 +25,7 @@ namespace RoomRunner
                 string output = fileIn.ReadToEnd();
                 return output;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return "";
             }
