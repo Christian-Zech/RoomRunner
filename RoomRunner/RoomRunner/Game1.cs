@@ -1804,9 +1804,6 @@ namespace RoomRunner
 
                 }     
             }
-            val = getCurrentMenu();
-            if (val != null)
-                val.DrawAndUpdate(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
