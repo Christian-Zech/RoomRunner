@@ -957,8 +957,8 @@ namespace RoomRunner
 
             if (gameState == GameState.Menu && menuCoolDown == 0)
             {
-                
 
+                if (gameSongListInstance[gameSongListIndex].State == SoundState.Playing) gameSongListInstance[gameSongListIndex].Stop();
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
@@ -995,51 +995,8 @@ namespace RoomRunner
 
             if (gameState == GameState.Play)
             {
-                gameSongListInstance[3].Stop();
-                if (musicScreen.customMusic) //if custom music is selected
-                {
-                    if (customSongList.Count != 0)
-                    {
-                        if (songTimeElapsed == 0 && customSongIndex == 0)
-                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
-                        if (songTimeElapsed / 60 > customSongList[customSongIndex].Duration.TotalSeconds)
-                        {
-                            customSongIndex++;
-                            if (customSongIndex >= customSongList.Count)
-                            {
-                                customSongIndex = 0;
-                            }
-                            songTimeElapsed = 0;
-                            customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
-                        }
-                        else
-                        {
-                            songTimeElapsed++;
-                        }
 
-                    }
-
-                }
-                else //regular game music
-                {
-                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume / 15);
-                    if (songTimeElapsed == 0 && gameSongListIndex == 0)
-                        gameSongListInstance[gameSongListIndex].Play();
-                    if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
-                    {
-                        gameSongListIndex++;
-                        if (gameSongListIndex >= 3)
-                        {
-                            gameSongListIndex = 0;
-                        }
-                        songTimeElapsed = 0;
-                        gameSongListInstance[gameSongListIndex].Play();
-                    }
-                    else
-                    {
-                        songTimeElapsed++;
-                    }
-                }
+                playMusic();
 
                 if (activePowerupIndex == 0)
                 {
@@ -1238,6 +1195,8 @@ namespace RoomRunner
             }
             if (gameState == GameState.Death)
             {
+                
+
                 if (DeathTimer == 0)
                 {
                     gameState = GameState.Cutscene;
@@ -1265,6 +1224,54 @@ namespace RoomRunner
 
 
             base.Update(gameTime);
+        }
+        public void playMusic()
+        {
+            gameSongListInstance[3].Stop();
+            if (musicScreen.customMusic) //if custom music is selected
+            {
+                if (customSongList.Count != 0)
+                {
+                    if (songTimeElapsed == 0 && customSongIndex == 0)
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
+                    if (songTimeElapsed / 60 > customSongList[customSongIndex].Duration.TotalSeconds)
+                    {
+                        customSongIndex++;
+                        if (customSongIndex >= customSongList.Count)
+                        {
+                            customSongIndex = 0;
+                        }
+                        songTimeElapsed = 0;
+                        customSongList[customSongIndex].Play(volume: (float)musicVolume / 3, pitch: 0.0f, pan: 0.0f);
+                    }
+                    else
+                    {
+                        songTimeElapsed++;
+                    }
+
+                }
+
+            }
+            else //regular game music
+            {
+                gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume / 15);
+                if (songTimeElapsed == 0 && gameSongListIndex == 0)
+                    gameSongListInstance[gameSongListIndex].Play();
+                if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
+                {
+                    gameSongListIndex++;
+                    if (gameSongListIndex >= 3)
+                    {
+                        gameSongListIndex = 0;
+                    }
+                    songTimeElapsed = 0;
+                    gameSongListInstance[gameSongListIndex].Play();
+                }
+                else
+                {
+                    songTimeElapsed++;
+                }
+            }
         }
         public void UpdateProjList(List<Projectile> list)
         {
@@ -1643,6 +1650,7 @@ namespace RoomRunner
             }
             if (gameState == GameState.Death || gameState == GameState.GameOver)
             {
+                playMusic();
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)
                 {
