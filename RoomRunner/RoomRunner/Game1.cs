@@ -312,17 +312,17 @@ namespace RoomRunner
                 {
                     BorderWidth = 6,
                     TextColor = Color.White
-                },
+                }
                 
                 
             };
             foreach (Rectangle r in multiplayerButtons)
                 butts.Add(new Button(r, iconTextures[0]));
-            (butts[4] as Button).Texture = iconTextures[1];
+            (butts[3] as Button).Texture = iconTextures[1];
 
             MenuThingie hold = new SelectionGrid(new Button[][]
             {
-                new Button[] {butts[3] as Button, butts[0] as Button /*,butts[3] as Button*/},
+                new Button[] {butts[3] as Button, butts[0] as Button},
                 new Button[] {butts[4] as Button, butts[1] as Button},
                 new Button[] {butts[5] as Button, butts[2] as Button}
             });
