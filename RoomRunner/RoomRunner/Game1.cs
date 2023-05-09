@@ -57,7 +57,9 @@ namespace RoomRunner
         private int amountOfRooms;
         public static Powerups powerups;
         public int activePowerupIndex;
-        int slowTimeTemp;
+        public int slowTimeTemp;
+        public Texture2D DeathTxt;
+        public byte DeathTimer;
 
 
         private int gameTimer;
@@ -125,6 +127,12 @@ namespace RoomRunner
         Texture2D runningGuy;
         Rectangle coinSource;
         int collectedCoins;
+        bool revived;
+        private bool HasReset;
+
+        bool saving;
+        string savingText;
+        Color saveColor;
 
         public enum GameState
         {
@@ -134,9 +142,10 @@ namespace RoomRunner
             Music,
             GameOver,
             Cutscene,
+            Death,
             Difficulty
         }
-        
+
         public enum Levels
         {
             Level1,
@@ -188,21 +197,22 @@ namespace RoomRunner
             cosmeticRect = Player.LoadSheet(5, 5, 32, 32, 1);
 
             bosses = new Dictionary<Levels, Boss>();
+            rand = new Random();
             CreateBosses();
 
-            
+
 
             roomList = new List<Room>();
             jebList = new List<Rectangle>();
             projectileList = new List<Projectile>();
             idleAnimationRectangles = new List<Rectangle>();
-            rand = new Random();
 
 
             amountOfRooms = 5;
             scrollSpeed = 10;
             menuCoolDown = 0;
             bossCooldown = 0;
+            HasReset = true;
 
             gameState = GameState.Menu;
             levels = Levels.Level1;
@@ -266,25 +276,20 @@ namespace RoomRunner
             oldMouse = Mouse.GetState();
 
             tutorialActive = false;
-            tutorialRect = new Rectangle(window.Width/2, 280, 60, 60);
-            textboxes = new List<Textbox>
-            {
-                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)),
-                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
-                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(musicScreen.sliderHandleMusic.X, musicScreen.sliderHandleMusic.Y)),
-                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(musicScreen.customMusicButton.X+musicScreen.customMusicButton.Width/2, musicScreen.customMusicButton.Y+musicScreen.customMusicButton.Height)),
-                new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
-                new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
-                new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
-            };
-            textboxesIndex = 0;
+            tutorialRect = new Rectangle(window.Width / 2, 280, 60, 60);
 
+
+            textboxesIndex = 0;
+            savingText = "Saving...";
+            saving = false;
+            saveColor = Color.Black;
             questID = rand.Next(0, 2);
             quest = new Quest(questID);
             collectedCoins = 0;
+            revived = false;
             base.Initialize();
 
-                                                                                                                                                                                    
+
 
         }
 
@@ -368,7 +373,7 @@ namespace RoomRunner
             butts.Add(new Box(new Rectangle(window.Width * 13 / 16, window.Height * 2 / 18, size, size), anims[14], shopFont, () => "Coins: " + players[CurrentPlayerInShop].Coins));
             butts.Add(new Box(new Rectangle(window.Width * 5 / 32, window.Height * 8 / 18, size, size), anims[15], shopFont, () => "Equipped: " + players[CurrentPlayerInShop].currentHat));
             butts.Add(new MenuText(shopTitleFont, "SHOP", new Vector2(window.Width / 2.43f, window.Height / 25)));
-            
+
             foreach (MenuThingie a in butts)
             {
                 if (a is Button)
@@ -384,7 +389,7 @@ namespace RoomRunner
                     continue;
                 }
             }
-            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, size * 2), Color.Green, shopFont, "Go Back")
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5 * size)), Color.Green, shopFont, "Go Back")
             {
                 BorderWidth = 4,
                 TextColor = Color.White
@@ -470,19 +475,84 @@ namespace RoomRunner
 
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125)));
             butts.Add(new Slider(new Rectangle(window.Width / 19 * 7, window.Height / 5 * 3, window.Width / 19 * 5, window.Height / 125)));
+            (butts[2] as Slider).SetPercent((float)soundVolume);
+            (butts[3] as Slider).SetPercent((float)musicVolume);
 
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
+
+
+            butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height / 10 * 3, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
+            {
+                BorderWidth = 3,
+                Shown = false
+            });
+            
             butts.Add(new Button(difficultyButtonRectangle, Color.Purple, menuFont, "Difficulty")
             {
                 BorderWidth = 6,
                 TextColor = Color.White
             });
 
+            butts.Add(new MenuText(shopFontBold, () =>
+            {
+                string a = "            Playlist:\n\n";
+                int i = 1;
+                Vector2 ogLen = shopFontBold.MeasureString("Playlist:");
+                foreach (string b in musicScreen.customMusicNames)
+                {
+                    string s = b.Substring(b.LastIndexOf('\\') + 1);
+                    Vector2 len = shopFontBold.MeasureString(i + ". " + s);
+                    int xDiff = (int)(len.X - ogLen.X);
+                    for (int x = 12; x > xDiff / 20; x--)
+                        a += " ";
+                    a += i + ". " + b.Substring(b.LastIndexOf('\\') + 1) + "\n";
+                    i++;
+                }
 
+                return a;
+            },
+            new Vector2(window.Width / 19 * 15 - shopFontBold.MeasureString("            ").X, window.Height / 10 * 3 - 80))
+            {
+                Shown = false
+            }); ;
+            butts.Add(new MenuText(shopTitleFont, "SETTINGS", new Vector2(window.Width / 2.79f, window.Height / 25)));
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 18, size * 3, (int)(1.5 * size)), Color.Green, shopFont, "Go Back")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 2, size * 3, size), Color.Green, shopFont, "Save")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
 
+            butts.Add(new Button(new Rectangle(window.Width * 2 / 16, window.Height / 2 + butts[butts.Count - 1].Rectangle.Height + 50, size * 3, size), Color.Red, shopFont, "Clear Save*")
+            {
+                BorderWidth = 4,
+                TextColor = Color.White
+            });
+            butts.Add(new MenuText(shopFontBold, "* settings require a restart", new Vector2(40, window.Height - shopFontBold.MeasureString("* settings require a restart").Y - 10)));
+            butts.Add(new MenuText(shopFont, () => 
+                {
+                    int highest = 0;
+                    sbyte pId = -1;
+                    foreach (Player p in players)
+                        if (p.distanceHighScore > highest) 
+                        {
+                            highest = p.distanceHighScore;
+                            pId = (sbyte)p.id;
+                        }
+                    return "Max Distance traveled was done by player " + (pId+1) + ", who traveled " + highest + " meters!";
+                }, new Vector2(window.Width / 100 * 2, window.Height * 9 / 10)));
             menus[GameState.Music] = new Menu(butts.ToArray());
             butts.Clear();
+
+            menus[GameState.Menu].Background = Content.Load<Texture2D>("MenuBGs/BG");
+            menus[GameState.Shop].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.Music].Background = Content.Load<Texture2D>("MenuBGs/BG_Blurred");
+            menus[GameState.GameOver].Background = Content.Load<Texture2D>("MenuBGs/Death_blurred");
         }
         private Animation[] GenShopButts()
         {
@@ -504,7 +574,7 @@ namespace RoomRunner
 
             sheet = cosmeticSheet;
             rects = Player.LoadSheet(5, 5, 32, 32, 1);
-            for (int i = 0; i < 24; i+=2)
+            for (int i = 0; i < 24; i += 2)
             {
                 hold = new Animation("idle");
                 if (i == 12) { hold.AddAnimation("idle", sheet, GraphicsDevice, 10, rects[12], rects[14], rects[16]); i += 4; }
@@ -519,7 +589,7 @@ namespace RoomRunner
             rects = Player.LoadSheet(4, 3, 32, 32);
             hold.AddAnimation("idle", jebSheet, GraphicsDevice, 60, rects[10]);
             outp.Add(hold);
-            
+
 
             return outp.ToArray();
         }
@@ -533,7 +603,7 @@ namespace RoomRunner
                 UpdatePopup(Price);
                 return;
             }
-            
+
             MenuThingie[] shopMenu = menus[GameState.Shop].thingies.ToArray();
             Player current = players[CurrentPlayerInShop];
             KeyboardState kb = Keyboard.GetState();
@@ -600,7 +670,7 @@ namespace RoomRunner
                             {
                                 BorderWidth = 6
                             }
-                            
+
                         }
                     }
                 )
@@ -635,14 +705,22 @@ namespace RoomRunner
         private void CreateBosses()
         {
             Texture2D sheet = loadImage("Enemies/EnemiesButBetter", Content);
+            sbyte[] order = new sbyte[4];
+            List<sbyte> numsLeft = new List<sbyte>() { 0, 1, 2, 3 };
+            for (sbyte i = 0; i < order.Length; i++)
+            {
+                order[i] = numsLeft[rand.Next(order.Length - i)];
+                numsLeft.Remove(order[i]);
+            }
             List<Boss> bos = new List<Boss>
             {
-                new Boss(Bosses.Bat, 200, sheet, GraphicsDevice),
-                new Boss(Bosses.Demon, 300, sheet, GraphicsDevice),
-                new Boss(Bosses.Yeti, 500, sheet, GraphicsDevice),
-                new Boss(Bosses.Shark, 1000, sheet, GraphicsDevice)
+                new Boss((Bosses)order[0], 200, sheet, GraphicsDevice),
+                new Boss((Bosses)order[1], 300, sheet, GraphicsDevice),
+                new Boss((Bosses)order[2], 500, sheet, GraphicsDevice),
+                new Boss((Bosses)order[3], 1000, sheet, GraphicsDevice)
             };
 
+            bosses.Clear();
             for (int i = 0; i < bos.Count; i++)
                 bosses.Add((Levels)i, bos[i]);
         }
@@ -667,6 +745,7 @@ namespace RoomRunner
             iconTextures[1] = Content.Load<Texture2D>("Icons/personIconSelected-removebg-preview");
             questionMark = Content.Load<Texture2D>("Icons/questionMark");
             backgroundImages = loadTextures("Background", Content);
+            DeathTxt = Content.Load<Texture2D>("MenuBGs/Death");
             runningGuy = Content.Load<Texture2D>("runningGuy");
             difficultyArrow = this.Content.Load<Texture2D>("difficultyArrow");
 
@@ -683,19 +762,29 @@ namespace RoomRunner
 
             menus = new Dictionary<GameState, Menu>();
             GenMens();
-
+            Load();
             loadGameSongs(0);
             loadSoundEffects();
 
             GenerateRooms(amountOfRooms, backgroundImages, window);
-
-
+            Slider temp = menus[GameState.Music].thingies[2] as Slider;
+            Rectangle knobRect = temp.Knob.DrawRectangle;
+            textboxes = new List<Textbox>
+            {
+                new Textbox("Here you can press these buttons\nto select how many players \nyou'd like.", new Vector2(multiplayerButtons[1].X + multiplayerButtons[1].Width, multiplayerButtons[1].Y + multiplayerButtons[1].Width / 2)), //window.Width / 19 * 7, window.Height / 5 * 4, window.Width / 19 * 5, window.Height / 125
+                new Textbox("This is the shop! You can use\nspace or click to buy \npowerups and cosmetics. You\nstart off with 100 coins,\nbut will collect more when\nyou play the game."),
+                new Textbox("Here you can adjust sound and\nmusic! Moving these sliders\nwill change the volume\nto your desired level", new Vector2(knobRect.X + knobRect.Width, knobRect.Y + knobRect.Height/2)),
+                new Textbox("If you'd rather listen to\nyour own music, you can\nselect the custom music\nbutton, and add .wav files\nfrom your own computer.\nYou can change this back\nto game music at any time.", new Vector2(window.Width / 190 * 101 - window.Width / 76 + window.Width / 190 * 17 / 2, window.Height / 10 * 3 + window.Height / 10)),
+                new Textbox("Now to playing the game!\nWhat is the objective? Well,\nyour trying to get as far\nas you can without dying\nwhile collecting coins on the \nway. Use W to jump and S to \nfastfall.", new Vector2(window.Width-300, 200)),
+                new Textbox("Find yourself in a pickle?\nNo worries, just use a powerup!\nThe powerups are as follows:\nslow time, invulnrability, \ninstakill, and a coin magnet.\nTo use them, press 1, 2, 3, \nor 4 respectively.", new Vector2(390, 200)),
+                new Textbox("Finally, a boss battle will \noccur after a set time,\nin which you must dodge and\nattack with your fireballs\nby pressing D on your\nkeyboard. Once the boss\nis defeated, another one will\nappear after that same time\ninterval. That's it, have fun!")
+            };
         }
         private void LoadFonts()
         {
             string fontFolder = "SpriteFonts/";
 
-            FileInfo[] fontFiles = new DirectoryInfo("Content/"+fontFolder).GetFiles();
+            FileInfo[] fontFiles = new DirectoryInfo("Content/" + fontFolder).GetFiles();
             fonts = new SpriteFont[fontFiles.Length];
             for (int i = 0; i < fontFiles.Length; i++)
                 fonts[i] = Content.Load<SpriteFont>(fontFolder + Path.GetFileNameWithoutExtension(fontFiles[i].FullName));
@@ -737,7 +826,7 @@ namespace RoomRunner
                         gameSongListInstance[i].Pause();
                 }
             }
-            
+
         }
         public void loadSoundEffects()
         {
@@ -748,10 +837,21 @@ namespace RoomRunner
         }
         private void GeneratePlayers(int amount)
         {
+            const bool invulnerable = false;
+            Player.players = Math.Min(1, amount);
+            players.Clear();
+            players.Add(new Player(new Vector2(700, 500))
+            {
+                Invulnerable = invulnerable,
+                Up = new List<Keys> { Keys.W },
+                Down = new List<Keys> { Keys.S },
+                Left = new List<Keys> { Keys.A },
+                Shoot = new List<Keys> { Keys.D }
+            });
             if (amount <= 1) return;
             players.Add(new Player(new Vector2(900, 500))
             {
-                Invulnerable = false,
+                Invulnerable = invulnerable,
                 Up = new List<Keys> { Keys.Up },
                 Down = new List<Keys> { Keys.Down },
                 Left = new List<Keys> { Keys.Left },
@@ -760,7 +860,7 @@ namespace RoomRunner
             if (amount == 2) return;
             players.Add(new Player(new Vector2(500, 500))
             {
-                Invulnerable = false,
+                Invulnerable = invulnerable,
                 Up = new List<Keys> { Keys.I },
                 Down = new List<Keys> { Keys.K },
                 Left = new List<Keys> { Keys.J },
@@ -775,7 +875,7 @@ namespace RoomRunner
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
-            
+
         }
 
         /// <summary>
@@ -785,7 +885,7 @@ namespace RoomRunner
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            
+
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -814,6 +914,9 @@ namespace RoomRunner
             }
             Menu currentMenu = getCurrentMenu();
 
+            if (DeathTimer > 0)
+                DeathTimer--;
+
             // controls the main menu with each gamestate representing a different portion of the game
 
             if (menuCoolDown == 0 && currentMenu != default)
@@ -833,52 +936,89 @@ namespace RoomRunner
 
                         cutsceneDestination = GameState.Play;
                         gameState = GameState.Cutscene;
+                        HasReset = false;
                         Reset();
                         menuCoolDown = 2;
-                        GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count);
+                        GeneratePlayers(multiplayerButtonStates.FindAll(a => a).Count); //the arrow function just finds all true values in list
                     }
 
                     if ((gameState == GameState.Menu || gameState == GameState.GameOver) && b.Text.Equals("Settings"))
                     {
                         gameState = GameState.Music;
+                        menuCoolDown = 2;
                     }
-
+                    
                     if (gameState == GameState.GameOver && b.Text.Equals("Menu"))
                     {
                         gameState = GameState.Menu;
                         menuCoolDown = 2;
+                        HasReset = false;
                     }
-
+                    if (gameState == GameState.Music && b.Text.Equals("Go Back"))
+                    {
+                        gameState = GameState.Menu;
+                        menuCoolDown = 2;
+                    }
+                    if (gameState == GameState.Music && b.Text.Equals("Save"))
+                    {
+                        Save();
+                        saving = true;
+                    }
+                    if (gameState == GameState.Music && b.Text.Equals("Clear Save*"))
+                    {
+                        ClearSave();
+                    }
                     if(gameState == GameState.Music && b.Text.Equals("Difficulty"))
                     {
                         gameState = GameState.Difficulty;
                         menuCoolDown = 2;
                     }
-
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
                         gameState = GameState.Shop;
                         Button[] arr = (menus[gameState].thingies[0] as SelectionGrid).Butts;
-                        for (int c = 4, i = 1; i < arr.Length; i++,c++)
+                        for (int c = 4, i = 1; i < arr.Length; i++, c++)
+                        {
+                            if (c == 12 || c == 15) continue;
                             if (i <= 7)
                             {
                                 if (players[0].ownedHats.Contains(i))
                                     arr[c].BGColor = Color.Green;
+
                             }
                             else
                                 if (players[0].ownedHats.Contains(i + 2))
                                 arr[c].BGColor = Color.Green;
+
+                        }
                         menuCoolDown = 2;
                     }
-                    if (gameState == GameState.Music && b.Text.Equals("Game Music"))
+                    if (gameState == GameState.Music)
                     {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = true;
-                    }
-                    if (gameState == GameState.Music && b.Text.Equals("Custom Music"))
-                    {
-                        foreach (MenuThingie mt in currentMenu.thingies.Skip(2).Take(4))
-                            mt.Shown = false;
+                        if (b.Text.Equals("Game Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = false;
+                            musicScreen.customMusic = false;
+                        }
+                        if (b.Text.Equals("Custom Music"))
+                        {
+                            foreach (MenuThingie mt in currentMenu.thingies.Skip(6).Take(2))
+                                mt.Shown = true;
+                            musicScreen.customMusic = true;
+                        }
+                        if (b.Text.Equals("Add Music"))
+                        {
+                            int len = musicScreen.customMusicNames.Count;
+                            string s = new FileDialogue().Show();
+                            if (s != "")
+                                musicScreen.customMusicNames.Add(s);
+                            if (len != musicScreen.customMusicNames.Count)
+                            {
+                                (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
+                                (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
+                            }
+                        }
                     }
                     if(gameState == GameState.Menu && b.Text.Equals("Difficulty"))
                     {
@@ -911,15 +1051,16 @@ namespace RoomRunner
                     gameState = cutsceneDestination;
                 }
             }
-            SkipInputs:
+        SkipInputs:
 
             if (menuCoolDown > 0)
                 menuCoolDown--;
+            if (gameState == GameState.Menu && menuCoolDown != 0 && musicScreen.customMusic)
+                LoadCustomSongs();
 
             if (gameState == GameState.Menu && menuCoolDown == 0)
             {
-                if (musicScreen.customMusic)
-                    LoadCustomSongs();
+                
 
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
@@ -954,16 +1095,14 @@ namespace RoomRunner
                         }
                     }
                 }
-                foreach (Player player in players)
-                    player.Save();
+                //foreach (Player player in players)
+                //    player.Save();
             }
-            
+
 
             if (gameState == GameState.Play)
             {
                 gameSongListInstance[3].Stop();
-                musicVolume = musicScreen.musicVolume;
-                soundVolume = musicScreen.soundVolume;
                 if (musicScreen.customMusic) //if custom music is selected
                 {
                     if (customSongList.Count != 0)
@@ -986,11 +1125,11 @@ namespace RoomRunner
                         }
 
                     }
-                    
+
                 }
                 else //regular game music
                 {
-                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume/15);
+                    gameSongListInstance[gameSongListIndex].Volume = (float)(musicVolume / 15);
                     if (songTimeElapsed == 0 && gameSongListIndex == 0)
                         gameSongListInstance[gameSongListIndex].Play();
                     if (songTimeElapsed / 60 > gameSongList[gameSongListIndex].Duration.TotalSeconds)
@@ -1016,17 +1155,7 @@ namespace RoomRunner
                         return;
 
                 }
-                if (transition)
-                {
-                    //draws the obstacles in the next room
-                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
-                    {
-                        obstacle.Current.Velocity.X = scrollSpeed;
-                        if (obstacle.Current.Rectangle.Intersects(window))
-                            obstacle.Current.anim.Idle = false;
-                        obstacle.DrawAndUpdate(spriteBatch);
-                    }
-                }
+
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
@@ -1038,7 +1167,7 @@ namespace RoomRunner
                 }
                 if (quest.completedQuest)
                     quest.completedUpdate();
-                if (!quest.completedQuest)
+                if (!quest.completedQuest && !revived)
                 {
                     if (questID == 1 && quest.amnt <= collectedCoins)
                     {
@@ -1062,7 +1191,7 @@ namespace RoomRunner
 
                 if (bossFight)
                 {
-                    if (roomList[currentRoomIndex].enemyArray.Count > 0) 
+                    if (roomList[currentRoomIndex].enemyArray.Count > 0)
                         roomList[currentRoomIndex].enemyArray.Clear();
 
                     goto Jeb;
@@ -1075,51 +1204,51 @@ namespace RoomRunner
                     if (activePowerupIndex != 1)
                         if (enemy != null)
                             foreach (Player p in players)
-                            if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height)))
-                                p.Damage();
+                                if (new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height).Intersects(new Rectangle(enemy.rectangle.X + enemyHitBox.X, enemy.rectangle.Y + enemyHitBox.Y, enemy.rectangle.Width + enemyHitBox.Width, enemy.rectangle.Height + enemyHitBox.Height)))
+                                    p.Damage();
                 }
 
                 // player coin collection
                 foreach (Coin[,] coinGrid in roomList[currentRoomIndex].coinsGridList)
                 {
-                    foreach(Coin coin in coinGrid)
+                    foreach (Coin coin in coinGrid)
                     {
                         foreach (Player p in players)
-                        if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
-                        {
-                            coin.Destroy();
-                            p.Coins++;
-                            collectedCoins++;
-                            soundEffects[0].Play(volume: (float)soundVolume/180, pitch: 0.0f, pan: 0.0f);
-                        }
+                            if (coin != null && new Rectangle(coin.rectangle.X + coinHitBox.X, coin.rectangle.Y + coinHitBox.Y, coinHitBox.Width, coinHitBox.Height).Intersects(new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)))
+                            {
+                                coin.Destroy();
+                                p.Coins++;
+                                collectedCoins++;
+                                soundEffects[0].Play(volume: (float)soundVolume / 180, pitch: 0.0f, pan: 0.0f);
+                            }
                     }
                 }
 
 
-               // damages player if obstacle intercepts them
-               foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                // damages player if obstacle intercepts them
+                foreach (ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
                 {
 
-                    foreach(Player jeb in players)
+                    foreach (Player jeb in players)
                     {
 
 
                         if (new Rectangle(jeb.PlayerRectangle.X + playerHitBox.X, jeb.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height)
                             .Intersects(new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y,
                             obstacle.Current.Rectangle.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height)))
-                                jeb.Damage();
+                            jeb.Damage();
                     }
-                        
+
                 }
 
-                    if (bossFight)
+                if (bossFight)
                 {
                     if (roomList[currentRoomIndex].enemyArray.Count > 0) roomList[currentRoomIndex].enemyArray.Clear();
                     goto Jeb;
                 }
 
 
-                Jeb:
+            Jeb:
 
                 bool weLiving = false;
                 foreach (Player p in players)
@@ -1131,24 +1260,31 @@ namespace RoomRunner
                         weLiving = true;
                 }
                 if (!weLiving)
-                    if (quest.completedQuest)
+                {
+                    if (quest.completedQuest && !revived)
                     {
                         weLiving = true;
                         foreach (Player p in players)
                         {
-                            p.Health = 3;
+                            p.Health = Player.MaxHealth;
                             p.IsAlive = true;
                         }
-                        quest.completedQuest = false;
+                        revived = true;
                     }
                     else
-                        gameState = GameState.GameOver;
+                    {
+                        gameState = GameState.Cutscene;
+                        cutsceneDestination = GameState.Death;
+                        DeathTimer = byte.MaxValue;
+                    }
+
+                }
 
                 UpdateProjList(projectileList);
 
 
-                
-                
+
+
 
 
 
@@ -1171,13 +1307,13 @@ namespace RoomRunner
                 if (powerups.ActivePowerups())
                 {
                     activePowerupIndex = powerups.ActivePowerupsIndex();
-                    
-                    
+
+
                     if (activePowerupIndex == 2)
                     {
 
                         roomList[currentRoomIndex].enemyArray.Clear();
-                        
+
                     }
                     if (activePowerupIndex == 3)
                     {
@@ -1201,43 +1337,40 @@ namespace RoomRunner
 
                 powerups.Update();
             }
-            
+
             gameTimer++;
-            if (gameState == GameState.GameOver)
+            if (gameState == GameState.Death)
             {
-                for (int i = 0; i < players.Count; i++)
+                
+            }
+            if (gameState == GameState.Death)
+            {
+                if (DeathTimer == 0)
                 {
-                    players[i].distanceTraveled = 0;
+                    gameState = GameState.Cutscene;
+                    cutsceneDestination = GameState.GameOver;
                 }
-
-                if (musicScreen.customMusic)
-                {
-                    LoadCustomSongs();
-                    loadSoundEffects();
-                    customSongIndex = 0;
-                    songTimeElapsed = 0;
-                }
-                else
-                {
-                    loadGameSongs(1);
-                    loadSoundEffects();
-                    gameSongListIndex = 0;
-                    songTimeElapsed = 0;
-                }
-
-                activePowerupIndex = -1;
-                powerups.RemovePowerups();
-
                 collectedCoins = 0;
                 questID = rand.Next(0, 2);
                 quest = new Quest(questID);
+                revived = false;
             }
             if (gameState == GameState.Shop)
                 UpdateShop();
+            if (gameState == GameState.Music && currentMenu.thingies.Count > 1)
+            {
+                soundVolume = (currentMenu.thingies[2] as Slider).Percent;
+                musicVolume = (currentMenu.thingies[3] as Slider).Percent;
+                if (musicVolume == 1)
+                    Console.WriteLine("how");
+            }
+
+
+
             oldMouse = mouse;
             oldKB = Keyboard.GetState();
 
-            
+
             base.Update(gameTime);
         }
         public void UpdateProjList(List<Projectile> list)
@@ -1269,10 +1402,35 @@ namespace RoomRunner
                 }
         }
 
-        
+
 
         private void Reset()
         {
+            if (HasReset) return;
+            HasReset = true;
+            for (int i = 0; i < players.Count; i++)
+            {
+                players[i].distanceTraveled = 0;
+            }
+
+            if (musicScreen.customMusic)
+            {
+                LoadCustomSongs();
+                loadSoundEffects();
+                customSongIndex = 0;
+                songTimeElapsed = 0;
+            }
+            else
+            {
+                loadGameSongs(1);
+                loadSoundEffects();
+                gameSongListIndex = 0;
+                songTimeElapsed = 0;
+            }
+
+            activePowerupIndex = -1;
+            powerups.RemovePowerups();
+
             levels = Levels.Level1;
             gameTimer = 0;
             levelTimer = 0;
@@ -1291,51 +1449,48 @@ namespace RoomRunner
 
             projectileList.Clear();
             currentBoss = null;
-
+            questID = rand.Next(0, 2);
+            quest = new Quest(questID);
             GenerateRooms(amountOfRooms, backgroundImages, window);
+            CreateBosses();
         }
 
         /// This is called when the game should draw itself.
+        /// 
+        public void DrawSavingText()
+        {
+            if (saving && savingText.Equals("saved") && saveColor != new Color(0, 0, 0, 0))
+                saveColor = new Color(0, 0, 0, (byte)(saveColor.A-3));
+            else
+            {
+                savingText = "saving...";
+                saving = false;
+                saveColor = Color.Black;
+                return;
+            }
+                
+            spriteBatch.DrawString(shopFontBold, savingText, new Vector2(window.Width - shopFont.MeasureString(savingText).X - 20, window.Height - shopFontBold.MeasureString(savingText).Y - 10), saveColor);
+        }
         protected override void Draw(GameTime gameTime)
         {
+            if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene || gameState == GameState.GameOver) GraphicsDevice.Clear(Color.Black);
+            else GraphicsDevice.Clear(Color.Gray);
             KeyboardState kb = Keyboard.GetState();
 
             GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
-
-            
-
-            
+            Menu val = getCurrentMenu();
+            if (val != null)
+                val.DrawAndUpdate(spriteBatch);
 
             // menu
-            if(gameState == GameState.Menu)
+            if (gameState == GameState.Menu)
             {
                 if (!tutorialActive)
                 {
-                    int halfSeconds = gameTimer / 30;
-                    Rectangle playerIdleDimensions = new Rectangle(window.Width / 2 - 20, 100, 100, 100);
-
-                    Vector2 titlePosition = new Vector2(window.Width / 2 - 220, 200);
-
-
-                    // Title screen animation
-                    if (halfSeconds % 2 == 0)
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[0], Color.White);
-                    else
-                        spriteBatch.Draw(jebSheet, playerIdleDimensions, idleAnimationRectangles[1], Color.White);
-
-                    spriteBatch.DrawString(menuFont, "Welcome to Room Runner!", titlePosition, Color.White);
 
                     spriteBatch.Draw(questionMark, tutorialRect, Color.White);
-
-                    for (int i = 0; i < multiplayerButtons.Count; i++)
-                    {
-                        if (multiplayerButtonStates[i])
-                            spriteBatch.Draw(iconTextures[1], multiplayerButtons[i], Color.White);
-                        else
-                            spriteBatch.Draw(iconTextures[0], multiplayerButtons[i], Color.White);
-                    }
 
                     cutscenes.Draw(spriteBatch, pixel);
                     if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1343,23 +1498,26 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-                else
+
+            }
+            if (tutorialActive)
+            {
                 {
                     switch (textboxesIndex)
                     {
                         case 0:
-                            //menu.draw once samuel does it
+                            gameState = GameState.Menu;
                             break;
                         case 1:
-                            //shop.Draw(gameTime, spriteBatch, shopFont, shopFontBold, shopTitleFont, pixel);
+                            gameState = GameState.Shop;
                             break;
                         case 2:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            gameState = GameState.Music;
                             break;
                         case 3:
-                            musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
+                            gameState = GameState.Music;
                             break;
-                        
+
                         default:
                             if (!transition)
                                 levelTimer++;
@@ -1407,12 +1565,11 @@ namespace RoomRunner
                         cutscenes = new Cutscene();
                     }
                 }
-
             }
             if (gameState == GameState.Cutscene)
             {
-                
-                    
+
+
                 cutscenes.cutseneActive = true;
                 cutscenes.Draw(spriteBatch, pixel);
             }
@@ -1426,16 +1583,28 @@ namespace RoomRunner
             }
             if (gameState == GameState.Music)
             {
-                //musicScreen.Draw(spriteBatch, pixel, shopTitleFont, shopFontBold, shopFont);
-                musicVolume = musicScreen.musicVolume;
                 gameSongListInstance[3].Volume = (float)musicVolume / 5;
                 if (gameSongListInstance[3].State != SoundState.Playing)
                     gameSongListInstance[3].Play();
+                if (saving)
+                {
+                    DrawSavingText();
+                }
             }
-            if (gameState == GameState.Play)
+            if (gameState == GameState.Play || (cutsceneDestination == GameState.Death && gameState == GameState.Cutscene))
             {
 
-                
+                if (transition)
+                {
+                    //draws the obstacles in the next room
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
+                    {
+                        obstacle.Current.Velocity.X = scrollSpeed;
+                        if (obstacle.Current.Rectangle.Intersects(window))
+                            obstacle.Current.anim.Idle = false;
+                        obstacle.DrawAndUpdate(spriteBatch);
+                    }
+                }
 
 
 
@@ -1446,7 +1615,7 @@ namespace RoomRunner
 
 
                 if (bossCooldown > 0 && !bossFight) bossCooldown--;
-                if (levelSeconds > 999 && !bossFight && bossCooldown == 0)
+                if (levelSeconds > 10 && !bossFight && bossCooldown == 0)
                     SummonBoss();
                 // tries to advance to next room every 10 seconds
                 if (currentRoomIndex < roomList.Count - 1 && levelSeconds > 10 && !bossFight)
@@ -1456,16 +1625,16 @@ namespace RoomRunner
                     levels++;
                 }
 
-                
+
 
                 // scrolling calculations
-                
+
                 bool loopImage = roomList[currentRoomIndex].backgroundRectangle.X < -((window.Width * 2) - window.Right - 10);
 
 
 
-                
-                
+
+
 
 
                 // checks if the transition period is over so we can move on to the next room
@@ -1493,7 +1662,7 @@ namespace RoomRunner
 
                 //Console.WriteLine("LoopImage: " + loopImage + "\ntransition: " + transition + "\nendCurrentRoom: " + endCurrentRoom);
 
-                
+
 
                 // draws the room
 
@@ -1503,13 +1672,10 @@ namespace RoomRunner
                 spriteBatch.Draw(roomList[currentRoomIndex].background2, new Rectangle(roomRectangle.Right, 0, roomRectangle.Width, roomRectangle.Height), Color.White);
 
 
-                
+
 
                 // draws the boss
                 if (!bossFight) roomList[currentRoomIndex].Draw(spriteBatch);
-
-                if(bossFight)
-                    spriteBatch.DrawString(menuFont, "BOSS FIGHT!", new Vector2(window.Width / 2 - 100, 300), Color.Red);
 
                 foreach (Player p in players)
                     p.Draw(spriteBatch);
@@ -1518,7 +1684,7 @@ namespace RoomRunner
                     p.Draw(spriteBatch);
 
                 powerups.Draw(spriteBatch, collectableSheet, pixel, clock, skull, nuke, magnet, shopFontBold, shopFont);
-                
+
                 //score and coins
                 int y = 70;
                 for (int i = 0; i < players.Count; i++)
@@ -1551,9 +1717,9 @@ namespace RoomRunner
                         spriteBatch.Draw(pixel, new Rectangle(p.PlayerRectangle.X + playerHitBox.X, p.PlayerRectangle.Y + playerHitBox.Y, playerHitBox.Width, playerHitBox.Height), Color.Black * 0.5f);
 
 
-                    foreach(ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
+                    foreach (ProjectileClump obstacle in roomList[currentRoomIndex].obstacleList)
                     {
-                        if(!obstacle.Delete)
+                        if (!obstacle.Delete)
                             spriteBatch.Draw(pixel, new Rectangle(obstacle.Current.Rectangle.X + obstacleHitBox.X, obstacle.Current.Rectangle.Y + obstacleHitBox.Y, obstacle.Current.Rectangle.Width + obstacleHitBox.Width, obstacle.Current.Rectangle.Height + obstacleHitBox.Height), Color.Black * 0.5f);
                     }
                 }
@@ -1570,7 +1736,7 @@ namespace RoomRunner
                         quest.Draw(spriteBatch, shopFontBold, jebSheet, new Rectangle(0, 0, 32, 32), pixel);
                     }
                 }
-                    
+
 
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)
@@ -1578,6 +1744,20 @@ namespace RoomRunner
                     cutscenes = new Cutscene();
                 }
 
+            }
+            if (gameState == GameState.Death) spriteBatch.Draw(DeathTxt, window, Color.White);
+            if (gameState == GameState.Cutscene && cutsceneDestination == GameState.GameOver)
+            {
+                spriteBatch.Draw(DeathTxt, window, Color.White);
+                spriteBatch.Draw(pixel, window, new Color(0, 0, 0, cutscenes.alpha));
+            }
+            if (gameState == GameState.Death || gameState == GameState.GameOver)
+            {
+                cutscenes.Draw(spriteBatch, pixel);
+                if (cutscenes.alpha < 1 && !cutscenes.phase)
+                {
+                    cutscenes = new Cutscene();
+                }
             }
 
             Menu currentMenu = getCurrentMenu();
@@ -1622,14 +1802,8 @@ namespace RoomRunner
                         spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
                         break;
 
-                }
-
-                
-                
-                    
+                }     
             }
-
-
             Menu val = getCurrentMenu();
             if (val != null)
                 val.DrawAndUpdate(spriteBatch);
@@ -1646,7 +1820,8 @@ namespace RoomRunner
 
         private void SummonBoss()
         {
-            currentBoss = bosses[levels].Clone();
+            if (bosses[levels] != default)
+                currentBoss = bosses[levels].Clone();
             bossCooldown = 300;
         }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
@@ -1662,13 +1837,13 @@ namespace RoomRunner
             currentRoomIndex = 0;
             roomList.Clear();
 
-            for(int i = 0; i < amountOfRooms; i++)
+            for (int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1,Enemy.EnemyNames), GraphicsDevice, Content, window));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1, Enemy.EnemyNames), GraphicsDevice, Content, window));
             }
 
-            
+
         }
 
         // directory should be the name of a FOLDER with the images you want to load.
@@ -1736,10 +1911,41 @@ namespace RoomRunner
         {
             foreach (Player player in players)
                 player.Save();
+            string str = musicVolume + "\n" + soundVolume + "\n";
+            for (int i = 0; i < 4; i++)
+                str += powerups.quantities[i] + " ";
+            SaveAndLoad.Save(str, "SettingsData.txt");
+            savingText = "saved";
         }
         public void Load()
         {
-
+            foreach (Player player in players)
+                player.Load();
+            string str = SaveAndLoad.Load("SettingsData.txt");
+            string[] lines = str.Split('\n');
+            if (lines.Length < 2) return;
+            musicVolume = double.Parse(lines[0]);
+            soundVolume = double.Parse(lines[1]);
+            (menus[GameState.Music].thingies[3] as Slider).SetPercent((float)musicVolume);
+            (menus[GameState.Music].thingies[2] as Slider).SetPercent((float)soundVolume);
+            string[] quants = lines[2].Split(' ');
+            for (int i = 0; i < 4; i++)
+                powerups.quantities[i] = Int32.Parse(quants[i]);
+        }
+        public void ClearSave()
+        {
+            foreach (Player player in players)
+            {
+                player.ClearSave();
+            }
+            musicVolume = 1;
+            soundVolume = 1;
+            for (int i = 0; i < 4; i++)
+                powerups.quantities[i] = 1;
+            //string str = musicVolume + "\n" + soundVolume;
+            //SaveAndLoad.Save(str, "SettingsData.txt");
+            Save();
+            this.Exit();
         }
     }
 }

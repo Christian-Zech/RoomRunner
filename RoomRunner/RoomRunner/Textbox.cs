@@ -26,15 +26,15 @@ namespace RoomRunner
             arrowEndPoint = relevantPoint;
             message = text;
             if (relevantPoint.X > Game1.window.Width - 310)
-                relevantPoint.X = Game1.window.Width/ 2 + 200;
+                relevantPoint.X = Game1.window.Width / 2 + 200;
             if (relevantPoint.X < 400)
-                relevantPoint.X = Game1.window.Width / 2 ;
+                relevantPoint.X = Game1.window.Width / 2;
             if (relevantPoint.Y < 205)
-                relevantPoint.Y = Game1.window.Height/2 +150;
+                relevantPoint.Y = Game1.window.Height / 2 + 150;
             rect = new Rectangle(Game1.window.Width - (int)relevantPoint.X, Game1.window.Height - (int)relevantPoint.Y, 400, 300);
             exitButton = new Rectangle(rect.X + rect.Width - 60, rect.Y + rect.Height - 40, 60, 40);
             exited = false;
-            distance = (int)Math.Sqrt(Math.Pow(rect.X+rect.Width/2 - arrowEndPoint.X, 2) + Math.Pow(rect.Y + rect.Height / 2 - arrowEndPoint.Y, 2));
+            distance = (int)Math.Sqrt(Math.Pow(rect.X + rect.Width / 2 - arrowEndPoint.X, 2) + Math.Pow(rect.Y + rect.Height / 2 - arrowEndPoint.Y, 2));
             angle = (float)Math.Atan2(rect.Y + rect.Height / 2 - arrowEndPoint.Y, rect.X + rect.Width / 2 - arrowEndPoint.X);
         }
         public Textbox(string text)
@@ -52,6 +52,11 @@ namespace RoomRunner
             {
                 exited = true;
             }
+        }
+        public void Recalculate(Vector2 newPoint)
+        {
+            distance = (int)Math.Sqrt(Math.Pow(rect.X + rect.Width / 2 - newPoint.X, 2) + Math.Pow(rect.Y + rect.Height / 2 - newPoint.Y, 2));
+            angle = (float)Math.Atan2(rect.Y + rect.Height / 2 - newPoint.Y, rect.X + rect.Width / 2 - newPoint.X);
         }
         public void Draw(SpriteBatch spriteBatch, Texture2D pixel, SpriteFont font)
         {

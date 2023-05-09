@@ -41,11 +41,12 @@ namespace RoomRunner
         public List<int> ownedHats; //save this
         public static Texture2D Heart;
         public static int players;
-        private readonly int id;
-        
+        public readonly int id;
+        private int FireTimer;
+
         static Player()
         {
-            
+
             Hats = new Dictionary<PlayerHats, Texture2D>();
             ceilingHeight = frameHeight;
             floorHeight = 0;
@@ -79,6 +80,7 @@ namespace RoomRunner
             delayLeft = InputDelay;
             InvinciblityTimer = MaxInvinciblity;
             FlashTimer = 0;
+            FireTimer = 10;
             currentHat = PlayerHats.None;
             Coins = 1000;
             distanceTraveled = 0;
@@ -158,7 +160,7 @@ namespace RoomRunner
             PlayerRectangle.X = (int)Position.X;
             HatRectangle.X = PlayerRectangle.X;
             HatRectangle.Y = PlayerRectangle.Y;
-            if (SelectedAnimation == "Running" && (Frame == 1 || Frame == 3)) 
+            if (SelectedAnimation == "Running" && (Frame == 1 || Frame == 3))
                 HatRectangle.Y -= 2;
 
             if (fireCooldown > 0) fireCooldown--;
@@ -179,7 +181,7 @@ namespace RoomRunner
                     Shown = true;
                 }
                 if (FlashTimer > 0)
-                    FlashTimer--; 
+                    FlashTimer--;
             }
             if (FlashTimer == 0 && InvinciblityTimer > 0)
             {
@@ -189,7 +191,7 @@ namespace RoomRunner
             if (distanceTraveled > distanceHighScore)
                 distanceHighScore = distanceTraveled;
 
-            
+
             base.Update();
 
             oldkb = kb;
@@ -213,13 +215,26 @@ namespace RoomRunner
             {
                 sb.Draw(CurrentTexture, PlayerRectangle, Color.White);
                 if (currentHat != PlayerHats.None)
+                {
+                    if (currentHat - 7 >= 0 && (int)(currentHat - 7) <= 2)
+                    {
+                        if (FireTimer == 0)
+                        {
+                            currentHat++;
+                            if (currentHat > PlayerHats.Fire3)
+                                currentHat = PlayerHats.Fire1;
+                            FireTimer = 10;
+                        }
+                        else FireTimer--;
+                    }
                     sb.Draw(Hats[currentHat], HatRectangle, Color.White);
+                }
             }
             if (Idle) return;
 
             const int shift = 75;
             Color col = new Color(255 - shift * id, 255, 255);
-            for (int i = 0, x = 180*id; i < Health; i++, x += 55)
+            for (int i = 0, x = 180 * id; i < Health; i++, x += 55)
                 sb.Draw(Heart, new Rectangle(x, 0, 50, 50), col);
         }
         public void Damage()
@@ -239,7 +254,7 @@ namespace RoomRunner
                 for (int x = 0, ii = 0; ii < width; ii++, x += Swidth, c++)
                 {
                     outp[c] = new Rectangle(x, y, Swidth, Sheight);
-                    if (c + 1 >= limit) 
+                    if (c + 1 >= limit)
                         return outp;
                 }
             return outp;
@@ -249,7 +264,7 @@ namespace RoomRunner
             string hats = "";
             for (int i = 0; i < ownedHats.Count; i++)
                 hats += ownedHats[i] + " ";
-            
+
             string str = Coins + "\n" + distanceHighScore + "\n" + currentHat + "\n" + hats;
             SaveAndLoad.Save(str, "playerData.txt");
         }
@@ -259,17 +274,25 @@ namespace RoomRunner
             if (data.Equals(""))
                 return;
             string[] lines = data.Split('\n');
-            Coins = Int32.Parse(lines[0]);
-            distanceHighScore = Int32.Parse(lines[1]);
+            Coins = int.Parse(lines[0]);
+            distanceHighScore = int.Parse(lines[1]);
             currentHat = (PlayerHats)Enum.Parse(typeof(PlayerHats), lines[2]);
             string[] hats = lines[3].Split(' ');
             if (!hats[0].Equals(""))
             {
                 for (int i = 0; i < hats.Length; i++)
                     if (!hats[i].Equals("\r"))
-                        ownedHats.Add(Int32.Parse(hats[i]));
+                        ownedHats.Add(int.Parse(hats[i]));
             }
-            
+
+        }
+        public void ClearSave()
+        {
+            Coins = 1000;
+            distanceHighScore = 0;
+            currentHat = PlayerHats.None;
+            ownedHats.Clear();
+            //Save();
         }
     }
     public enum PlayerHats
@@ -289,3 +312,4 @@ namespace RoomRunner
         Blue_Bandana
     }
 }
+

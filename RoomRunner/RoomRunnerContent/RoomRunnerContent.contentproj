@@ -218,6 +218,28 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MenuBGs\BG.PNG">
+      <Name>BG</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="MenuBGs\BG_blurred.PNG">
+      <Name>BG_blurred</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="MenuBGs\Death.PNG">
+      <Name>Death</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MenuBGs\Death_blurred.PNG">
+      <Name>Death_blurred</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <None Include="SaveData\playerData.txt">
       <SubType>Form</SubType>
       <Name>playerData</Name>
