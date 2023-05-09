@@ -22,9 +22,12 @@ namespace RoomRunner
 
         public static Texture2D pixel;
         public Texture2D jebSheet;
+        public Texture2D difficultyArrow;
 
-        public SpriteFont menuFont { get { return fonts[1]; } }
+        public SpriteFont menuFont { get { return fonts[2]; } }
         public SpriteFont buttonFont { get { return fonts[0]; } }
+
+        
 
         List<Rectangle> jebList;
         List<Rectangle> idleAnimationRectangles;
@@ -33,6 +36,7 @@ namespace RoomRunner
         Rectangle shopButtonRectangle;
         Rectangle MusicButtonRectangle;
         Rectangle menuButtonRectangle;
+        Rectangle difficultyButtonRectangle;
         List<Rectangle> multiplayerButtons;
         List<bool> multiplayerButtonStates;
         Texture2D[] iconTextures;
@@ -78,9 +82,13 @@ namespace RoomRunner
         //for shop
         public Texture2D collectableSheet, cosmeticSheet;
         public Rectangle[] collectableRect, cosmeticRect;
-        public SpriteFont shopFont { get { return fonts[2]; } }
-        public SpriteFont shopFontBold { get { return fonts[3]; } }
-        public SpriteFont shopTitleFont { get { return fonts[4]; } }
+        public SpriteFont shopFont { get { return fonts[4]; } }
+        public SpriteFont shopFontBold { get { return fonts[5]; } }
+        public SpriteFont shopTitleFont { get { return fonts[6]; } }
+
+        public SpriteFont menuFontBold {  get { return fonts[3]; } }
+
+        public SpriteFont largeFont { get { return fonts[1]; } }
 
         public int menuCoolDown;
 
@@ -134,7 +142,8 @@ namespace RoomRunner
             Music,
             GameOver,
             Cutscene,
-            Death
+            Death,
+            Difficulty
         }
 
         public enum Levels
@@ -144,8 +153,16 @@ namespace RoomRunner
             Level3
         }
 
+        public enum Difficulty
+        {
+            Easy,
+            Normal,
+            Hard
+        }
+
         public static Levels levels;
         public static GameState gameState;
+        public static Difficulty difficulty;
 
         public Game1()
         {
@@ -228,6 +245,7 @@ namespace RoomRunner
             shopButtonRectangle = new Rectangle(startButtonRectangle.X, startButtonRectangle.Y + 200, startButtonRectangle.Width, startButtonRectangle.Height);
             menuButtonRectangle = new Rectangle(window.Width / 2 - 140, 600, 350, 100);
             MusicButtonRectangle = new Rectangle(window.Width / 2 - 140, 800, 350, 100);
+            difficultyButtonRectangle = new Rectangle(window.Width / 2 + 300, 400, 350, 100);
 
             powerups = new Powerups();
             activePowerupIndex = -1;
@@ -295,6 +313,8 @@ namespace RoomRunner
                     BorderWidth = 6,
                     TextColor = Color.White
                 }
+                
+                
             };
             foreach (Rectangle r in multiplayerButtons)
                 butts.Add(new Button(r, iconTextures[0]));
@@ -399,8 +419,49 @@ namespace RoomRunner
                     TextColor = Color.White
                 }
             });
-
             menus[GameState.GameOver] = new Menu(butts.ToArray());
+
+            butts.Clear();
+            butts.AddRange(new MenuThingie[]
+            {
+                new SelectionGrid(new Button[][] { new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 3, window.Width / 5, window.Height / 10), Color.Green, menuFont, "Easy")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        } 
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, window.Height / 2, window.Width / 5, window.Height / 10), Color.Orange, menuFont, "Normal")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 5) / 2, (int)(window.Height / 1.5), window.Width / 5, window.Height / 10), Color.Red, menuFont, "Hard")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.Black
+                        }
+                }, new Button[] {
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 4) / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Black, menuFont, "Return To Menu")
+                        {
+                            BorderWidth = 6,
+                            TextColor = Color.White
+                        }
+                    }
+                }),
+                new MenuText(largeFont, "Select your difficulty!", new Vector2(window.Width / 2 - largeFont.MeasureString("Select your difficulty!").X/2, window.Height / 6))
+                {
+                    TextColor = Color.White
+
+                }
+            });
+
+
+
+            menus[GameState.Difficulty] = new Menu(butts.ToArray());
+            
+
             butts.Clear();
 
             butts.Add(new Button(new Rectangle(window.Width / 38 * 15 - window.Width / 76, window.Height / 10 * 3, window.Width / 190 * 17, window.Height / 10), Color.DarkGray, shopFontBold, "Game Music")
@@ -420,10 +481,17 @@ namespace RoomRunner
             butts.Add(new MenuText(shopFontBold, "Music Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 53)));
             butts.Add(new MenuText(shopFontBold, "Sound Volume", new Vector2(window.Width / 19 * 9 - window.Width / 76, window.Height / 100 * 73)));
 
+
             butts.Add(new Button(new Rectangle(window.Width / 19 * 15 - window.Width / 75, window.Height / 10 * 3, window.Width / 38 * 3, window.Height / 10), Color.DarkGray, shopFontBold, "Add Music")
             {
                 BorderWidth = 3,
                 Shown = false
+            });
+            
+            butts.Add(new Button(difficultyButtonRectangle, Color.Purple, menuFont, "Difficulty")
+            {
+                BorderWidth = 6,
+                TextColor = Color.White
             });
 
             butts.Add(new MenuText(shopFontBold, () =>
@@ -679,6 +747,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
             DeathTxt = Content.Load<Texture2D>("MenuBGs/Death");
             runningGuy = Content.Load<Texture2D>("runningGuy");
+            difficultyArrow = this.Content.Load<Texture2D>("BetterArrowTransparent");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
@@ -834,6 +903,10 @@ namespace RoomRunner
                             gameState = GameState.Menu;
                             menuCoolDown = 2;
                             break;
+                        case GameState.Difficulty:
+                            gameState = GameState.Menu;
+                            menuCoolDown = 2;
+                            break;
                         default:
                             this.Exit();
                             break;
@@ -891,12 +964,15 @@ namespace RoomRunner
                         Save();
                         saving = true;
                     }
-
                     if (gameState == GameState.Music && b.Text.Equals("Clear Save*"))
                     {
                         ClearSave();
                     }
-
+                    if(gameState == GameState.Music && b.Text.Equals("Difficulty"))
+                    {
+                        gameState = GameState.Difficulty;
+                        menuCoolDown = 2;
+                    }
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
                         gameState = GameState.Shop;
@@ -942,6 +1018,22 @@ namespace RoomRunner
                                 (menus[gameState].thingies[6] as Button).Rectangle.Y += window.Height / 30;
                                 (menus[gameState].thingies[6] as Button).DrawRectangle.Y += window.Height / 30;
                             }
+                        }
+                    }
+                    if(gameState == GameState.Menu && b.Text.Equals("Difficulty"))
+                    {
+                        gameState = GameState.Difficulty;
+                        menuCoolDown = 2;
+                    }
+                    if (gameState == GameState.Difficulty)
+                    {
+                        switch(b.Text)
+                        {
+                            case "Return To Menu":
+                                gameState = GameState.Menu;
+                                menuCoolDown = 2;
+                                break;
+
                         }
                     }
                 }
@@ -1386,6 +1478,9 @@ namespace RoomRunner
         {
             if (cutsceneDestination == GameState.GameOver && gameState == GameState.Cutscene || gameState == GameState.GameOver) GraphicsDevice.Clear(Color.Black);
             else GraphicsDevice.Clear(Color.Gray);
+            KeyboardState kb = Keyboard.GetState();
+
+            GraphicsDevice.Clear(Color.Gray);
 
             spriteBatch.Begin();
             Menu val = getCurrentMenu();
@@ -1667,6 +1762,51 @@ namespace RoomRunner
                 {
                     cutscenes = new Cutscene();
                 }
+            }
+
+            Menu currentMenu = getCurrentMenu();
+
+
+
+            
+
+
+            if (gameState == GameState.Difficulty)
+            {
+                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
+
+                if (kb.IsKeyDown(Keys.Enter) || b.MouseClickedOnce)
+                {
+                    if (b.Text.Equals("Easy"))
+                        difficulty = Difficulty.Easy;
+                    if (b.Text.Equals("Normal"))
+                        difficulty = Difficulty.Normal;
+                    if (b.Text.Equals("Hard"))
+                        difficulty = Difficulty.Hard;
+
+                }
+
+                b = null;
+
+                switch (difficulty)
+                {
+
+                    case Difficulty.Easy:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[0];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Normal:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[1];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                    case Difficulty.Hard:
+                        b = (currentMenu.thingies[0] as SelectionGrid).Butts[2];
+                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
+                        break;
+
+                }     
             }
             spriteBatch.End();
 
