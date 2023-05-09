@@ -1073,13 +1073,9 @@ namespace RoomRunner
                     if (b.MouseClickedOnce || KeyPressed(keyboard, Keys.Enter, Keys.Space))
                     {
                         int i = grid.Butts.ToList().IndexOf(grid.Current);
-                        int[] hardCode = new int[] { 0, 3, 5 };
-                        if (hardCode.Contains(i))
+                        if (i % 2 == 0)
                         {
-                            if (i == 3)
-                                i = 1;
-                            else if (i == 5)
-                                i = 2;
+                            i /= 2;
                             bool toSet = !multiplayerButtonStates[i];
                             if (toSet)
                                 for (int j = i; j >= 0; j--)
@@ -1089,9 +1085,9 @@ namespace RoomRunner
                                     multiplayerButtonStates[j] = false;
                             for (int ii = 0; ii < 3; ii++)
                                 if (multiplayerButtonStates[ii])
-                                    grid.Butts[hardCode[ii]].Texture = iconTextures[1];
+                                    grid.Butts[ii * 2].Texture = iconTextures[1];
                                 else
-                                    grid.Butts[hardCode[ii]].Texture = iconTextures[0];
+                                    grid.Butts[ii * 2].Texture = iconTextures[0];
                         }
                     }
                 }
