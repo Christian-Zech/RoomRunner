@@ -251,7 +251,7 @@
       <Name>runningGuy</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-     </Compile>
+    </Compile>
     <Compile Include="SpriteFonts\largeFont.spritefont">
       <Name>largeFont</Name>
       <Importer>FontDescriptionImporter</Importer>
@@ -266,8 +266,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="difficultyArrow.png">
-      <Name>difficultyArrow</Name>
+    <Compile Include="BetterArrowTransparent.png">
+      <Name>BetterArrowTransparent</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

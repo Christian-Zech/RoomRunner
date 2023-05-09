@@ -747,7 +747,7 @@ namespace RoomRunner
             backgroundImages = loadTextures("Background", Content);
             DeathTxt = Content.Load<Texture2D>("MenuBGs/Death");
             runningGuy = Content.Load<Texture2D>("runningGuy");
-            difficultyArrow = this.Content.Load<Texture2D>("difficultyArrow");
+            difficultyArrow = this.Content.Load<Texture2D>("BetterArrowTransparent");
 
             players = new List<Player> {
                 new Player(new Vector2(700, 500))
