@@ -849,6 +849,11 @@ namespace RoomRunner
                         menuCoolDown = 2;
                     }
 
+                    if(gameState == GameState.Music && b.Text.Equals("Difficulty"))
+                    {
+                        gameState = GameState.Difficulty;
+                        menuCoolDown = 2;
+                    }
 
                     if (gameState == GameState.Menu && b.Text.Equals("Enter Shop"))
                     {
