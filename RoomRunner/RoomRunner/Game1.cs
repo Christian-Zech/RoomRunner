@@ -1804,7 +1804,7 @@ namespace RoomRunner
 
                 }     
             }
-            Menu val = getCurrentMenu();
+            val = getCurrentMenu();
             if (val != null)
                 val.DrawAndUpdate(spriteBatch);
             spriteBatch.End();
