@@ -262,7 +262,7 @@ namespace RoomRunner
 
 
             textboxesIndex = 0;
-            savingText = "saving...";
+            savingText = "Saving...";
             saving = false;
             saveColor = Color.Black;
             questID = rand.Next(0, 2);
@@ -768,10 +768,21 @@ namespace RoomRunner
         }
         private void GeneratePlayers(int amount)
         {
+            const bool invulnerable = false;
+            Player.players = Math.Min(1, amount);
+            players.Clear();
+            players.Add(new Player(new Vector2(700, 500))
+            {
+                Invulnerable = invulnerable,
+                Up = new List<Keys> { Keys.W },
+                Down = new List<Keys> { Keys.S },
+                Left = new List<Keys> { Keys.A },
+                Shoot = new List<Keys> { Keys.D }
+            });
             if (amount <= 1) return;
             players.Add(new Player(new Vector2(900, 500))
             {
-                Invulnerable = false,
+                Invulnerable = invulnerable,
                 Up = new List<Keys> { Keys.Up },
                 Down = new List<Keys> { Keys.Down },
                 Left = new List<Keys> { Keys.Left },
@@ -780,7 +791,7 @@ namespace RoomRunner
             if (amount == 2) return;
             players.Add(new Player(new Vector2(500, 500))
             {
-                Invulnerable = false,
+                Invulnerable = invulnerable,
                 Up = new List<Keys> { Keys.I },
                 Down = new List<Keys> { Keys.K },
                 Left = new List<Keys> { Keys.J },
@@ -1662,7 +1673,8 @@ namespace RoomRunner
 
         private void SummonBoss()
         {
-            currentBoss = bosses[levels].Clone();
+            if (bosses[levels] != default)
+                currentBoss = bosses[levels].Clone();
             bossCooldown = 300;
         }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)
