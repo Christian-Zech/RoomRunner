@@ -171,6 +171,7 @@ namespace RoomRunner
         public void DrawAndUpdate(SpriteBatch sb)
         {
             if (Delete) return;
+            if (Program.Game.activePowerupIndex == 1 && Program.Game.slowTimeTemp % 2 == 0) return;
             Program.Game.UpdateProjectile(Current);
             if (!Current.InFrame || (!Current.Persists && Current.DeltDamage)) projs.Dequeue();
             if (projs.Count == 0)
