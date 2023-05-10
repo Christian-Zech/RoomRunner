@@ -838,7 +838,10 @@ namespace RoomRunner
         private void GeneratePlayers(int amount)
         {
             const bool invulnerable = false;
-            Player.players = Math.Min(1, amount);
+            if (amount != 1)
+                Player.players = amount;
+            else
+                Player.players = 0;
             players.Clear();
             players.Add(new Player(new Vector2(700, 500))
             {
