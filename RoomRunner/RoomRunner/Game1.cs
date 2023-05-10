@@ -1531,7 +1531,7 @@ namespace RoomRunner
                             {
                                 spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
                                 spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
-                                spriteBatch.DrawString(fonts[3], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                                spriteBatch.DrawString(fonts[0], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
                                 //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
                                 y += 140;
                             }
@@ -1687,7 +1687,7 @@ namespace RoomRunner
                 {
                     spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
                     spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
-                    spriteBatch.DrawString(fonts[3], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                    spriteBatch.DrawString(fonts[5], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
                     //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
                     y += 140;
                 }
@@ -1833,7 +1833,7 @@ namespace RoomRunner
             for (int i = 0; i < amountOfRooms; i++)
             {
 
-                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, rand.Next(1, Enemy.EnemyNames), GraphicsDevice, Content, window));
+                roomList.Add(new Room(textures[rand.Next(0, textures.Count)], dimensions, GraphicsDevice, Content, window));
             }
 
 
