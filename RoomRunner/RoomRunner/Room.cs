@@ -40,16 +40,38 @@ namespace RoomRunner
         
 
         // Each room operates as its own entity where it will have its own background, enemies, and coins. Game1 has a roomList variable that stores all of the rooms.
-        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content, Rectangle window)
+        public Room(Texture2D background, Rectangle backgroundRectangle, GraphicsDevice graphics, ContentManager content, Rectangle window)
         {
             background1 = background;
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
-            this.numberOfEnemies = numberOfEnemies;
             this.graphics = graphics;
             this.content = content;
             enemyArray = new List<Enemy>();
             obstacleList = new List<ProjectileClump>();
+
+            // modifies enemies and obstacles depending on game difficulty
+            int maximumObstacleAmount = 0;
+            int maximumEnemyAmount = 0;
+            switch (Game1.difficulty)
+            {
+                case Game1.Difficulty.Easy:
+                    maximumObstacleAmount = 2;
+                    maximumEnemyAmount = 5;
+                    break;
+
+                case Game1.Difficulty.Normal:
+                    maximumObstacleAmount = 8;
+                    maximumEnemyAmount = 14;
+                    break;
+
+                case Game1.Difficulty.Hard:
+                    maximumObstacleAmount = 12;
+                    maximumEnemyAmount = 21;
+                    break;
+
+
+            }
 
             rand = new Random();
 
@@ -61,7 +83,7 @@ namespace RoomRunner
                 coinsGridList.Add(new Coin[amountOfCoins,amountOfCoins]);
             }
 
-            generateEnemies(numberOfEnemies);
+            generateEnemies(rand.Next(5, maximumEnemyAmount));
 
             // generates random amount of coins in a random pattern per coin patch
             for(int i = 0; i < coinsGridList.Count; i++)
@@ -72,7 +94,9 @@ namespace RoomRunner
             RemoveCoinOverLap();
 
             // generates room obstacles
-            GenerateObstacles(rand.Next(4, 8));
+
+            
+            GenerateObstacles(rand.Next(2, maximumObstacleAmount));
 
         }
 
