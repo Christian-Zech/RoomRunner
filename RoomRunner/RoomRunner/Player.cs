@@ -17,7 +17,6 @@ namespace RoomRunner
         public const int InputDelay = 20; //In Frames
         private const int FireDelay = 10; //In Frames
         public const int FrameBetweenFlash = 5; //In Frames
-        public const int MaxHealth = 3;
         public const int MaxInvinciblity = 120; //In Frames
         public const int frameHeight = 1000; //px
 
@@ -26,6 +25,21 @@ namespace RoomRunner
         public static readonly Dictionary<PlayerHats, Texture2D> Hats;
         public static float JumpMultiplier;
         public static float GravityMultiplier;
+        public static int MaxHealth 
+        { 
+            get 
+            { 
+                switch (Game1.difficulty) 
+                {
+                    case Game1.Difficulty.Easy:
+                        return 5;
+                    case Game1.Difficulty.Hard:
+                        return 1;
+                    default:
+                        return 3;
+                }
+            } 
+        }
 
         public bool IsAlive, Shown, Invulnerable;
         public Vector2 Velocity, Position, Acceleration;
@@ -34,7 +48,8 @@ namespace RoomRunner
         private KeyboardState oldkb;
         public List<Keys> Up, Down, Left, Shoot;
         private MouseState oldms;
-        public int Coins, Health, distanceTraveled, distanceHighScore; //save these
+        public int Coins, Health;
+        public double distanceTraveled, distanceHighScore; //save these
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat; //save this
@@ -265,7 +280,7 @@ namespace RoomRunner
             for (int i = 0; i < ownedHats.Count; i++)
                 hats += ownedHats[i] + " ";
 
-            string str = Coins + "\n" + distanceHighScore + "\n" + currentHat + "\n" + hats;
+            string str = Coins + "\n" + Math.Round(distanceHighScore) + "\n" + currentHat + "\n" + hats;
             SaveAndLoad.Save(str, "playerData.txt");
         }
         public void Load()

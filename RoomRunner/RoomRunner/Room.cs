@@ -237,7 +237,8 @@ namespace RoomRunner
             }
         }
 
-        // makes the game scroll by moving the background to the left. Also controls enemies and coins.
+        // makes the game
+        // by moving the background to the left. Also controls enemies and coins.
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
