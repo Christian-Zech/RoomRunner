@@ -290,6 +290,9 @@ namespace RoomRunner
             quest = new Quest(questID);
             collectedCoins = 0;
             revived = false;
+
+            difficulty = Difficulty.Normal;
+
             base.Initialize();
 
 
@@ -446,7 +449,7 @@ namespace RoomRunner
                             TextColor = Color.Black
                         }
                 }, new Button[] {
-                        new Button(new Rectangle(window.Width / 2 - (window.Width / 4) / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Black, menuFont, "Return To Menu")
+                        new Button(new Rectangle(window.Width / 2 - (window.Width / 4) / 2, (int)(window.Height / 1.2), window.Width / 4, window.Height / 8), Color.Black, menuFont, "Return To Settings")
                         {
                             BorderWidth = 6,
                             TextColor = Color.White
@@ -1064,6 +1067,17 @@ namespace RoomRunner
                         gameState = GameState.Difficulty;
                         menuCoolDown = 2;
                     }
+                    if (gameState == GameState.Difficulty)
+                    {
+                        switch(b.Text)
+                        {
+                            case "Return To Settings":
+                                gameState = GameState.Music;
+                                menuCoolDown = 2;
+                                break;
+
+                        }
+                    }
                 }
             }
             if (gameState == GameState.Menu && mouse.LeftButton == ButtonState.Pressed && CheckForCollision(mouse.X, mouse.Y, tutorialRect) && menuCoolDown == 0 && !tutorialActive)
@@ -1342,6 +1356,7 @@ namespace RoomRunner
                 UpdateShop();
             if (gameState == GameState.Music && currentMenu.thingies.Count > 1)
             {
+                currentMenu = getCurrentMenu();
                 soundVolume = (currentMenu.thingies[2] as Slider).Percent;
                 musicVolume = (currentMenu.thingies[3] as Slider).Percent;
             }
