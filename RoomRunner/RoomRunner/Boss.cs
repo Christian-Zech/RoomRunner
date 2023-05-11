@@ -12,7 +12,8 @@ namespace RoomRunner
         private const int Insets = 20; //in px
         public const int WarningTime = 120; //in frames
         public const int TimeBetweenPatterns = WarningTime + 50; //in frames
-        public const double SpeedMultiplier = 2;
+
+        public static double SpeedMultiplier { get { return 2 * Program.Game.DifficultyMultiplier; } }
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;
         public bool DoingPattern;
@@ -41,11 +42,22 @@ namespace RoomRunner
                 bossBarRect.Width = (int)((1900.0f - Insets * 2) * BossBarPercent);
             }
         }
+        public int MaxHealth
+        {
+            get
+            {
+                return maxHealth;
+            }
+            set
+            {
+                maxHealth = value;
+            }
+        }
         private int health;
-        private readonly int maxHealth;
+        private int maxHealth;
         private int timer1, warningTime, whiteSpace;
         private Rectangle warningRect;
-        private bool showWarning;
+        private bool showWarning, first;
         private static Texture2D warning;
         private float BossBarPercent;
         public bool IsDead, FlipProjX, FlipProjY;
@@ -74,6 +86,7 @@ namespace RoomRunner
             IsDown = true;
             Velocity = Vector2.Zero;
             TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
+            CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
             TimeLeftInPattern = 0;
             DoingPattern = false;
             projList = new List<ProjectileClump>();
@@ -88,6 +101,7 @@ namespace RoomRunner
             BossBarPercent = 1.0f;
             IsDead = false;
             showWarning = false;
+            first = true;
             warningTime = 0;
             FlipProjX = FlipProjY = false;
             bossBarRect = new Rectangle(Insets, 900, 1900 - Insets * 2, 50);
@@ -112,6 +126,11 @@ namespace RoomRunner
                 DoingPattern = true;
                 TimeLeftInPattern = (int)(PatternTimes[CurrentPattern] / SpeedMultiplier);
                 InitPattern();
+            }
+            if (first)
+            {
+                InitWarning();
+                first = false;
             }
             if (DoingPattern)
                 UpdatePattern();
@@ -275,10 +294,10 @@ namespace RoomRunner
                     break;
                 case BossPattern.Move:
                     IsDown = !IsDown;
-                    timer1 = 0;
+                    timer1 = TimeLeftInPattern;
                     break;
                 case BossPattern.MoveForward:
-                    timer1 = 0;
+                    timer1 = TimeLeftInPattern;
                     SetState("MoveForward");
                     FlipProjX = false;
                     FlipProjY = false;
@@ -321,26 +340,27 @@ namespace RoomRunner
                 case BossPattern.BigPound_Bottom:
                     break;
                 case BossPattern.Move:
-                    timer1++;
-                    if (timer1 <= 30) if (IsDown)
-                            Velocity.Y -= 5.0f / timer1;
+                    const float speed = 1.5f;
+                    if (timer1 / 2 <= TimeLeftInPattern) if (IsDown)
+                            Velocity.Y -= speed * (float)Math.Pow(SpeedMultiplier / 2.0f, 2);
                         else
-                            Velocity.Y += 5.0f / timer1;
+                            Velocity.Y += speed * (float)Math.Pow(SpeedMultiplier / 2.0f, 2);
                     else if (IsDown)
-                            Velocity.Y += 10.0f / (30 - timer1);
+                            Velocity.Y += speed * (float)Math.Pow(SpeedMultiplier / 2.0f, 2);
                         else
-                            Velocity.Y -= 10.0f / (30 - timer1);
+                            Velocity.Y -= speed * (float)Math.Pow(SpeedMultiplier / 2.0f, 2);
 
                     break;
                 case BossPattern.MoveForward:
-                    timer1++;
-                    if (timer1 <= 60)
-                        Velocity.X -= 1;
+                    if (timer1 / 4 <= TimeLeftInPattern)
+                        Velocity.X -= (float)SpeedMultiplier / 2.0f;
                     else
                     {
-                        if (timer1 == 61)
-                            rect.X = 2000;
-                        Velocity.X += 1.5f;
+                        if (timer1 / 4 - 1 == TimeLeftInPattern)
+                        {
+                            Velocity.X = -(float)(24.0f * (SpeedMultiplier / 2.0f));
+                            rect.X = originRect.X + (int)Math.Round(-Velocity.X * TimeLeftInPattern);
+                        }
                     }
                     break;
             }
