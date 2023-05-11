@@ -41,6 +41,7 @@ namespace RoomRunner
         List<bool> multiplayerButtonStates;
         Texture2D[] iconTextures;
         private int CurrentPlayerInShop;
+        public double DifficultyMultiplier;
 
         Rectangle enemyHitBox;
         Rectangle playerHitBox;
@@ -212,6 +213,8 @@ namespace RoomRunner
             scrollSpeed = 10;
             menuCoolDown = 0;
             bossCooldown = 0;
+            DifficultyMultiplier = 1.0;
+            difficulty = Difficulty.Normal;
             HasReset = true;
 
             gameState = GameState.Menu;
@@ -1115,7 +1118,7 @@ namespace RoomRunner
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
-                        players[i].distanceTraveled += (int)Math.Ceiling((decimal)scrollSpeed / 15);
+                        players[i].distanceTraveled += (int)Math.Ceiling(scrollSpeed / 15.0 * DifficultyMultiplier);
                 }
                 if (!quest.completedAnim)
                 {
@@ -1141,7 +1144,7 @@ namespace RoomRunner
 
                 scrollSpeed = currentRoomIndex + 10;
 
-                roomList[currentRoomIndex].Update(scrollSpeed);
+                roomList[currentRoomIndex].Update((int)Math.Round(scrollSpeed * DifficultyMultiplier));
 
 
 
@@ -1319,10 +1322,9 @@ namespace RoomRunner
             {
                 soundVolume = (currentMenu.thingies[2] as Slider).Percent;
                 musicVolume = (currentMenu.thingies[3] as Slider).Percent;
-                if (musicVolume == 1)
-                    Console.WriteLine("how");
             }
-
+            if (gameState == GameState.Death && gameSongListInstance[gameSongListIndex].State == SoundState.Playing)
+                gameSongListInstance[gameSongListIndex].Stop();
 
 
             oldMouse = mouse;
@@ -1605,7 +1607,7 @@ namespace RoomRunner
                     //draws the obstacles in the next room
                     foreach (ProjectileClump obstacle in roomList[currentRoomIndex + 1].obstacleList)
                     {
-                        obstacle.Current.Velocity.X = scrollSpeed;
+                        obstacle.Current.Velocity.X = (int)Math.Round(scrollSpeed * DifficultyMultiplier);
                         if (obstacle.Current.Rectangle.Intersects(window))
                             obstacle.Current.anim.Idle = false;
                         obstacle.DrawAndUpdate(spriteBatch);
@@ -1769,23 +1771,27 @@ namespace RoomRunner
 
             Menu currentMenu = getCurrentMenu();
 
-
-
-            
-
-
             if (gameState == GameState.Difficulty)
             {
                 Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
 
-                if (kb.IsKeyDown(Keys.Enter) || b.MouseClickedOnce)
+                if (KeyPressed(kb, Keys.Enter, Keys.Space) || b.MouseClickedOnce)
                 {
                     if (b.Text.Equals("Easy"))
+                    {
                         difficulty = Difficulty.Easy;
+                        DifficultyMultiplier = 0.5;
+                    }
                     if (b.Text.Equals("Normal"))
+                    {
                         difficulty = Difficulty.Normal;
+                        DifficultyMultiplier = 1.0;
+                    }
                     if (b.Text.Equals("Hard"))
+                    {
                         difficulty = Difficulty.Hard;
+                        DifficultyMultiplier = 1.75;
+                    }
 
                 }
 
@@ -1796,20 +1802,17 @@ namespace RoomRunner
 
                     case Difficulty.Easy:
                         b = (currentMenu.thingies[0] as SelectionGrid).Butts[0];
-                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
                         break;
 
                     case Difficulty.Normal:
                         b = (currentMenu.thingies[0] as SelectionGrid).Butts[1];
-                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
                         break;
 
                     case Difficulty.Hard:
                         b = (currentMenu.thingies[0] as SelectionGrid).Butts[2];
-                        spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
                         break;
-
-                }     
+                }
+                spriteBatch.Draw(difficultyArrow, new Rectangle(b.Rectangle.Right, b.Rectangle.Y, 100, 100), Color.White);
             }
             spriteBatch.End();
 
@@ -1825,7 +1828,10 @@ namespace RoomRunner
         private void SummonBoss()
         {
             if (bosses[levels] != default)
+            {
                 currentBoss = bosses[levels].Clone();
+                currentBoss.Health = (int)Math.Round(currentBoss.Health * DifficultyMultiplier);
+            }
             bossCooldown = 300;
         }
         public bool CheckForCollision(int x, int y, Rectangle inputRectangle)

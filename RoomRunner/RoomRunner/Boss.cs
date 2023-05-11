@@ -12,7 +12,8 @@ namespace RoomRunner
         private const int Insets = 20; //in px
         public const int WarningTime = 120; //in frames
         public const int TimeBetweenPatterns = WarningTime + 50; //in frames
-        public const double SpeedMultiplier = 2;
+
+        public static double SpeedMultiplier { get { return 2 * Program.Game.DifficultyMultiplier; } }
 
         public int TimeBeforeNextPattern, TimeLeftInPattern;
         public bool DoingPattern;
@@ -335,12 +336,12 @@ namespace RoomRunner
                 case BossPattern.MoveForward:
                     timer1++;
                     if (timer1 <= 60)
-                        Velocity.X -= 1;
+                        Velocity.X -= (int)Math.Round(SpeedMultiplier / 2);
                     else
                     {
                         if (timer1 == 61)
                             rect.X = 2000;
-                        Velocity.X += 1.5f;
+                        Velocity.X += 1.5f * (float)(SpeedMultiplier / 2);
                     }
                     break;
             }

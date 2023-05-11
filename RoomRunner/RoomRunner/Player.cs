@@ -17,7 +17,6 @@ namespace RoomRunner
         public const int InputDelay = 20; //In Frames
         private const int FireDelay = 10; //In Frames
         public const int FrameBetweenFlash = 5; //In Frames
-        public const int MaxHealth = 3;
         public const int MaxInvinciblity = 120; //In Frames
         public const int frameHeight = 1000; //px
 
@@ -26,6 +25,21 @@ namespace RoomRunner
         public static readonly Dictionary<PlayerHats, Texture2D> Hats;
         public static float JumpMultiplier;
         public static float GravityMultiplier;
+        public static int MaxHealth 
+        { 
+            get 
+            { 
+                switch (Game1.difficulty) 
+                {
+                    case Game1.Difficulty.Easy:
+                        return 5;
+                    case Game1.Difficulty.Hard:
+                        return 1;
+                    default:
+                        return 3;
+                }
+            } 
+        }
 
         public bool IsAlive, Shown, Invulnerable;
         public Vector2 Velocity, Position, Acceleration;
