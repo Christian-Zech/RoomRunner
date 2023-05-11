@@ -12,7 +12,7 @@ using System.Linq;
 namespace RoomRunner
 {
     
-    class PowerupItem
+    public class PowerupItem
     {
         public string id;
         public int duration;
@@ -29,7 +29,7 @@ namespace RoomRunner
         }
         public void Activate()
         {
-            if (active = true)
+            if (active == true)
                 duration--;
             else
                 active = true;

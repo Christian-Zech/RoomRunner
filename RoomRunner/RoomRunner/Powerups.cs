@@ -11,9 +11,10 @@ using System.Linq;
 
 namespace RoomRunner
 {
-    class Powerups
+    public class Powerups
     {
         int count1, count2, count3, count4;
+
         public List<PowerupItem> items;
         public List<int> quantities;
         public double currentFrameIndex1, currentFrameIndex2, currentFrameIndex3, currentFrameIndex4;
@@ -35,7 +36,7 @@ namespace RoomRunner
             {
                 quantities[index]--;
                 items[index].Activate();
-                
+                Game1.soundEffects[2].Play(volume: (float)Game1.soundVolume / 10, pitch: 0.0f, pan: 0.0f);
             }
         }
         public void Update()
@@ -73,7 +74,7 @@ namespace RoomRunner
                     items[i].active = false;
             }
         }
-        
+
         public void Draw(SpriteBatch spriteBatch, Texture2D textures, Texture2D pixel, List<Rectangle> clock, List<Rectangle> skull, List<Rectangle> nuke, List<Rectangle> magnet, SpriteFont font, SpriteFont font2)
         {
             currentFrameIndex1 = items[0].AnimateLinear(clock, currentFrameIndex1);
@@ -81,17 +82,19 @@ namespace RoomRunner
             currentFrameIndex3 = items[2].AnimateLinear(nuke, currentFrameIndex3);
             currentFrameIndex4 = items[3].AnimateLinear(magnet, currentFrameIndex4);
 
-            spriteBatch.Draw(pixel, new Rectangle(40, 20, 390, 130), Color.Black*.3f);
-            spriteBatch.DrawString(font, "" + quantities[0], new Vector2(75, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[1], new Vector2(175, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[2], new Vector2(275, 120), Color.White);
-            spriteBatch.DrawString(font, "" + quantities[3], new Vector2(375, 120), Color.White);
-            
-            
-            spriteBatch.Draw(textures, new Rectangle(50, 40, 70, 70), clock[(int)(currentFrameIndex1)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(150, 40, 70, 70), skull[(int)(currentFrameIndex2)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(250, 40, 70, 70), nuke[(int)(currentFrameIndex3)], Color.White);
-            spriteBatch.Draw(textures, new Rectangle(350, 40, 70, 70), magnet[(int)(currentFrameIndex4)], Color.White);
+            spriteBatch.Draw(pixel, new Rectangle(0, 70, 390, 130), Color.Black * .3f);
+            spriteBatch.DrawString(font, "" + quantities[0], new Vector2(35, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[1], new Vector2(135, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[2], new Vector2(235, 170), Color.White);
+            spriteBatch.DrawString(font, "" + quantities[3], new Vector2(335, 170), Color.White);
+
+
+            spriteBatch.Draw(textures, new Rectangle(10, 90, 70, 70), clock[(int)(currentFrameIndex1)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(110, 90, 70, 70), skull[(int)(currentFrameIndex2)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(210, 90, 70, 70), nuke[(int)(currentFrameIndex3)], Color.White);
+            spriteBatch.Draw(textures, new Rectangle(310, 90, 70, 70), magnet[(int)(currentFrameIndex4)], Color.White);
         }
     }
 }
+
+

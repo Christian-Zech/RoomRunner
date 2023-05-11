@@ -8,7 +8,7 @@ using System.Text;
 
 namespace RoomRunner
 {
-    class Room
+    public class Room
     {
         public const int minimumNumOfEnemies = 5;
 
@@ -21,6 +21,7 @@ namespace RoomRunner
         public List<Enemy> enemyArray;
         public Random rand;
         public List<Coin[,]> coinsGridList;
+        public List<ProjectileClump> obstacleList;
 
         public Rectangle backgroundRectangle;
 
@@ -36,18 +37,43 @@ namespace RoomRunner
             Column,
             Block
         }
+        
 
-        // intended for single images
-        public Room(Texture2D background, Rectangle backgroundRectangle, int numberOfEnemies, GraphicsDevice graphics, ContentManager content, Rectangle window)
+        // Each room operates as its own entity where it will have its own background, enemies, and coins. Game1 has a roomList variable that stores all of the rooms.
+        public Room(Texture2D background, Rectangle backgroundRectangle, GraphicsDevice graphics, ContentManager content, Rectangle window)
         {
             background1 = background;
             background2 = background;
             this.backgroundRectangle = backgroundRectangle;
-            this.numberOfEnemies = numberOfEnemies;
             this.graphics = graphics;
             this.content = content;
             enemyArray = new List<Enemy>();
-            rand = new Random(DateTime.Now.Millisecond);
+            obstacleList = new List<ProjectileClump>();
+
+            // modifies enemies and obstacles depending on game difficulty
+            int maximumObstacleAmount = 0;
+            int maximumEnemyAmount = 0;
+            switch (Game1.difficulty)
+            {
+                case Game1.Difficulty.Easy:
+                    maximumObstacleAmount = 2;
+                    maximumEnemyAmount = 5;
+                    break;
+
+                case Game1.Difficulty.Normal:
+                    maximumObstacleAmount = 8;
+                    maximumEnemyAmount = 14;
+                    break;
+
+                case Game1.Difficulty.Hard:
+                    maximumObstacleAmount = 12;
+                    maximumEnemyAmount = 21;
+                    break;
+
+
+            }
+
+            rand = new Random();
 
             // determines amount of coin patches in the room
             coinsGridList = new List<Coin[,]>();
@@ -57,16 +83,24 @@ namespace RoomRunner
                 coinsGridList.Add(new Coin[amountOfCoins,amountOfCoins]);
             }
 
-            generateEnemies(numberOfEnemies);
+            generateEnemies(rand.Next(5, maximumEnemyAmount));
 
             // generates random amount of coins in a random pattern per coin patch
             for(int i = 0; i < coinsGridList.Count; i++)
             {
                 generateCoins(coinsGridList[i], (CoinPattern)rand.Next(0, 5), window);
             }
+
+            RemoveCoinOverLap();
+
+            // generates room obstacles
+
             
+            GenerateObstacles(rand.Next(2, maximumObstacleAmount));
+
         }
 
+        // generates enemies. Call this once and the room will have enemies.
         private void generateEnemies(int amount)
         {
             Enemy.totalEnemyCount += amount;
@@ -75,7 +109,7 @@ namespace RoomRunner
             RemoveOverlap();
         }
 
-
+        // generates 1 coin patch. Call this multiple times to get lots of coins
         private void generateCoins(Coin[,] coinsGrid, CoinPattern pattern, Rectangle window)
         {
             int coinGap = 50; // seperation between coins (pixels)
@@ -120,10 +154,37 @@ namespace RoomRunner
             }
         }
 
+
+        // generates obstacles for the room. Call once and forget.
+        private void GenerateObstacles(int amountOfObstacles)
+        {
+
+
+            Rectangle[] frameRectangles = Player.LoadSheet(3, 3, 32, 32);
+            for (int i = 0; i < amountOfObstacles; i++)
+            {
+                int height = rand.Next(100, 300);
+                int width = (int)(height / 2.5);
+                obstacleList.Add(new ProjectileClump(false, false, new Projectile(true, new Rectangle(rand.Next(Game1.window.Width, Game1.window.Width * 4), rand.Next(Player.frameHeight - ceilingHeight, Player.frameHeight - floorHeight - height), width, height), 1, new Point(0, 0),
+                    new OnetimeAnimation(15, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles.Take(5).ToArray())
+                    {
+                        Next = new OnetimeAnimation(1, graphics, Program.Game.Content.Load<Texture2D>("Level1/Enemies/Obstacles"), frameRectangles[4])
+                    })));
+                   
+
+                obstacleList[i].Current.anim.Idle = true;
+            }
+        }
+
+
+
+        // fixes an issue where enemies can "despawn" if the room count progresses.
         public void InheritEnemies(List<Enemy> toInherit)
         {
             enemyArray.AddRange(toInherit);
         }
+
+        // fixes an issue where enemies can be spawned right on top of each other. Fixes the issue by making a list of problematic enemies and then deleting them from the main enemy list.
         private void RemoveOverlap()
         {
             List<Enemy> hasOverlap = new List<Enemy>();
@@ -140,7 +201,43 @@ namespace RoomRunner
             generateEnemies(hasOverlap.Count);
         }
 
-        // makes the game scroll by moving the background to the left. Also controls enemies.
+        // fixes an issue where coincs can spawn on top of each other
+        public void RemoveCoinOverLap()
+        {
+            for(int i = 0; i < coinsGridList.Count; i++)
+            {
+                for(int j = i+1; j < coinsGridList.Count; j++)
+                {
+                    foreach(Coin coin in coinsGridList[i])
+                    {
+                        foreach(Coin coin2 in coinsGridList[j])
+                        {
+                            if(coin != null && coin2 != null && coin.rectangle.Intersects(coin2.rectangle))
+                            {
+                                coin.Destroy();
+
+                            }
+                        }
+                    }
+                }
+
+                
+            }
+        }
+
+        public void RemoveObstacleOverLap()
+        {
+            for(int i = 0; i < obstacleList.Count; i++)
+            {
+                for(int j = i+1; j < obstacleList.Count; j++)
+                {
+                    if (obstacleList[i].Current.Rectangle.Intersects(obstacleList[j].Current.Rectangle))
+                        obstacleList.RemoveAt(i);
+                }
+            }
+        }
+
+        // makes the game scroll by moving the background to the left. Also controls enemies and coins.
         public void Update(int scrollSpeed)
         {
             backgroundRectangle.X -= scrollSpeed;
@@ -164,15 +261,37 @@ namespace RoomRunner
 
             foreach (Coin[,] coinGrid in coinsGridList)
             {
-                foreach(Coin coin in coinGrid)
+                foreach (Coin coin in coinGrid)
                 {
                     if (coin != null)
                     {
-                        coin.rectangle.X -= scrollSpeed;
+                        if (Program.Game.activePowerupIndex != 3) // 3rd index = magnet powerup
+                            coin.Position.X -= scrollSpeed;
                         coin.Update();
                     }
                 }
             }
+
+
+            for(int i = 0; i < obstacleList.Count; i++)
+            {
+                ProjectileClump obstacle = obstacleList[i];
+
+                if(obstacle.Delete)
+                {
+                    obstacleList.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+
+                obstacle.Current.Velocity.X = -scrollSpeed;
+                if (obstacle.Current.Rectangle.Intersects(Game1.window))
+                    obstacle.Current.anim.Idle = false;
+                
+            }
+
+
 
             foreach (Enemy e in toRemove)
                 enemyArray.Remove(e);
@@ -196,6 +315,14 @@ namespace RoomRunner
                         spriteBatch.Draw(coin.CurrentTexture, coin.rectangle, Color.White);
                 }
             }
+
+            foreach (ProjectileClump obstacle in obstacleList)
+            {
+                obstacle.DrawAndUpdate(spriteBatch);
+            }
+
+
+
         }
 
 
