@@ -42,8 +42,19 @@ namespace RoomRunner
                 bossBarRect.Width = (int)((1900.0f - Insets * 2) * BossBarPercent);
             }
         }
+        public int MaxHealth
+        {
+            get
+            {
+                return maxHealth;
+            }
+            set
+            {
+                maxHealth = value;
+            }
+        }
         private int health;
-        private readonly int maxHealth;
+        private int maxHealth;
         private int timer1, warningTime, whiteSpace;
         private Rectangle warningRect;
         private bool showWarning;
@@ -323,25 +334,25 @@ namespace RoomRunner
                     break;
                 case BossPattern.Move:
                     timer1++;
-                    if (timer1 <= 30) if (IsDown)
-                            Velocity.Y -= 5.0f / timer1;
+                    if (timer1 <= Math.Round(30 / (SpeedMultiplier / 2.0))) if (IsDown)
+                            Velocity.Y -= 5.0f * ((float)SpeedMultiplier / 4.0f) / timer1;
                         else
-                            Velocity.Y += 5.0f / timer1;
+                            Velocity.Y += 5.0f * ((float)SpeedMultiplier / 4.0f) / timer1;
                     else if (IsDown)
-                            Velocity.Y += 10.0f / (30 - timer1);
+                            Velocity.Y += 10.0f * ((float)SpeedMultiplier / 4.0f) / (int)Math.Round(30 / (SpeedMultiplier / 2.0) - timer1);
                         else
-                            Velocity.Y -= 10.0f / (30 - timer1);
+                            Velocity.Y -= 10.0f * ((float)SpeedMultiplier / 4.0f) / (int)Math.Round(30 / (SpeedMultiplier / 2.0) - timer1);
 
                     break;
                 case BossPattern.MoveForward:
                     timer1++;
-                    if (timer1 <= 60)
-                        Velocity.X -= (int)Math.Round(SpeedMultiplier / 2);
+                    if (timer1 <= Math.Round(60 / (SpeedMultiplier / 2.0)))
+                        Velocity.X -= (float)SpeedMultiplier / 2.0f;
                     else
                     {
-                        if (timer1 == 61)
-                            rect.X = 2000;
-                        Velocity.X += 1.5f * (float)(SpeedMultiplier / 2);
+                        if (timer1 == Math.Round(60 / (SpeedMultiplier / 2.0)) + 1)
+                            rect.X = (int)Math.Round(2000 / (SpeedMultiplier / 2.0));
+                        Velocity.X += 1.5f * (float)SpeedMultiplier / 2.0f;
                     }
                     break;
             }

@@ -910,7 +910,11 @@ namespace RoomRunner
                             menuCoolDown = 2;
                             break;
                         case GameState.Difficulty:
-                            gameState = GameState.Menu;
+                            gameState = GameState.Music;
+                            menuCoolDown = 2;
+                            break;
+                        case GameState.Death:
+                            gameState = GameState.GameOver;
                             menuCoolDown = 2;
                             break;
                         default:
@@ -998,6 +1002,25 @@ namespace RoomRunner
 
                         }
                         menuCoolDown = 2;
+                    }
+                    if (gameState == GameState.Difficulty)
+                    {
+                        if (b.Text.Equals("Easy"))
+                        {
+                            difficulty = Difficulty.Easy;
+                            DifficultyMultiplier = 0.5;
+                        }
+                        if (b.Text.Equals("Normal"))
+                        {
+                            difficulty = Difficulty.Normal;
+                            DifficultyMultiplier = 1.0;
+                        }
+                        if (b.Text.Equals("Hard"))
+                        {
+                            difficulty = Difficulty.Hard;
+                            DifficultyMultiplier = 1.75;
+                        }
+
                     }
                     if (gameState == GameState.Music)
                     {
@@ -1118,7 +1141,7 @@ namespace RoomRunner
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
-                        players[i].distanceTraveled += (int)Math.Ceiling(scrollSpeed / 15.0 * DifficultyMultiplier);
+                        players[i].distanceTraveled += (int)Math.Ceiling(scrollSpeed / (15.0 / DifficultyMultiplier));
                 }
                 if (!quest.completedAnim)
                 {
@@ -1761,7 +1784,6 @@ namespace RoomRunner
             }
             if (gameState == GameState.Death || gameState == GameState.GameOver)
             {
-                playMusic();
                 cutscenes.Draw(spriteBatch, pixel);
                 if (cutscenes.alpha < 1 && !cutscenes.phase)
                 {
@@ -1773,29 +1795,7 @@ namespace RoomRunner
 
             if (gameState == GameState.Difficulty)
             {
-                Button b = (currentMenu.thingies[0] as SelectionGrid).Current;
-
-                if (KeyPressed(kb, Keys.Enter, Keys.Space) || b.MouseClickedOnce)
-                {
-                    if (b.Text.Equals("Easy"))
-                    {
-                        difficulty = Difficulty.Easy;
-                        DifficultyMultiplier = 0.5;
-                    }
-                    if (b.Text.Equals("Normal"))
-                    {
-                        difficulty = Difficulty.Normal;
-                        DifficultyMultiplier = 1.0;
-                    }
-                    if (b.Text.Equals("Hard"))
-                    {
-                        difficulty = Difficulty.Hard;
-                        DifficultyMultiplier = 1.75;
-                    }
-
-                }
-
-                b = null;
+                Button b = null;
 
                 switch (difficulty)
                 {
@@ -1831,6 +1831,8 @@ namespace RoomRunner
             {
                 currentBoss = bosses[levels].Clone();
                 currentBoss.Health = (int)Math.Round(currentBoss.Health * DifficultyMultiplier);
+                currentBoss.MaxHealth = currentBoss.Health;
+                currentBoss.Health = currentBoss.Health;
             }
             bossCooldown = 300;
         }
