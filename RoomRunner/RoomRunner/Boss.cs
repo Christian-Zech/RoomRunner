@@ -86,7 +86,7 @@ namespace RoomRunner
             IsDown = true;
             Velocity = Vector2.Zero;
             TimeBeforeNextPattern = (int)(TimeBetweenPatterns / SpeedMultiplier);
-            CurrentPattern = BossPattern.Move;//(BossPattern)Program.Game.rand.Next(0, 6);
+            CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
             TimeLeftInPattern = 0;
             DoingPattern = false;
             projList = new List<ProjectileClump>();
@@ -116,7 +116,7 @@ namespace RoomRunner
                 if (TimeLeftInPattern == 0)
                 {
                     FinishPattern();
-                    CurrentPattern = BossPattern.Move;// (BossPattern)Program.Game.rand.Next(0, 6);
+                    CurrentPattern = (BossPattern)Program.Game.rand.Next(0, 6);
                     InitWarning();
                 }
             }
