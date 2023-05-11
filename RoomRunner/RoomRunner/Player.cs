@@ -48,7 +48,8 @@ namespace RoomRunner
         private KeyboardState oldkb;
         public List<Keys> Up, Down, Left, Shoot;
         private MouseState oldms;
-        public int Coins, Health, distanceTraveled, distanceHighScore; //save these
+        public int Coins, Health;
+        public double distanceTraveled, distanceHighScore; //save these
         public int delayLeft, fireCooldown, InvinciblityTimer, FlashTimer;
         public static int ceilingHeight, floorHeight; //in px
         public PlayerHats currentHat; //save this
@@ -279,7 +280,7 @@ namespace RoomRunner
             for (int i = 0; i < ownedHats.Count; i++)
                 hats += ownedHats[i] + " ";
 
-            string str = Coins + "\n" + distanceHighScore + "\n" + currentHat + "\n" + hats;
+            string str = Coins + "\n" + Math.Round(distanceHighScore) + "\n" + currentHat + "\n" + hats;
             SaveAndLoad.Save(str, "playerData.txt");
         }
         public void Load()

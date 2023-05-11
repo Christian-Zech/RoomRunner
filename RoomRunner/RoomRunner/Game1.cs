@@ -539,7 +539,7 @@ namespace RoomRunner
             butts.Add(new MenuText(shopFontBold, "* settings require a restart", new Vector2(40, window.Height - shopFontBold.MeasureString("* settings require a restart").Y - 10)));
             butts.Add(new MenuText(shopFont, () => 
                 {
-                    int highest = 0;
+                    double highest = 0;
                     sbyte pId = -1;
                     foreach (Player p in players)
                         if (p.distanceHighScore > highest) 
@@ -917,6 +917,13 @@ namespace RoomRunner
                             gameState = GameState.GameOver;
                             menuCoolDown = 2;
                             break;
+                        case GameState.Play:
+                            foreach (Player p in players)
+                            {
+                                p.Health = 1;
+                                p.Damage();
+                            }
+                            break;
                         default:
                             this.Exit();
                             break;
@@ -1005,22 +1012,25 @@ namespace RoomRunner
                     }
                     if (gameState == GameState.Difficulty)
                     {
-                        if (b.Text.Equals("Easy"))
+                        switch (b.Text)
                         {
-                            difficulty = Difficulty.Easy;
-                            DifficultyMultiplier = 0.5;
+                            case "Easy":
+                                difficulty = Difficulty.Easy;
+                                DifficultyMultiplier = 0.5;
+                                break;
+                            case "Normal":
+                                difficulty = Difficulty.Normal;
+                                DifficultyMultiplier = 1;
+                                break;
+                            case "Hard":
+                                difficulty = Difficulty.Hard;
+                                DifficultyMultiplier = 1.5;
+                                break;
+                            case "Return To Menu":
+                                gameState = GameState.Music;
+                                menuCoolDown = 2;
+                                break;
                         }
-                        if (b.Text.Equals("Normal"))
-                        {
-                            difficulty = Difficulty.Normal;
-                            DifficultyMultiplier = 1.0;
-                        }
-                        if (b.Text.Equals("Hard"))
-                        {
-                            difficulty = Difficulty.Hard;
-                            DifficultyMultiplier = 1.75;
-                        }
-
                     }
                     if (gameState == GameState.Music)
                     {
@@ -1053,17 +1063,6 @@ namespace RoomRunner
                     {
                         gameState = GameState.Difficulty;
                         menuCoolDown = 2;
-                    }
-                    if (gameState == GameState.Difficulty)
-                    {
-                        switch(b.Text)
-                        {
-                            case "Return To Menu":
-                                gameState = GameState.Menu;
-                                menuCoolDown = 2;
-                                break;
-
-                        }
                     }
                 }
             }
@@ -1141,7 +1140,7 @@ namespace RoomRunner
                 for (int i = 0; i < players.Count; i++)
                 {
                     if (players[i].IsAlive)
-                        players[i].distanceTraveled += (int)Math.Ceiling(scrollSpeed / (15.0 / DifficultyMultiplier));
+                        players[i].distanceTraveled += scrollSpeed / (15.0 / DifficultyMultiplier);
                 }
                 if (!quest.completedAnim)
                 {
@@ -1566,7 +1565,7 @@ namespace RoomRunner
                             {
                                 spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
                                 spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
-                                spriteBatch.DrawString(fonts[0], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                                spriteBatch.DrawString(fonts[0], "    : " + players[i].Coins + "\n\n Distance: " + ((int)Math.Round(players[i].distanceTraveled)), new Vector2(window.Width - 295, y + 20), Color.White);
                                 //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
                                 y += 140;
                             }
@@ -1722,7 +1721,7 @@ namespace RoomRunner
                 {
                     spriteBatch.Draw(pixel, new Rectangle(window.Width - 300, y, 300, 130), Color.Black * .3f);
                     spriteBatch.Draw(collectableSheet, new Rectangle(window.Width - 285, y + 15, 40, 40), collectableRect[25], Color.White);
-                    spriteBatch.DrawString(fonts[5], "    : " + players[i].Coins + "\n\n Distance: " + players[i].distanceTraveled, new Vector2(window.Width - 295, y + 20), Color.White);
+                    spriteBatch.DrawString(fonts[5], "    : " + players[i].Coins + "\n\n Distance: " + ((int)Math.Round(players[i].distanceTraveled)), new Vector2(window.Width - 295, y + 20), Color.White);
                     //spriteBatch.DrawString(fonts[3], "Player " + i, new Vector2(window.Width - 120, y + 40), Color.White);
                     y += 140;
                 }
